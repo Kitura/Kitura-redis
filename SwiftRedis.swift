@@ -21,6 +21,11 @@ public enum RedisResponse {
     case Nil
 }
 
+public enum RedisExpire {
+    case Seconds(Int)
+    case MilliSecs(Int)
+}
+
 
 public class SwiftRedis {
     
@@ -63,18 +68,85 @@ public class SwiftRedis {
     }
     
     public func get(key: String, callback: (String?, error: NSError?) -> Void) {
-        issueCommand("GET", key) {(redisResponse: RedisResponse) in
-            self.redisStringResponseHandler(redisResponse, callback: callback)
+        issueCommand("GET", key) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
-    public func set(key: String, value: String, callback: (Bool, error: NSError?) -> Void) {
-        issueCommand("SET", key, value) {(redisResponse: RedisResponse) in
+    public func getSet(key: String, value: String, callback: (String?, error: NSError?) -> Void) {
+        issueCommand("GETSET", key, value) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func set(key: String, value: String, exists: Bool?=nil, expires: RedisExpire?=nil, callback: (Bool, error: NSError?) -> Void) {
+        var command = ["SET", key, value]
+        if  let exists = exists  {
+            command.append(exists ? "XX" : "NX")
+        }
+        if  let expires = expires  {
+            switch(expires) {
+                case .Seconds(let seconds):
+                    command.append("EX")
+                    command.append(String(seconds))
+                case .MilliSecs(let millis):
+                    command.append("PX")
+                    command.append(String(millis))
+            }
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            switch(response) {
+                case .Status(let str):
+                    if  str == "OK"  {
+                        callback(true, error: nil)
+                    }
+                    else {
+                        callback(false, error: self.createError("Status result other than 'OK' received from Redis", code: 2))
+                    }
+                case .Nil:
+                    callback(false, error: nil)
+                case .Error(let error):
+                    callback(false, error: self.createError("Error: \(error)", code: 1))
+                default:
+                    callback(false, error: self.createError("Unexpected result received from Redis \(response)", code: 2))
+            }
+        }
+    }
+    
+    public func del(keys: String..., callback: (Int?, error: NSError?) -> Void) {
+        var command = ["DEL"]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func incr(key: String, by: Int=1, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("INCRBY", key, String(by)) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func incr(key: String, byFloat: Float, callback: (String?, error: NSError?) -> Void) {
+        issueCommand("INCRBYFLOAT", key, String(byFloat)) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func decr(key: String, by: Int=1, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("DECRBY", key, String(by)) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func issueCommand(stringArgs: String..., callback: (RedisResponse) -> Void) {
+        issueCommandInArray(stringArgs, callback: callback)
     }
     
     // TODO: binary safe
-    public func issueCommand (stringArgs: String..., callback: (RedisResponse) -> Void) {
+    public func issueCommandInArray(stringArgs: [String], callback: (RedisResponse) -> Void) {
         var response: RedisResponse
 
         if context != nil {
@@ -129,6 +201,17 @@ public class SwiftRedis {
         callback(response)
     }
     
+    private func redisIntegerResponseHandler(response: RedisResponse, callback: (Int?, error: NSError?) -> Void) {
+        switch(response) {
+            case .IntegerValue(let num):
+                callback(Int(num), error: nil)
+            case .Error(let error):
+                callback(nil, error: createError("Error: \(error)", code: 1))
+            default:
+                callback(nil, error: createError("Non-Integer result received from Redis \(response)", code: 2))
+        }
+    }
+    
     private func redisStringResponseHandler(response: RedisResponse, callback: (String?, error: NSError?) -> Void) {
         switch(response) {
             case .StringValue(let str):
@@ -138,7 +221,7 @@ public class SwiftRedis {
             case .Error(let error):
                 callback(nil, error: createError("Error: \(error)", code: 1))
             default:
-                callback(nil, error: createError("Non-string result received from Redis", code: 2))
+                callback(nil, error: createError("Non-string result received from Redis \(response)", code: 2))
         }
     }
     
