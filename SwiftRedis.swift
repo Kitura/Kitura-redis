@@ -67,6 +67,77 @@ public class SwiftRedis {
         callback(error)
     }
     
+    public func auth(pswd: String, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("AUTH", pswd) {(response: RedisResponse) in
+            switch(response) {
+            case .Status(let str):
+                if  str == "OK"  {
+                    callback(true, error: nil)
+                }
+                else {
+                    callback(false, error: self.createError("Status result other than 'OK' received from Redis '\(str)'", code: 2))
+                }
+            case .Error(let error):
+                callback(false, error: self.createError("Error: \(error)", code: 1))
+            default:
+                callback(false, error: self.createError("Unexpected result received from Redis \(response)", code: 2))
+            }
+        }
+    }
+    
+    public func select(db: Int, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("SELECT", String(db)) {(response: RedisResponse) in
+            switch(response) {
+            case .Status(let str):
+                if  str == "OK"  {
+                    callback(true, error: nil)
+                }
+                else {
+                    callback(false, error: self.createError("Status result other than 'OK' received from Redis '\(str)'", code: 2))
+                }
+            case .Error(let error):
+                callback(false, error: self.createError("Error: \(error)", code: 1))
+            default:
+                callback(false, error: self.createError("Unexpected result received from Redis \(response)", code: 2))
+            }
+        }
+    }
+    
+    public func ping(pingStr: String?=nil, callback: (Bool, error: NSError?) -> Void) {
+        var command = ["PING"]
+        if  let pingStr = pingStr  {
+            command.append(pingStr)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            switch(response) {
+            case .Status(let str):
+                if  str == "PONG"  {
+                    callback(true, error: nil)
+                }
+                else {
+                    callback(false, error: self.createError("Status result other than 'PONG' received from Redis (\(str))", code: 2))
+                }
+            case .StringValue(let str):
+                if  pingStr != nil  &&  pingStr! == str {
+                    callback(true, error: nil)
+                }
+                else {
+                    callback(false, error: self.createError("String result other than '\(pingStr)' received from Redis (\(str))", code: 2))
+                }
+            case .Error(let error):
+                callback(false, error: self.createError("Error: \(error)", code: 1))
+            default:
+                callback(false, error: self.createError("Unexpected result received from Redis \(response)", code: 2))
+            }
+        }
+    }
+    
+    public func echo(str: String, callback: (String?, error: NSError?) -> Void) {
+        issueCommand("ECHO", str) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
     public func get(key: String, callback: (String?, error: NSError?) -> Void) {
         issueCommand("GET", key) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
