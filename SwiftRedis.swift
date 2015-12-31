@@ -21,11 +21,6 @@ public enum RedisResponse {
     case Nil
 }
 
-public enum RedisExpire {
-    case Seconds(Int)
-    case MilliSecs(Int)
-}
-
 
 public class SwiftRedis {
     
@@ -128,20 +123,14 @@ public class SwiftRedis {
         }
     }
     
-    public func set(key: String, value: String, exists: Bool?=nil, expires: RedisExpire?=nil, callback: (Bool, error: NSError?) -> Void) {
+    public func set(key: String, value: String, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
         var command = ["SET", key, value]
         if  let exists = exists  {
             command.append(exists ? "XX" : "NX")
         }
-        if  let expires = expires  {
-            switch(expires) {
-                case .Seconds(let seconds):
-                    command.append("EX")
-                    command.append(String(seconds))
-                case .MilliSecs(let millis):
-                    command.append("PX")
-                    command.append(String(millis))
-            }
+        if  let expiresIn = expiresIn  {
+            command.append("PX")
+            command.append(String(Int(expiresIn * 1000.0)))
         }
         issueCommandInArray(command) {(response: RedisResponse) in
             let (ok, error) = self.redisOkResponseHandler(response)
