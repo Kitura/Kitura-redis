@@ -227,6 +227,77 @@ public class SwiftRedis {
         }
     }
     
+    public func exists(keys: String..., callback: (Int?, error: NSError?) -> Void) {
+        var command = ["EXISTS"]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func move(key: String, toDB: Int, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("MOVE", key, String(toDB)) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func rename(key: String, newKey: String, exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
+        if  exists  {
+            issueCommand("RENAME", key, newKey) {(response: RedisResponse) in
+                let (renamed, error) = self.redisOkResponseHandler(response, nilOk: false)
+                callback(renamed, error: error)
+            }
+        }
+        else {
+            issueCommand("RENAMENX", key, newKey) {(response: RedisResponse) in
+                self.redisBoolResponseHandler(response, callback: callback)
+            }
+        }
+    }
+    
+    public func expire(key: String, inTime: NSTimeInterval, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("PEXPIRE", key, String(Int(inTime * 1000.0))) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func expire(key: String, atDate: NSDate, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("PEXPIREAT", key, String(Int(atDate.timeIntervalSince1970 * 1000.0))) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func persist(key: String, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("PERSIST", key) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func ttl(key: String, callback: (NSTimeInterval?, error: NSError?) -> Void) {
+        issueCommand("PTTL", key) {(response: RedisResponse) in
+            switch(response) {
+                case .IntegerValue(let num):
+                    if  num >= 0  {
+                        callback(NSTimeInterval(Double(num)/1000.0), error: nil)
+                    }
+                    else {
+                        callback(NSTimeInterval(num), error: nil)
+                    }
+                case .Error(let error):
+                    callback(nil, error: self.createError("Error: \(error)", code: 1))
+                default:
+                    callback(nil, error: self.createUnexpectedResponseError(response))
+            }
+        }
+    }
+    
+    
+    // *********************
+    //  Base API functions *
+    // *********************
+    
     public func issueCommand(stringArgs: String..., callback: (RedisResponse) -> Void) {
         issueCommandInArray(stringArgs, callback: callback)
     }
@@ -264,6 +335,10 @@ public class SwiftRedis {
         }
         callback(response)
     }
+    
+    // *******************
+    //  Helper functions *
+    // *******************
     
     private func redisReplyToRedisResponse(reply: redisReply) -> RedisResponse {
         var response: RedisResponse
