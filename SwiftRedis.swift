@@ -196,34 +196,24 @@ public class SwiftRedis {
         }
     }
     
-    public func mset(keyValuePairs: (String, String)..., callback: (NSError?) -> Void) {
-        msetArrayOfKeyValues(keyValuePairs, callback: callback)
+    public func mset(keyValuePairs: (String, String)..., exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
+        msetArrayOfKeyValues(keyValuePairs, exists: exists, callback: callback)
     }
     
-    public func msetArrayOfKeyValues(keyValuePairs: [(String, String)], callback: (NSError?) -> Void) {
-        var command = ["MSET"]
+    public func msetArrayOfKeyValues(keyValuePairs: [(String, String)], exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
+        var command = [exists ? "MSET" : "MSETNX"]
         for (key, value) in keyValuePairs {
             command.append(key)
             command.append(value)
         }
         issueCommandInArray(command) {(response: RedisResponse) in
-            let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
-            callback(error)
-        }
-    }
-    
-    public func msetnx(keyValuePairs: (String, String)..., callback: (Bool, error: NSError?) -> Void) {
-        msetnxArrayOfKeyValues(keyValuePairs, callback: callback)
-    }
-    
-    public func msetnxArrayOfKeyValues(keyValuePairs: [(String, String)], callback: (Bool, error: NSError?) -> Void) {
-        var command = ["MSETNX"]
-        for (key, value) in keyValuePairs {
-            command.append(key)
-            command.append(value)
-        }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisBoolResponseHandler(response, callback: callback)
+            if  exists {
+                let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
+                callback(ok, error: error)
+            }
+            else {
+                self.redisBoolResponseHandler(response, callback: callback)
+            }
         }
     }
     
