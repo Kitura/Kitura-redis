@@ -217,6 +217,30 @@ public class SwiftRedis {
         }
     }
     
+    public func append(key: String, value: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("APPEND", key, value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func getrange(key: String, start: Int, end: Int, callback: (String?, error: NSError?) -> Void) {
+        issueCommand("GETRANGE", key, String(start), String(end)) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func setrange(key: String, offset: Int, value: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("SETRANGE", key, String(offset), value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func strlen(key: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("STRLEN", key) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
     public func exists(keys: String..., callback: (Int?, error: NSError?) -> Void) {
         var command = ["EXISTS"]
         for key in keys {
