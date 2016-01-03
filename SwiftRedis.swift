@@ -12,8 +12,35 @@ import hiredis
 
 import Foundation
 
+
+public class RedisString {
+    private let data: NSData
+    
+    public init(_ data: NSData) {
+        self.data = data
+    }
+    
+    public convenience init(_ value: String) {
+        self.init(StringUtils.toUtf8String(value)!)
+    }
+    
+    public convenience init(_ value: Int) {
+        self.init(String(value))
+    }
+    
+    public convenience init(_ value: Double) {
+        self.init(String(value))
+    }
+    
+    public var asData: NSData { return data }
+    public var asString: String { return NSString(data: data, encoding: NSUTF8StringEncoding) as! String }
+    public var asInteger: Int { return Int(self.asString)! }
+    public var asDouble: Double { return Double(self.asString)! }
+}
+
+
 public enum RedisResponse {
-    case StringValue(String)
+    case StringValue(RedisString)
     case Array([RedisResponse])
     case IntegerValue(Int64)
     case Status(String)
@@ -91,7 +118,7 @@ public class SwiftRedis {
                     callback(self.createError("Status result other than 'PONG' received from Redis (\(str))", code: 2))
                 }
             case .StringValue(let str):
-                if  pingStr != nil  &&  pingStr! == str {
+                if  pingStr != nil  &&  pingStr! == str.asString {
                     callback(nil)
                 }
                 else {
@@ -105,20 +132,26 @@ public class SwiftRedis {
         }
     }
     
-    public func echo(str: String, callback: (String?, error: NSError?) -> Void) {
+    public func echo(str: String, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("ECHO", str) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
-    public func get(key: String, callback: (String?, error: NSError?) -> Void) {
+    public func get(key: String, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("GET", key) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
-    public func getSet(key: String, value: String, callback: (String?, error: NSError?) -> Void) {
+    public func getSet(key: String, value: String, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("GETSET", key, value) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func getSet(key: String, value: RedisString, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand(RedisString("GETSET"), RedisString(key), value) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
@@ -131,6 +164,21 @@ public class SwiftRedis {
         if  let expiresIn = expiresIn  {
             command.append("PX")
             command.append(String(Int(expiresIn * 1000.0)))
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response)
+            callback(ok, error: error)
+        }
+    }
+    
+    public func set(key: String, value: RedisString, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
+        var command = [RedisString("SET"), RedisString(key), value]
+        if  let exists = exists  {
+            command.append(RedisString(exists ? "XX" : "NX"))
+        }
+        if  let expiresIn = expiresIn  {
+            command.append(RedisString("PX"))
+            command.append(RedisString(Int(expiresIn * 1000.0)))
         }
         issueCommandInArray(command) {(response: RedisResponse) in
             let (ok, error) = self.redisOkResponseHandler(response)
@@ -154,7 +202,7 @@ public class SwiftRedis {
         }
     }
     
-    public func incr(key: String, byFloat: Float, callback: (String?, error: NSError?) -> Void) {
+    public func incr(key: String, byFloat: Float, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("INCRBYFLOAT", key, String(byFloat)) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
@@ -166,14 +214,14 @@ public class SwiftRedis {
         }
     }
     
-    public func mget(keys: String..., callback: ([String?]?, error: NSError?) -> Void) {
+    public func mget(keys: String..., callback: ([RedisString?]?, error: NSError?) -> Void) {
         var command = ["MGET"]
         for key in keys {
             command.append(key)
         }
         issueCommandInArray(command) {(response: RedisResponse) in
             var error: NSError? = nil
-            var strings = [String?]()
+            var strings = [RedisString?]()
             
             switch(response) {
                 case .Array(let responses):
@@ -217,13 +265,34 @@ public class SwiftRedis {
         }
     }
     
+    public func mset(keyValuePairs: (String, RedisString)..., exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
+        msetArrayOfKeyValues(keyValuePairs, exists: exists, callback: callback)
+    }
+    
+    public func msetArrayOfKeyValues(keyValuePairs: [(String, RedisString)], exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
+        var command = [RedisString(exists ? "MSET" : "MSETNX")]
+        for (key, value) in keyValuePairs {
+            command.append(RedisString(key))
+            command.append(value)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            if  exists {
+                let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
+                callback(ok, error: error)
+            }
+            else {
+                self.redisBoolResponseHandler(response, callback: callback)
+            }
+        }
+    }
+    
     public func append(key: String, value: String, callback: (Int?, error: NSError?) -> Void) {
         issueCommand("APPEND", key, value) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
     
-    public func getrange(key: String, start: Int, end: Int, callback: (String?, error: NSError?) -> Void) {
+    public func getrange(key: String, start: Int, end: Int, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("GETRANGE", key, String(start), String(end)) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
@@ -334,15 +403,52 @@ public class SwiftRedis {
                 arrOfPtrsToArgs.append(UnsafePointer<Int8>(cString.bytes))
             }
             
-            let replyPtr = UnsafeMutablePointer<redisReply>(redisCommandArgv (contextPtr!, Int32(stringArgs.count), UnsafeMutablePointer<UnsafePointer<Int8>>(arrOfPtrsToArgs), nil))
+            let replyPtr = UnsafeMutablePointer<redisReply>(redisCommandArgv (contextPtr!, Int32(stringArgs.count), &arrOfPtrsToArgs, nil))
 
             if replyPtr == nil {
                 response = RedisResponse.Error(createRedisErrorMessage("Failed to execute Redis command:"))
-                callback(response)
                 // TODO               redisFree(contextPtr!)
             }
+            else {
+                response = redisReplyToRedisResponse(replyPtr.memory)
+            }
+        }
+        else {
+            response = RedisResponse.Error("Not connected to Redis server")
+        }
+        callback(response)
+    }
+    
+    public func issueCommand(stringArgs: RedisString..., callback: (RedisResponse) -> Void) {
+        issueCommandInArray(stringArgs, callback: callback)
+    }
+    
+    public func issueCommandInArray(stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
+        var response: RedisResponse
+        
+        if context != nil {
+            var contextPtr: UnsafeMutablePointer<redisContext>?
+            withUnsafeMutablePointer(&context) { ptr in
+                contextPtr = UnsafeMutablePointer<redisContext>(ptr)
+            }
             
-            response = redisReplyToRedisResponse(replyPtr.memory)
+            var arrOfPtrsToArgs: [UnsafePointer<Int8>] = []
+            var arrOfArgLengths = [Int]()
+            for arg in stringArgs {
+                arrOfPtrsToArgs.append(UnsafePointer<Int8>(arg.asData.bytes))
+                arrOfArgLengths.append(arg.asData.length)
+            }
+            
+            let origReplyPtr = redisCommandArgv(contextPtr!, Int32(stringArgs.count), &arrOfPtrsToArgs, &arrOfArgLengths)
+            let replyPtr = UnsafeMutablePointer<redisReply>(origReplyPtr)
+            
+            if replyPtr == nil {
+                response = RedisResponse.Error(createRedisErrorMessage("Failed to execute Redis command:"))
+            }
+            else {
+                response = redisReplyToRedisResponse(replyPtr.memory)
+                //freeReplyObject(origReplyPtr)
+            }
         }
         else {
             response = RedisResponse.Error("Not connected to Redis server")
@@ -359,7 +465,7 @@ public class SwiftRedis {
         switch reply.type {
             case REDIS_REPLY_STRING:
                 let data = NSData(bytesNoCopy: reply.str, length: Int(reply.len))
-                response = RedisResponse.StringValue(StringUtils.fromUtf8String(data)!)
+                response = RedisResponse.StringValue(RedisString(data))
             case REDIS_REPLY_STATUS:
                 let data = NSData(bytesNoCopy: reply.str, length: Int(reply.len))
                 response = RedisResponse.Status(StringUtils.fromUtf8String(data)!)
@@ -427,7 +533,7 @@ public class SwiftRedis {
         }
     }
     
-    private func redisStringResponseHandler(response: RedisResponse, callback: (String?, error: NSError?) -> Void) {
+    private func redisStringResponseHandler(response: RedisResponse, callback: (RedisString?, error: NSError?) -> Void) {
         switch(response) {
             case .StringValue(let str):
                 callback(str, error: nil)
