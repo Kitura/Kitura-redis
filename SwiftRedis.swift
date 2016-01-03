@@ -310,6 +310,84 @@ public class SwiftRedis {
         }
     }
     
+    public func getbit(key: String, offset: Int, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("GETBIT", key, String(offset)) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func setbit(key: String, offset: Int, value: Bool, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("SETBIT", key, String(offset), value ? "1" : "0") {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitcount(key: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("BITCOUNT", key) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitcount(key: String, start: Int, end: Int, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("BITCOUNT", key, String(start), String(end)) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitpos(key: String, bit:Bool, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("BITPOS", key, bit ? "1" : "0") {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitpos(key: String, bit:Bool, start: Int, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("BITPOS", key, bit ? "1" : "0", String(start)) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitpos(key: String, bit:Bool, start: Int, end: Int, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("BITPOS", key, bit ? "1" : "0", String(start), String(end)) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitop(destKey: String, and: String..., callback: (Int?, error: NSError?) -> Void) {
+        var command = ["BITOP", "AND", destKey]
+        for key in and {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitop(destKey: String, or: String..., callback: (Int?, error: NSError?) -> Void) {
+        var command = ["BITOP", "OR", destKey]
+        for key in or {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitop(destKey: String, xor: String..., callback: (Int?, error: NSError?) -> Void) {
+        var command = ["BITOP", "XOR", destKey]
+        for key in xor {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func bitop(destKey: String, not: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("BITOP", "NOT", destKey, not) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
     public func exists(keys: String..., callback: (Int?, error: NSError?) -> Void) {
         var command = ["EXISTS"]
         for key in keys {
