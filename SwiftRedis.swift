@@ -480,21 +480,39 @@ public class SwiftRedis {
         }
     }
     
+    public func hincr(key: String, field: String, by: Int, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("HINCRBY", key, field, String(by)) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hincr(key: String, field: String, byFloat: Float, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand("HINCRBYFLOAT", key, field, String(byFloat)) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
     public func hlen(key: String, callback: (Int?, error: NSError?) -> Void) {
         issueCommand("HLEN", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
     
-    public func hset(key: String, field: String, value: String, callback: (Bool, error: NSError?) -> Void) {
-        issueCommand("HSET", key, field, value) {(response: RedisResponse) in
+    public func hset(key: String, field: String, value: String, exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand(exists ? "HSET" : "HSETNX", key, field, value) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
     
-    public func hset(key: String, field: String, value: RedisString, callback: (Bool, error: NSError?) -> Void) {
-        issueCommand(RedisString("HSET"), RedisString(key), RedisString(field), value) {(response: RedisResponse) in
+    public func hset(key: String, field: String, value: RedisString, exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand(RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), value) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hstrlen(key: String, field: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("HSTRLEN", key, field) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
     
