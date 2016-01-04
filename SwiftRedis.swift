@@ -454,6 +454,50 @@ public class SwiftRedis {
         }
     }
     
+    // *********************
+    //    Hash functions   *
+    // *********************
+    
+    public func hdel(key: String, fields: String..., callback: (Int?, error: NSError?) -> Void) {
+        var command = ["HDEL", key]
+        for field in fields {
+            command.append(field)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hexists(key: String, field: String, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("HEXISTS", key, field) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hget(key: String, field: String, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand("HGET", key, field) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hlen(key: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("HLEN", key) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hset(key: String, field: String, value: String, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("HSET", key, field, value) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hset(key: String, field: String, value: RedisString, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand(RedisString("HSET"), RedisString(key), RedisString(field), value) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
     
     // *********************
     //  Base API functions *
