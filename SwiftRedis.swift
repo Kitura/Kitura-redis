@@ -13,42 +13,6 @@ import hiredis
 import Foundation
 
 
-public class RedisString {
-    private let data: NSData
-    
-    public init(_ data: NSData) {
-        self.data = data
-    }
-    
-    public convenience init(_ value: String) {
-        self.init(StringUtils.toUtf8String(value)!)
-    }
-    
-    public convenience init(_ value: Int) {
-        self.init(String(value))
-    }
-    
-    public convenience init(_ value: Double) {
-        self.init(String(value))
-    }
-    
-    public var asData: NSData { return data }
-    public var asString: String { return NSString(data: data, encoding: NSUTF8StringEncoding) as! String }
-    public var asInteger: Int { return Int(self.asString)! }
-    public var asDouble: Double { return Double(self.asString)! }
-}
-
-
-public enum RedisResponse {
-    case StringValue(RedisString)
-    case Array([RedisResponse])
-    case IntegerValue(Int64)
-    case Status(String)
-    case Error(String)
-    case Nil
-}
-
-
 public class SwiftRedis {
     
     private var context: redisContext?
@@ -595,6 +559,14 @@ public class SwiftRedis {
         issueCommand("HVALS", key) {(response: RedisResponse) in
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
+    }
+    
+    // **********************
+    //  Transaction support *
+    // **********************
+    
+    public func multi() -> SwiftRedisMulti {
+        return SwiftRedisMulti(redis: self)
     }
     
     
