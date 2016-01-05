@@ -220,27 +220,7 @@ public class SwiftRedis {
             command.append(key)
         }
         issueCommandInArray(command) {(response: RedisResponse) in
-            var error: NSError? = nil
-            var strings = [RedisString?]()
-            
-            switch(response) {
-                case .Array(let responses):
-                    for innerResponse in responses {
-                        switch(innerResponse) {
-                            case .StringValue(let str):
-                                strings.append(str)
-                            case .Nil:
-                                strings.append(nil)
-                            default:
-                                error = self.createUnexpectedResponseError(response)
-                        }
-                    }
-                case .Error(let err):
-                    error = self.createError("Error: \(err)", code: 1)
-                default:
-                    error = self.createUnexpectedResponseError(response)
-            }
-            callback(error == nil ? strings : nil, error: error)
+            self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
     
@@ -480,6 +460,35 @@ public class SwiftRedis {
         }
     }
     
+    public func hgetall(key: String, callback: ([String: RedisString], error: NSError?) -> Void) {
+        issueCommand("HGETALL", key) {(response: RedisResponse) in
+            var values = [String: RedisString]()
+            var error: NSError? = nil
+            
+            switch(response) {
+                case .Array(let responses):
+                    for idx in 0.stride(to: responses.count-1, by:2) {
+                        switch(responses[idx]) {
+                            case .StringValue(let field):
+                                switch(responses[idx+1]) {
+                                    case .StringValue(let value):
+                                        values[field.asString] = value
+                                    default:
+                                        error = self.createUnexpectedResponseError(response)
+                                }
+                            default:
+                                error = self.createUnexpectedResponseError(response)
+                        }
+                    }
+                case .Error(let err):
+                    error = self.createError("Error: \(err)", code: 1)
+                default:
+                    error = self.createUnexpectedResponseError(response)
+            }
+            callback(values, error: error)
+        }
+    }
+    
     public func hincr(key: String, field: String, by: Int, callback: (Int?, error: NSError?) -> Void) {
         issueCommand("HINCRBY", key, field, String(by)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
@@ -492,9 +501,75 @@ public class SwiftRedis {
         }
     }
     
+    public func hkeys(key: String, callback: ([String]?, error: NSError?) -> Void) {
+        issueCommand("HKEYS", key) {(response: RedisResponse) in
+            var error: NSError? = nil
+            var strings = [String]()
+            
+            switch(response) {
+            case .Array(let responses):
+                for innerResponse in responses {
+                    switch(innerResponse) {
+                    case .StringValue(let str):
+                        strings.append(str.asString)
+                    default:
+                        error = self.createUnexpectedResponseError(response)
+                    }
+                }
+            case .Error(let err):
+                error = self.createError("Error: \(err)", code: 1)
+            default:
+                error = self.createUnexpectedResponseError(response)
+            }
+            callback(error == nil ? strings : nil, error: error)
+        }
+    }
+    
     public func hlen(key: String, callback: (Int?, error: NSError?) -> Void) {
         issueCommand("HLEN", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hmget(key: String, fields: String..., callback: ([RedisString?]?, error: NSError?) -> Void) {
+        var command = ["HMGET", key]
+        for field in fields {
+            command.append(field)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hmset(key: String, fieldValuePairs: (String, String)..., callback: (Bool, error: NSError?) -> Void) {
+        hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
+    }
+    
+    public func hmsetArrayOfKeyValues(key: String, fieldValuePairs: [(String, String)], callback: (Bool, error: NSError?) -> Void) {
+        var command = ["HMSET", key]
+        for (field, value) in fieldValuePairs {
+            command.append(field)
+            command.append(value)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
+            callback(ok, error: error)
+        }
+    }
+    
+    public func hmset(key: String, fieldValuePairs: (String, RedisString)..., callback: (Bool, error: NSError?) -> Void) {
+        hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
+    }
+    
+    public func hmsetArrayOfKeyValues(key: String, fieldValuePairs: [(String, RedisString)], callback: (Bool, error: NSError?) -> Void) {
+        var command = [RedisString("HMSET"), RedisString(key)]
+        for (field, value) in fieldValuePairs {
+            command.append(RedisString(field))
+            command.append(value)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
+            callback(ok, error: error)
         }
     }
     
@@ -513,6 +588,12 @@ public class SwiftRedis {
     public func hstrlen(key: String, field: String, callback: (Int?, error: NSError?) -> Void) {
         issueCommand("HSTRLEN", key, field) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    public func hvals(key: String, callback: ([RedisString?]?, error: NSError?) -> Void) {
+        issueCommand("HVALS", key) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
     
@@ -684,6 +765,30 @@ public class SwiftRedis {
             default:
                 callback(nil, error: createUnexpectedResponseError(response))
         }
+    }
+    
+    private func redisStringArrayResponseHandler(response: RedisResponse, callback: ([RedisString?]?, error: NSError?) -> Void) {
+        var error: NSError? = nil
+        var strings = [RedisString?]()
+        
+        switch(response) {
+        case .Array(let responses):
+            for innerResponse in responses {
+                switch(innerResponse) {
+                case .StringValue(let str):
+                    strings.append(str)
+                case .Nil:
+                    strings.append(nil)
+                default:
+                    error = self.createUnexpectedResponseError(response)
+                }
+            }
+        case .Error(let err):
+            error = self.createError("Error: \(err)", code: 1)
+        default:
+            error = self.createUnexpectedResponseError(response)
+        }
+        callback(error == nil ? strings : nil, error: error)
     }
     
     private func createUnexpectedResponseError(response: RedisResponse) -> NSError {
