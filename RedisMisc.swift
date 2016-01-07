@@ -50,6 +50,61 @@ public enum RedisResponse {
     case Nil
     case Status(String)
     case StringValue(RedisString)
+    
+    public var asArray: [RedisResponse]? {
+        let result: [RedisResponse]?
+        switch(self) {
+        case .Array(let responses):
+            result = responses
+        default:
+            result = nil
+        }
+        return result
+    }
+    
+    public var asError: String? {
+        let result: String?
+        switch(self) {
+        case .Error(let str):
+            result = str
+        default:
+            result = nil
+        }
+        return result
+    }
+    
+    public var asInteger: Int64? {
+        let result: Int64?
+        switch(self) {
+            case .IntegerValue(let num):
+                result = num
+            default:
+                result = nil
+        }
+        return result
+    }
+    
+    public var asStatus: String? {
+        let result: String?
+        switch(self) {
+        case .Status(let str):
+            result = str
+        default:
+            result = nil
+        }
+        return result
+    }
+    
+    public var asString: RedisString? {
+        let result: RedisString?
+        switch(self) {
+        case .StringValue(let str):
+            result = str
+        default:
+            result = nil
+        }
+        return result
+    }
 }
 
 extension RedisResponse: Equatable {}
