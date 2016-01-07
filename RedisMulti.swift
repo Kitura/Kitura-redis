@@ -97,6 +97,25 @@ public class RedisMulti {
         return self
     }
     
+    public func exists(keys: String...) -> RedisMulti {
+        var command = [RedisString("EXISTS")]
+        for key in keys {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func expire(key: String, inTime: NSTimeInterval) -> RedisMulti {
+        queuedCommands.append([RedisString("PEXPIRE"), RedisString(key), RedisString(Int(inTime * 1000.0))])
+        return self
+    }
+    
+    public func expire(key: String, atDate: NSDate) -> RedisMulti {
+        queuedCommands.append([RedisString("PEXPIREAT"), RedisString(key), RedisString(Int(atDate.timeIntervalSince1970 * 1000.0))])
+        return self
+    }
+    
     public func get(key: String) -> RedisMulti {
         queuedCommands.append([RedisString("GET"), RedisString(key)])
         return self
@@ -141,6 +160,11 @@ public class RedisMulti {
         return self
     }
     
+    public func move(key: String, toDB: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("MOVE"), RedisString(key), RedisString(toDB)])
+        return self
+    }
+    
     public func mset(keyValuePairs: (String, String)..., exists: Bool=true) -> RedisMulti {
         return msetArrayOfKeyValues(keyValuePairs, exists: exists)
     }
@@ -166,6 +190,16 @@ public class RedisMulti {
             command.append(value)
         }
         queuedCommands.append(command)
+        return self
+    }
+    
+    public func persist(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("PERSIST"), RedisString(key)])
+        return self
+    }
+    
+    public func rename(key: String, newKey: String, exists: Bool=true) -> RedisMulti {
+        queuedCommands.append([RedisString(exists ? "RENAME" : "RENAMENX"), RedisString(key), RedisString(newKey)])
         return self
     }
     
@@ -212,6 +246,11 @@ public class RedisMulti {
     
     public func strlen(key: String) -> RedisMulti {
         queuedCommands.append([RedisString("STRLEN"), RedisString(key)])
+        return self
+    }
+    
+    public func ttl(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("PTTL"), RedisString(key)])
         return self
     }
     
