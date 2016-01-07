@@ -1,6 +1,6 @@
 //
-//  SwiftRedisMisc.swift
-//  Phoenix
+//  RedisMisc.swift
+//  SwiftRedis
 //
 //  Created by Samuel Kallner on 05/01/2016.
 //  Copyright © 2016 Daniel Firsht. All rights reserved.

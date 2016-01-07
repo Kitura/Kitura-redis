@@ -1,5 +1,5 @@
 //
-//  SwiftRedis.swift
+//  Redis.swift
 //  SwiftRedis
 //
 //  Created by Ira Rosen on 17/11/15.
@@ -13,7 +13,7 @@ import hiredis
 import Foundation
 
 
-public class SwiftRedis {
+public class Redis {
     
     private var context: redisContext?
     
@@ -565,8 +565,8 @@ public class SwiftRedis {
     //  Transaction support *
     // **********************
     
-    public func multi() -> SwiftRedisMulti {
-        return SwiftRedisMulti(redis: self)
+    public func multi() -> RedisMulti {
+        return RedisMulti(redis: self)
     }
     
     
@@ -771,21 +771,21 @@ public class SwiftRedis {
         return NSError(domain: "RedisDomain", code: code, userInfo: [NSLocalizedDescriptionKey : errorMessage])
     }
     
-    private func createRedisError(swiftRedisError: String) -> NSError {
-        let errorMessage = createRedisErrorMessage(swiftRedisError)
+    private func createRedisError(redisError: String) -> NSError {
+        let errorMessage = createRedisErrorMessage(redisError)
         return createError(errorMessage, code: 1)
     }
     
-    private func createRedisErrorMessage(swiftRedisError: String) -> String {
+    private func createRedisErrorMessage(redisError: String) -> String {
         if  context != nil  {
             var errPtr : UnsafePointer<Int8> = nil
             withUnsafePointer(&context!.errstr) { ptr in
                 errPtr = UnsafePointer<Int8>(ptr)
             }
-            return "\(swiftRedisError) \(String(UTF8String: errPtr)!)"
+            return "\(redisError) \(String(UTF8String: errPtr)!)"
         }
         else {
-            return swiftRedisError
+            return redisError
         }
     }
     

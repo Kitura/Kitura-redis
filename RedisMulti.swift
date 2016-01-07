@@ -1,6 +1,6 @@
 //
-//  SwiftRedisMulti.swift
-//  Phoenix
+//  RedisMulti.swift
+//  SwiftRedis
 //
 //  Created by Samuel Kallner on 05/01/2016.
 //  Copyright © 2016 Daniel Firsht. All rights reserved.
@@ -8,11 +8,11 @@
 
 import Foundation
 
-public class SwiftRedisMulti {
-    let redis: SwiftRedis
+public class RedisMulti {
+    let redis: Redis
     var queuedCommands = [[RedisString]]()
     
-    init(redis: SwiftRedis) {
+    init(redis: Redis) {
         self.redis = redis
     }
     
@@ -21,12 +21,12 @@ public class SwiftRedisMulti {
     // ************************
     
     
-    public func decr(key: String, by: Int=1) -> SwiftRedisMulti {
+    public func decr(key: String, by: Int=1) -> RedisMulti {
         queuedCommands.append([RedisString("DECRBY"), RedisString(key), RedisString(by)])
         return self
     }
     
-    public func del(keys: String...) -> SwiftRedisMulti {
+    public func del(keys: String...) -> RedisMulti {
         var command = [RedisString("DEL")]
         for key in keys {
             command.append(RedisString(key))
@@ -35,32 +35,32 @@ public class SwiftRedisMulti {
         return self
     }
     
-    public func get(key: String) -> SwiftRedisMulti {
+    public func get(key: String) -> RedisMulti {
         queuedCommands.append([RedisString("GET"), RedisString(key)])
         return self
     }
     
-    public func getSet(key: String, value: String) -> SwiftRedisMulti {
+    public func getSet(key: String, value: String) -> RedisMulti {
         queuedCommands.append([RedisString("GETSET"), RedisString(key), RedisString(value)])
         return self
     }
     
-    public func getSet(key: String, value: RedisString) -> SwiftRedisMulti {
+    public func getSet(key: String, value: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("GETSET"), RedisString(key), value])
         return self
     }
     
-    public func incr(key: String, by: Int=1) -> SwiftRedisMulti {
+    public func incr(key: String, by: Int=1) -> RedisMulti {
         queuedCommands.append([RedisString("INCRBY"), RedisString(key), RedisString(by)])
         return self
     }
     
-    public func incr(key: String, byFloat: Float) -> SwiftRedisMulti {
+    public func incr(key: String, byFloat: Float) -> RedisMulti {
         queuedCommands.append([RedisString("INCRBYFLOAT"), RedisString(key), RedisString(Double(byFloat))])
         return self
     }
     
-    public func mget(keys: String...) -> SwiftRedisMulti {
+    public func mget(keys: String...) -> RedisMulti {
         var command = [RedisString("MGET")]
         for key in keys {
             command.append(RedisString(key))
@@ -69,11 +69,11 @@ public class SwiftRedisMulti {
         return self
     }
     
-    public func mset(keyValuePairs: (String, String)..., exists: Bool=true) -> SwiftRedisMulti {
+    public func mset(keyValuePairs: (String, String)..., exists: Bool=true) -> RedisMulti {
         return msetArrayOfKeyValues(keyValuePairs, exists: exists)
     }
     
-    public func msetArrayOfKeyValues(keyValuePairs: [(String, String)], exists: Bool=true) -> SwiftRedisMulti {
+    public func msetArrayOfKeyValues(keyValuePairs: [(String, String)], exists: Bool=true) -> RedisMulti {
         var command = [RedisString(exists ? "MSET" : "MSETNX")]
         for (key, value) in keyValuePairs {
             command.append(RedisString(key))
@@ -83,11 +83,11 @@ public class SwiftRedisMulti {
         return self
     }
     
-    public func mset(keyValuePairs: (String, RedisString)..., exists: Bool=true) -> SwiftRedisMulti {
+    public func mset(keyValuePairs: (String, RedisString)..., exists: Bool=true) -> RedisMulti {
         return msetArrayOfKeyValues(keyValuePairs, exists: exists)
     }
     
-    public func msetArrayOfKeyValues(keyValuePairs: [(String, RedisString)], exists: Bool=true) -> SwiftRedisMulti {
+    public func msetArrayOfKeyValues(keyValuePairs: [(String, RedisString)], exists: Bool=true) -> RedisMulti {
         var command = [RedisString(exists ? "MSET" : "MSETNX")]
         for (key, value) in keyValuePairs {
             command.append(RedisString(key))
@@ -97,12 +97,12 @@ public class SwiftRedisMulti {
         return self
     }
     
-    public func select(db: Int) -> SwiftRedisMulti {
+    public func select(db: Int) -> RedisMulti {
         queuedCommands.append([RedisString("SELECT"), RedisString(db)])
         return self
     }
     
-    public func set(key: String, value: String, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil) -> SwiftRedisMulti {
+    public func set(key: String, value: String, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil) -> RedisMulti {
         var command = [RedisString("SET"), RedisString(key), RedisString(value)]
         if  let exists = exists  {
             command.append(RedisString(exists ? "XX" : "NX"))
@@ -115,7 +115,7 @@ public class SwiftRedisMulti {
         return self
     }
     
-    public func set(key: String, value: RedisString, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil) -> SwiftRedisMulti {
+    public func set(key: String, value: RedisString, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil) -> RedisMulti {
         var command = [RedisString("SET"), RedisString(key), value]
         if  let exists = exists  {
             command.append(RedisString(exists ? "XX" : "NX"))
