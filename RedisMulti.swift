@@ -21,6 +21,68 @@ public class RedisMulti {
     // ************************
     
     
+    public func append(key: String, value: String) -> RedisMulti {
+        queuedCommands.append([RedisString("APPEND"), RedisString(key), RedisString(value)])
+        return self
+    }
+    
+    public func bitcount(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("BITCOUNT"), RedisString(key)])
+        return self
+    }
+    
+    public func bitcount(key: String, start: Int, end: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("BITCOUNT"), RedisString(key), RedisString(start), RedisString(end)])
+        return self
+    }
+    
+    public func bitop(destKey: String, and: String...) -> RedisMulti {
+        var command = [RedisString("BITOP"), RedisString("AND"), RedisString(destKey)]
+        for key in and {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func bitop(destKey: String, not: String) -> RedisMulti {
+        queuedCommands.append([RedisString("BITOP"), RedisString("NOT"), RedisString(destKey), RedisString(not)])
+        return self
+    }
+    
+    public func bitop(destKey: String, or: String...) -> RedisMulti {
+        var command = [RedisString("BITOP"), RedisString("OR"), RedisString(destKey)]
+        for key in or {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func bitop(destKey: String, xor: String...) -> RedisMulti {
+        var command = [RedisString("BITOP"), RedisString("XOR"), RedisString(destKey)]
+        for key in xor {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func bitpos(key: String, bit:Bool) -> RedisMulti {
+        queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0")])
+        return self
+    }
+    
+    public func bitpos(key: String, bit:Bool, start: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0"), RedisString(start)])
+        return self
+    }
+    
+    public func bitpos(key: String, bit:Bool, start: Int, end: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0"), RedisString(start), RedisString(end)])
+        return self
+    }
+    
     public func decr(key: String, by: Int=1) -> RedisMulti {
         queuedCommands.append([RedisString("DECRBY"), RedisString(key), RedisString(by)])
         return self
@@ -37,6 +99,16 @@ public class RedisMulti {
     
     public func get(key: String) -> RedisMulti {
         queuedCommands.append([RedisString("GET"), RedisString(key)])
+        return self
+    }
+    
+    public func getbit(key: String, offset: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("GETBIT"), RedisString(key), RedisString(offset)])
+        return self
+    }
+    
+    public func getrange(key: String, start: Int, end: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("GETRANGE"), RedisString(key), RedisString(start), RedisString(end)])
         return self
     }
     
@@ -127,6 +199,22 @@ public class RedisMulti {
         queuedCommands.append(command)
         return self
     }
+    
+    public func setbit(key: String, offset: Int, value: Bool) -> RedisMulti {
+        queuedCommands.append([RedisString("SETBIT"), RedisString(key), RedisString(offset), RedisString(value ? "1" : "0")])
+        return self
+    }
+    
+    public func setrange(key: String, offset: Int, value: String) -> RedisMulti {
+        queuedCommands.append([RedisString("SETRANGE"), RedisString(key), RedisString(offset), RedisString(value)])
+        return self
+    }
+    
+    public func strlen(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("STRLEN"), RedisString(key)])
+        return self
+    }
+    
     
     // **********************
     //  Run the transaction *
