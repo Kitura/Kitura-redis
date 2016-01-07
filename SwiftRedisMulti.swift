@@ -20,6 +20,12 @@ public class SwiftRedisMulti {
     //  Commands to be Queued *
     // ************************
     
+    
+    public func decr(key: String, by: Int=1) -> SwiftRedisMulti {
+        queuedCommands.append([RedisString("DECRBY"), RedisString(key), RedisString(by)])
+        return self
+    }
+    
     public func del(keys: String...) -> SwiftRedisMulti {
         var command = [RedisString("DEL")]
         for key in keys {
@@ -41,6 +47,53 @@ public class SwiftRedisMulti {
     
     public func getSet(key: String, value: RedisString) -> SwiftRedisMulti {
         queuedCommands.append([RedisString("GETSET"), RedisString(key), value])
+        return self
+    }
+    
+    public func incr(key: String, by: Int=1) -> SwiftRedisMulti {
+        queuedCommands.append([RedisString("INCRBY"), RedisString(key), RedisString(by)])
+        return self
+    }
+    
+    public func incr(key: String, byFloat: Float) -> SwiftRedisMulti {
+        queuedCommands.append([RedisString("INCRBYFLOAT"), RedisString(key), RedisString(Double(byFloat))])
+        return self
+    }
+    
+    public func mget(keys: String...) -> SwiftRedisMulti {
+        var command = [RedisString("MGET")]
+        for key in keys {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func mset(keyValuePairs: (String, String)..., exists: Bool=true) -> SwiftRedisMulti {
+        return msetArrayOfKeyValues(keyValuePairs, exists: exists)
+    }
+    
+    public func msetArrayOfKeyValues(keyValuePairs: [(String, String)], exists: Bool=true) -> SwiftRedisMulti {
+        var command = [RedisString(exists ? "MSET" : "MSETNX")]
+        for (key, value) in keyValuePairs {
+            command.append(RedisString(key))
+            command.append(RedisString(value))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func mset(keyValuePairs: (String, RedisString)..., exists: Bool=true) -> SwiftRedisMulti {
+        return msetArrayOfKeyValues(keyValuePairs, exists: exists)
+    }
+    
+    public func msetArrayOfKeyValues(keyValuePairs: [(String, RedisString)], exists: Bool=true) -> SwiftRedisMulti {
+        var command = [RedisString(exists ? "MSET" : "MSETNX")]
+        for (key, value) in keyValuePairs {
+            command.append(RedisString(key))
+            command.append(value)
+        }
+        queuedCommands.append(command)
         return self
     }
     
