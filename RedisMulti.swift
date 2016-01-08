@@ -141,6 +141,107 @@ public class RedisMulti {
         return self
     }
     
+    public func hdel(key: String, fields: String...) -> RedisMulti {
+        var command = [RedisString("HDEL"), RedisString(key)]
+        for field in fields {
+            command.append(RedisString(field))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func hexists(key: String, field: String) -> RedisMulti {
+        queuedCommands.append([RedisString("HEXISTS"), RedisString(key), RedisString(field)])
+        return self
+    }
+    
+    public func hget(key: String, field: String) -> RedisMulti {
+        queuedCommands.append([RedisString("HGET"), RedisString(key), RedisString(field)])
+        return self
+    }
+    
+    public func hgetall(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("HGETALL"), RedisString(key)])
+        return self
+    }
+    
+    public func hincr(key: String, field: String, by: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("HINCRBY"), RedisString(key), RedisString(field), RedisString(by)])
+        return self
+    }
+    
+    public func hincr(key: String, field: String, byFloat: Float) -> RedisMulti {
+        queuedCommands.append([RedisString("HINCRBYFLOAT"), RedisString(key), RedisString(field), RedisString(Double(byFloat))])
+        return self
+    }
+    
+    public func hkeys(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("HKEYS"), RedisString(key)])
+        return self
+    }
+    
+    public func hlen(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("HLEN"), RedisString(key)])
+        return self
+    }
+    
+    public func hmget(key: String, fields: String...) -> RedisMulti {
+        var command = [RedisString("HMGET"), RedisString(key)]
+        for field in fields {
+            command.append(RedisString(field))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func hmset(key: String, fieldValuePairs: (String, String)...) -> RedisMulti {
+        return hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs)
+    }
+    
+    public func hmsetArrayOfKeyValues(key: String, fieldValuePairs: [(String, String)]) -> RedisMulti {
+        var command = [RedisString("HMSET"), RedisString(key)]
+        for (field, value) in fieldValuePairs {
+            command.append(RedisString(field))
+            command.append(RedisString(value))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func hmset(key: String, fieldValuePairs: (String, RedisString)...) -> RedisMulti {
+        return hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs)
+    }
+    
+    public func hmsetArrayOfKeyValues(key: String, fieldValuePairs: [(String, RedisString)]) -> RedisMulti {
+        var command = [RedisString("HMSET"), RedisString(key)]
+        for (field, value) in fieldValuePairs {
+            command.append(RedisString(field))
+            command.append(value)
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    public func hset(key: String, field: String, value: String, exists: Bool=true) -> RedisMulti {
+        queuedCommands.append([RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), RedisString(value)])
+        return self
+    }
+    
+    public func hset(key: String, field: String, value: RedisString, exists: Bool=true) -> RedisMulti {
+        queuedCommands.append([RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), value])
+        return self
+    }
+    
+    public func hstrlen(key: String, field: String) -> RedisMulti {
+        queuedCommands.append([RedisString("HSTRLEN"), RedisString(key), RedisString(field)])
+        return self
+    }
+    
+    public func hvals(key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("HVALS"), RedisString(key)])
+        return self
+    }
+    
     public func incr(key: String, by: Int=1) -> RedisMulti {
         queuedCommands.append([RedisString("INCRBY"), RedisString(key), RedisString(by)])
         return self
