@@ -10,7 +10,7 @@ import SwiftRedis
 
 #if os(Linux)
     import Glibc
-#else
+#elseif os(OSX)
     import Darwin
 #endif
 
@@ -21,7 +21,14 @@ let redis = Redis()
 
 func connectRedis (callback: (NSError?) -> Void) {
     if !redis.connected  {
-        redis.connect("localhost", port: 6379, callback: callback)
+        var host = "localhost"
+        let hostCStr = getenv("SWIFT_REDIS_HOST") 
+        if  hostCStr != nil {
+            if  let hostStr = NSString(UTF8String: hostCStr) {
+                host = hostStr.bridge()
+            }
+        }
+        redis.connect(host, port: 6379, callback: callback)
     }
     else {
         callback(nil)
@@ -53,7 +60,7 @@ public struct AuthTests: XCTestCase {
                 let pswd = NSString(UTF8String: pswdCstr)
                 XCTAssertNotNil(pswd, "Password wasn't a UTF-8 string")
                 
-                redis.auth(pswd as! String) {(error: NSError?) in
+                redis.auth(pswd!.bridge()) {(error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     
                     redis.set(self.key, value: expectedValue) {(wasSet: Bool, error: NSError?) in
