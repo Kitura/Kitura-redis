@@ -372,7 +372,7 @@ public class RedisMulti {
                             switch(response) {
                                 case .Status(let status):
                                     if  status == "QUEUED"  {
-                                        idx++
+                                        idx += 1
                                         if  idx < self.queuedCommands.count  {
                                             // Queue another command to Redis
                                             self.redis.issueCommandInArray(self.queuedCommands[idx], callback: handler!)

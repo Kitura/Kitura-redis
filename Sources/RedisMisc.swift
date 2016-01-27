@@ -31,7 +31,7 @@ public class RedisString {
     }
     
     public var asData: NSData { return data }
-    public var asString: String { return NSString(data: data, encoding: NSUTF8StringEncoding) as! String }
+    public var asString: String { return NSString(data: data, encoding: NSUTF8StringEncoding)!.bridge() }
     public var asInteger: Int { return Int(self.asString)! }
     public var asDouble: Double { return Double(self.asString)! }
 }
