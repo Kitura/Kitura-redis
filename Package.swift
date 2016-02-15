@@ -19,7 +19,7 @@ import PackageDescription
 let package = Package(
     name: "SwiftRedis",
     dependencies: [ 
-        .Package(url: "https://github.com/IBM-Swift/Kitura-hiredis.git", majorVersion: 0),
-        .Package(url: "https://github.com/IBM-Swift/Kitura-router.git", majorVersion: 0),
+        .Package(url: "git@github.com:IBM-Swift/Kitura-hiredis.git", majorVersion: 0),
+        .Package(url: "git@github.com:IBM-Swift/Kitura-router.git", majorVersion: 0),
 ]
 )
