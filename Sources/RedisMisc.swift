@@ -14,30 +14,30 @@
  * limitations under the License.
  **/
 
-import sys
+import KituraSys
 
 import Foundation
 
 
 public class RedisString {
     private let data: NSData
-    
+
     public init(_ data: NSData) {
         self.data = data
     }
-    
+
     public convenience init(_ value: String) {
         self.init(StringUtils.toUtf8String(value)!)
     }
-    
+
     public convenience init(_ value: Int) {
         self.init(String(value))
     }
-    
+
     public convenience init(_ value: Double) {
         self.init(String(value))
     }
-    
+
     public var asData: NSData { return data }
     public var asString: String { return NSString(data: data, encoding: NSUTF8StringEncoding)!.bridge() }
     public var asInteger: Int { return Int(self.asString)! }
