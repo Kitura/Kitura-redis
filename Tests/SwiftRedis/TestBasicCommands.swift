@@ -26,7 +26,7 @@ import Foundation
 import XCTest
 
 
-public struct TestBasicCommands: XCTestCase {
+public class TestBasicCommands: XCTestCase {
     public var allTests : [(String, () throws -> Void)] {
         return [
             ("test_setAndGet", test_setAndGet),

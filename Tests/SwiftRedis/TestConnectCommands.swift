@@ -19,7 +19,7 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-public struct TestConnectCommands: XCTestCase {
+public class TestConnectCommands: XCTestCase {
     public var allTests : [(String, () throws -> Void)] {
         return [
             ("test_pingAndEcho", test_pingAndEcho),

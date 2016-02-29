@@ -6,8 +6,6 @@
 //  Copyright © 2015 Daniel Firsht. All rights reserved.
 //
 
-import SwiftRedis
-
 #if os(Linux)
     import Glibc
 #elseif os(OSX)
@@ -16,6 +14,8 @@ import SwiftRedis
 
 import Foundation
 import XCTest
+
+@testable import SwiftRedis
 
 let redis = Redis()
 
@@ -35,7 +35,7 @@ func connectRedis (callback: (NSError?) -> Void) {
     }
 }
 
-public struct AuthTests: XCTestCase {
+public class AuthTests: XCTestCase {
     
     let key = "authTestKey"
     

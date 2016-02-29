@@ -19,7 +19,7 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-public struct TestTransactionsPart1: XCTestCase {
+public class TestTransactionsPart1: XCTestCase {
     public var allTests : [(String, () throws -> Void)] {
         return [
             ("testSetPlusGetAndDel", testSetPlusGetAndDel),

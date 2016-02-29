@@ -19,7 +19,7 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-public struct TestBinarySafeCommands: XCTestCase {
+public class TestBinarySafeCommands: XCTestCase {
     public var allTests : [(String, () throws -> Void)] {
         return [
             ("test_setWithBinary", test_setWithBinary),

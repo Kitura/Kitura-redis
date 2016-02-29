@@ -19,7 +19,7 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-public struct TestStringAndBitCommands: XCTestCase {
+public class TestStringAndBitCommands: XCTestCase {
     public var allTests : [(String, () throws -> Void)] {
         return [
             ("test_StringManipulation", test_StringManipulation),

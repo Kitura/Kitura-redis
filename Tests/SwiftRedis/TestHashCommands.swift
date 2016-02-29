@@ -19,7 +19,7 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-public struct TestHashCommands: XCTestCase {
+public class TestHashCommands: XCTestCase {
     public var allTests : [(String, () throws -> Void)] {
         return [
             ("test_hashSetAndGet", test_hashSetAndGet),
