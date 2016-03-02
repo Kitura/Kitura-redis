@@ -1,4 +1,4 @@
-# Travis CI build file for Kitura-CouchDB.
+# Travis CI build file for Kitura-redis.
 # Kitura runs on OS X and Linux (Ubuntu v15.10).
 
 # whitelist (branches that should be built)
@@ -22,10 +22,13 @@ matrix:
 before_install:
   - echo "Operating system -> '$TRAVIS_OS_NAME'"
   - echo "Travis build directory -> '$TRAVIS_BUILD_DIR'"
+  - git clone https://github.com/IBM-Swift/Kitura-CI.git
+  - cp ./Kitura-CI/*.sh $TRAVIS_BUILD_DIR/
+  - rm -rf ./Kitura-CI
   - git clone -b master https://$JAZZHUB_USER:$JAZZHUB_PWD@hub.jazz.net/git/milbuild/MIL.DevOps
 
 script:
   - echo "About to build and test Kitura-redis for branch '$TRAVIS_BRANCH'."
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./build_ubuntu.sh ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./build_ubuntu.sh $TRAVIS_BRANCH $TRAVIS_BUILD_DIR Kitura-redis ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./build_osx.sh ; fi
   - echo "Build and tests completed. See above for status."
