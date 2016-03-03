@@ -25,7 +25,6 @@ before_install:
   - git clone https://github.com/IBM-Swift/Kitura-CI.git
   - cp ./Kitura-CI/*.sh $TRAVIS_BUILD_DIR/
   - rm -rf ./Kitura-CI
-  - git clone -b master https://$JAZZHUB_USER:$JAZZHUB_PWD@hub.jazz.net/git/milbuild/MIL.DevOps
 
 script:
   - echo "About to build and test Kitura-redis for branch '$TRAVIS_BRANCH'."
