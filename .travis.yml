@@ -20,15 +20,14 @@ matrix:
       sudo: required
 
 before_install:
-  - echo "Operating system -> '$TRAVIS_OS_NAME'"
-  - echo "Travis build directory -> '$TRAVIS_BUILD_DIR'"
-  - git clone https://github.com/IBM-Swift/Kitura-CI.git
-  - cp ./Kitura-CI/*.sh $TRAVIS_BUILD_DIR/
-  - rm -rf ./Kitura-CI
+  - git submodule init
+  - git submodule update
+  - cd Kitura-CI && git checkout master && cd $TRAVIS_BUILD_DIR
   - git clone -b master https://$GITHUB_USER:$GITHUB_PWD@github.com/IBM-Swift/DevOps.git
+  - git clone -b master https://$GITHUB_USER:$GITHUB_PWD@github.com/IBM-Swift/Kitura-TestingCredentials.git
 
 script:
-  - echo "About to build and test Kitura-redis for branch '$TRAVIS_BRANCH'."
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./exec_kitura_ubuntu_container.sh $TRAVIS_BRANCH $TRAVIS_BUILD_DIR Kitura-redis ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./build_osx.sh ; fi
-  - echo "Build and tests completed. See above for status."
+  - echo ">> Let's build and test Kitura-redis for branch '$TRAVIS_BRANCH'."
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./Kitura-CI/run_kitura_ubuntu_container.sh $TRAVIS_BRANCH $TRAVIS_BUILD_DIR Kitura-redis ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./Kitura-CI/build_kitura_package.sh ; fi
+  - echo ">> Build and tests completed. See above for status."
