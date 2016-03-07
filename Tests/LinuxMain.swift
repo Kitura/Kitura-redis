@@ -20,5 +20,17 @@ import XCTest
 @testable import SwiftRedisAuthtest
 
 XCTMain([
+	TestBasicCommands(),
+	TestBinarySafeCommands(),
+	TestConnectCommands(),
+	TestHashCommands(),
+	TestIssueCommand(),
+	TestMoreCommands(),
+	TestStringAndBitCommands(),
+	TestTransactionsPart1(),
+	TestTransactionsPart2(),
+	TestTransactionsPart3(),
+	TestTransactionsPart4(),
+	AuthTests()
 ])
 
