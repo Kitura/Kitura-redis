@@ -16,28 +16,15 @@ import Foundation
 import XCTest
 
 @testable import SwiftRedis
+import SwiftyJSON
 
 let redis = Redis()
-
-func connectRedis (callback: (NSError?) -> Void) {
-    if !redis.connected  {
-        var host = "localhost"
-        let hostCStr = getenv("SWIFT_REDIS_HOST") 
-        if  hostCStr != nil {
-            if  let hostStr = NSString(UTF8String: hostCStr) {
-                host = hostStr.bridge()
-            }
-        }
-        redis.connect(host, port: 6379, callback: callback)
-    }
-    else {
-        callback(nil)
-    }
-}
 
 public class AuthTests: XCTestCase {
     
     let key = "authTestKey"
+    let host = "localhost"
+    var password = ""
     
     public var allTests : [(String, () throws -> Void)] {
         return [
@@ -46,6 +33,7 @@ public class AuthTests: XCTestCase {
     }
     
     func test_ConnectWithAuth() {
+        readPassword()
         connectRedis() {(error: NSError?) in
             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
             
@@ -54,13 +42,7 @@ public class AuthTests: XCTestCase {
                 XCTAssertNotNil(error, "Error was nil")
                 XCTAssertFalse(wasSet, "Set \(self.key) without authenticating")
                 
-                let pswdCstr = getenv("SWIFT_REDIS_AUTH_PSWD")
-                XCTAssert(pswdCstr != nil, "Didn't get a password")
-                
-                let pswd = NSString(UTF8String: pswdCstr)
-                XCTAssertNotNil(pswd, "Password wasn't a UTF-8 string")
-                
-                redis.auth(pswd!.bridge()) {(error: NSError?) in
+                redis.auth(self.password) {(error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     
                     redis.set(self.key, value: expectedValue) {(wasSet: Bool, error: NSError?) in
@@ -75,5 +57,31 @@ public class AuthTests: XCTestCase {
                 }
             }
         }
+    }
+
+    func connectRedis (callback: (NSError?) -> Void) {
+        if !redis.connected  {
+            redis.connect(host, port: 6379, callback: callback)
+        }
+        else {
+            callback(nil)
+        }
+    }
+
+    func readPassword() {
+        // Read in credentials an NSData
+        let passwordData = NSData(contentsOfFile: "Tests/SwiftRedisAuth/password.txt")
+        XCTAssertNotNil(passwordData, "Failed to read in the password.txt file")
+
+        let password = String(data: passwordData!, encoding:NSUTF8StringEncoding)
+
+        guard
+           let passwordLiteral = password
+        else {
+            XCTFail("Error in password.txt.")
+            exit(1)
+        }
+
+        self.password = passwordLiteral
     }
 }
