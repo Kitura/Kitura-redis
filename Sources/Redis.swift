@@ -740,6 +740,16 @@ public class Redis {
     // MARK: Hash functions
     //
     
+    ///
+    /// Removes the specified fields from the hash stored at key. Specified fields that do not 
+    /// exist within this hash are ignored. If key does not exist, it is treated as an empty hash
+    /// and this command returns 0. 
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter fields: removes the specified fields as a variadic parameter
+    /// - Parameter callback: callback function containing the number of fields that were removed from 
+    ///             the hash, not including specified but non existing fields.
+    ///
     public func hdel(key: String, fields: String..., callback: (Int?, error: NSError?) -> Void) {
         var command = ["HDEL", key]
         for field in fields {
@@ -750,18 +760,42 @@ public class Redis {
         }
     }
     
+    /// 
+    /// Returns if field is an existing field in the hash stored at key 
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter field: String value for field 
+    /// - Parameter callback: a callback function returning 1 if the hash contains field
+    ///             0 if the hash does not contain field, or key does not exist 
+    ///
     public func hexists(key: String, field: String, callback: (Bool, error: NSError?) -> Void) {
         issueCommand("HEXISTS", key, field) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
     
+    ///
+    /// Returns the value associated with field in the hash stored at key.
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter field: String value for field
+    /// - Parameter callback: a callback function returning the value associated with the field, or nil
+    ///             when field is not present in the hash or key does not exist
+    ///
     public func hget(key: String, field: String, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("HGET", key, field) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
+    ///
+    /// Returns all fields and values of the hash stored at key. In the returned value, every field 
+    /// name is followed by its value, so the length of the reply is twice the size of the hash. 
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter callback: a callback function returning the list of fields and their values stored in the 
+    ///             hash, or an empty list when key does not exist.
+    ///
     public func hgetall(key: String, callback: ([String: RedisString], error: NSError?) -> Void) {
         issueCommand("HGETALL", key) {(response: RedisResponse) in
             var values = [String: RedisString]()
