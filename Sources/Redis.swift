@@ -20,15 +20,25 @@ import hiredis
 
 import Foundation
 
+// MARK: Redis
 
 public class Redis {
     
+    ///
+    /// Context for the Hiredis module
+    ///
     private var context: redisContext?
     
+    ///
+    /// Whether the client is connected or not
+    ///
     public var connected: Bool {
         return context != nil
     }
     
+    ///
+    /// Initializes a Redis instance
+    ///
     public init () {
         context = nil
     }
@@ -44,7 +54,15 @@ public class Redis {
         context = nil
     }
     
+    ///
+    /// Connects to a redis server
+    ///
+    /// - Parameter ipAddress: the server IP address
+    /// - Parameter port: port number
+    /// - Parameter callback: callback function for on completion
+    ///
     public func connect (ipAddress: String, port: Int32, callback: (NSError?) -> Void) {
+        
         let contextPtr = redisConnect(ipAddress, port)
         var error: NSError? = nil
         if contextPtr != nil {
@@ -61,21 +79,42 @@ public class Redis {
         callback(error)
     }
     
+    ///
+    /// Authenticate against the server
+    ///
+    /// - Parameter pswd: String for the password
+    /// - Parameter callback: callback function that is called after authenticating
+    ///
     public func auth(pswd: String, callback: (NSError?) -> Void) {
+        
         issueCommand("AUTH", pswd) {(response: RedisResponse) in
             let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
             callback(error)
         }
     }
     
+    ///
+    /// Selects the database to use
+    ///
+    /// - Parameter db: numeric index for the database
+    /// - Parameter callback: callback function for after the database is selected
+    ///
     public func select(db: Int, callback: (NSError?) -> Void) {
+        
         issueCommand("SELECT", String(db)) {(response: RedisResponse) in
             let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
             callback(error)
         }
     }
     
+    ///
+    /// Ping the server to test if a connection is still alive
+    ///
+    /// - Parameter pingStr: String for the ping message
+    /// - Parameter callback: callback function for after the pong is received
+    ///
     public func ping(pingStr: String?=nil, callback: (NSError?) -> Void) {
+        
         var command = ["PING"]
         if  let pingStr = pingStr  {
             command.append(pingStr)
@@ -104,31 +143,69 @@ public class Redis {
         }
     }
     
+    ///
+    /// Echos a message
+    ///
+    /// - Parameter str: String for the message
+    /// - Parameter callback: callback function with the response
+    ///
     public func echo(str: String, callback: (RedisString?, error: NSError?) -> Void) {
+        
         issueCommand("ECHO", str) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
+    ///
+    /// Get the value of key.
+    /// 
+    /// - Parameter key: String for the key name
+    /// - Parameter callback: callback function with the value
+    ///
     public func get(key: String, callback: (RedisString?, error: NSError?) -> Void) {
+        
         issueCommand("GET", key) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
+    ///
+    /// Atomically sets key to value and returns the old value stored at key.
+    ///
+    /// - Parameter key: String for the key name
+    /// - Parameter value: String value to set 
+    /// - Parameter callback: callback function with the old value
+    ///
     public func getSet(key: String, value: String, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("GETSET", key, value) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
+    ///
+    /// Atomically sets key to value and returns the old value stored at key.
+    ///
+    /// - Parameter key: String for the key name
+    /// - Parameter value: RedisString value to set
+    /// - Parameter callback: callback function with the old value
+    ///
     public func getSet(key: String, value: RedisString, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand(RedisString("GETSET"), RedisString(key), value) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
     
+    ///
+    /// Set key to hold the string value. If key already holds a value, it is overwritten.
+    ///
+    /// - Parameter key: String for the key name
+    /// - Parameter value: String value to set
+    /// - Parameter exists: if true will only set the key if it already exists
+    /// - Parameter expiresIn: Set the specified expire time, in milliseconds
+    /// - Parameter callback: callback function after setting the value
+    ///
     public func set(key: String, value: String, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
+        
         var command = ["SET", key, value]
         if  let exists = exists  {
             command.append(exists ? "XX" : "NX")
@@ -143,7 +220,17 @@ public class Redis {
         }
     }
     
+    ///
+    /// Set key to hold the string value. If key already holds a value, it is overwritten.
+    ///
+    /// - Parameter key: String for the key name
+    /// - Parameter value: RedisString value to set
+    /// - Parameter exists: if true will only set the key if it already exists
+    /// - Parameter expiresIn: Set the specified expire time, in milliseconds
+    /// - Parameter callback: callback function after setting the value
+    ///
     public func set(key: String, value: RedisString, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
+        
         var command = [RedisString("SET"), RedisString(key), value]
         if  let exists = exists  {
             command.append(RedisString(exists ? "XX" : "NX"))
@@ -158,7 +245,14 @@ public class Redis {
         }
     }
     
+    ///
+    /// Removes the specified keys. A key is ignored if it does not exist
+    ///
+    /// - Parameter keys: Variadic parameter as a list of Strings
+    /// - Parameter callback: callback function after deleting item
+    ///
     public func del(keys: String..., callback: (Int?, error: NSError?) -> Void) {
+        
         var command = ["DEL"]
         for key in keys {
             command.append(key)
@@ -168,13 +262,33 @@ public class Redis {
         }
     }
     
+    ///
+    /// Increments the number stored at key by an increment. If the key does not exist, it is set
+    /// to 0 before performing the operation.
+    /// **Note this is a string operation since Redis does not have a dedicated integer type**
+    ///
+    /// - Parameter key: String for the key name 
+    /// - Parameter by: number that will be added to the value at the key
+    /// - Parameter callback: callback containing the value of the key after the increment
+    ///
     public func incr(key: String, by: Int=1, callback: (Int?, error: NSError?) -> Void) {
+        
         issueCommand("INCRBY", key, String(by)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
     
+    ///
+    /// Increments the floating point number stored at key by an increment. 
+    /// If the key does not exist, it is set to 0 before performing the operation.
+    /// **Note this is a string operation since Redis does not have a dedicated float type**
+    ///
+    /// - Parameter key: String for the key name
+    /// - Parameter by: Floating point number that will be added to the value at the key
+    /// - Parameter callback: callback containing the value of the key after the increment
+    ///
     public func incr(key: String, byFloat: Float, callback: (RedisString?, error: NSError?) -> Void) {
+        
         issueCommand("INCRBYFLOAT", key, String(byFloat)) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
