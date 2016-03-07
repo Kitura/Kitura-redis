@@ -16,7 +16,6 @@ import Foundation
 import XCTest
 
 @testable import SwiftRedis
-import SwiftyJSON
 
 let redis = Redis()
 
