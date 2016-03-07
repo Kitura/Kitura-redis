@@ -23,8 +23,6 @@ before_install:
   - git submodule init
   - git submodule update
   - cd Kitura-CI && git checkout $TRAVIS_BRANCH && cd $TRAVIS_BUILD_DIR
-  - git clone -b master https://$GITHUB_USER:$GITHUB_PWD@github.com/IBM-Swift/DevOps.git
-  - git clone -b master https://$GITHUB_USER:$GITHUB_PWD@github.com/IBM-Swift/Kitura-TestingCredentials.git
 
 script:
   - echo ">> Let's build and test the '$TRAVIS_BRANCH' branch for Kitura-redis."
