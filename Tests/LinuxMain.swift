@@ -14,12 +14,22 @@
  * limitations under the License.
  **/
 
-import PackageDescription
+import XCTest
 
-let package = Package(
-    name: "SwiftRedis",
-    dependencies: [
-        .Package(url: "https://github.com/IBM-Swift/Kitura-hiredis.git", versions: Version(0,2,0)..<Version(0,3,0)),
-        .Package(url: "https://github.com/IBM-Swift/Kitura-sys.git", versions: Version(0,3,0)..<Version(0,4,0)),
-    ]
-)
+@testable import SwiftRedistest
+
+XCTMain([
+	TestBasicCommands(),
+	TestBinarySafeCommands(),
+	TestConnectCommands(),
+	TestHashCommands(),
+	TestIssueCommand(),
+	TestMoreCommands(),
+	TestStringAndBitCommands(),
+	TestTransactionsPart1(),
+	TestTransactionsPart2(),
+	TestTransactionsPart3(),
+	TestTransactionsPart4(),
+	AuthTests()
+])
+
