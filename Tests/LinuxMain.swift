@@ -17,7 +17,6 @@
 import XCTest
 
 @testable import SwiftRedistest
-@testable import SwiftRedisAuthtest
 
 XCTMain([
 	TestBasicCommands(),

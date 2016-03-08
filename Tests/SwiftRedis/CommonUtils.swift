@@ -20,28 +20,49 @@
     import Darwin
 #endif
 
+import XCTest
 import Foundation
 
 import SwiftRedis
 
 
-let redis = Redis()
+var redis = Redis()
 
-func connectRedis (callback: (NSError?) -> Void) {
+func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
     if !redis.connected  {
-        var host = "localhost"
-        let hostCStr = getenv("SWIFT_REDIS_HOST") 
-        if  hostCStr != nil {
-            if  let hostStr = NSString(UTF8String: hostCStr) {
-                host = hostStr.bridge()
+        let password = readPassword()
+        let host = "localhost"
+
+        redis.connect(host, port: 6379) {(error: NSError?) in
+            if authenticate {
+                redis.auth(password, callback: callback)
+            }
+            else {
+                callback(nil)
             }
         }
-        redis.connect(host, port: 6379, callback: callback)
     }
     else {
         callback(nil)
     }
 }
+
+func readPassword() -> String {
+        // Read in credentials an NSData
+        let passwordData = NSData(contentsOfFile: "Tests/SwiftRedis/password.txt")
+        XCTAssertNotNil(passwordData, "Failed to read in the password.txt file")
+
+        let password = String(data: passwordData!, encoding:NSUTF8StringEncoding)
+
+        guard
+           let passwordLiteral = password
+        else {
+            XCTFail("Error in password.txt.")
+            exit(1)
+        }
+
+        return passwordLiteral
+    }
 
 // Dummy class for test framework
 class CommonUtils { }

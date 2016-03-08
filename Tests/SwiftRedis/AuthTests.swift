@@ -17,13 +17,11 @@ import XCTest
 
 @testable import SwiftRedis
 
-let redis = Redis()
-
 public class AuthTests: XCTestCase {
     
     let key = "authTestKey"
     let host = "localhost"
-    var password = ""
+    let password = readPassword()
     
     public var allTests : [(String, () throws -> Void)] {
         return [
@@ -32,8 +30,9 @@ public class AuthTests: XCTestCase {
     }
     
     func test_ConnectWithAuth() {
-        readPassword()
-        connectRedis() {(error: NSError?) in
+        // reinit redis var in CommonUtils to reset authentication
+        redis = Redis()
+        connectRedis(false) {(error: NSError?) in
             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
             
             let expectedValue = "Hi ho, hi ho, we are so secured"
@@ -56,31 +55,5 @@ public class AuthTests: XCTestCase {
                 }
             }
         }
-    }
-
-    func connectRedis (callback: (NSError?) -> Void) {
-        if !redis.connected  {
-            redis.connect(host, port: 6379, callback: callback)
-        }
-        else {
-            callback(nil)
-        }
-    }
-
-    func readPassword() {
-        // Read in credentials an NSData
-        let passwordData = NSData(contentsOfFile: "Tests/SwiftRedisAuth/password.txt")
-        XCTAssertNotNil(passwordData, "Failed to read in the password.txt file")
-
-        let password = String(data: passwordData!, encoding:NSUTF8StringEncoding)
-
-        guard
-           let passwordLiteral = password
-        else {
-            XCTFail("Error in password.txt.")
-            exit(1)
-        }
-
-        self.password = passwordLiteral
     }
 }
