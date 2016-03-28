@@ -28,8 +28,8 @@ import XCTest
 public class AuthTests: XCTestCase {
     
     let key = "authTestKey"
-    let host = "localhost"
-    let password = readPassword()
+    let host = readFile("host.txt")
+    let password = readFile("password.txt")
     
     public var allTests : [(String, () throws -> Void)] {
         return [
