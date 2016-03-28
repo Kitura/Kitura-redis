@@ -16,7 +16,7 @@
 
 import KituraSys
 
-import hiredis
+import CHiredis
 
 import Foundation
 
