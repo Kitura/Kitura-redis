@@ -16,20 +16,19 @@
 
 import XCTest
 
-@testable import SwiftRedistest
+@testable import SwiftRedisTestSuite
 
 XCTMain([
-	TestBasicCommands(),
-	TestBinarySafeCommands(),
-	TestConnectCommands(),
-	TestHashCommands(),
-	TestIssueCommand(),
-	TestMoreCommands(),
-	TestStringAndBitCommands(),
-	TestTransactionsPart1(),
-	TestTransactionsPart2(),
-	TestTransactionsPart3(),
-	TestTransactionsPart4(),
-	AuthTests()
+	testCase(TestBasicCommands.allTests),
+	testCase(TestBinarySafeCommands.allTests),
+	testCase(TestHashCommands.allTests),
+	testCase(TestIssueCommand.allTests),
+	testCase(TestMoreCommands.allTests),
+	testCase(TestStringAndBitCommands.allTests),
+	testCase(TestTransactionsPart1.allTests),
+	testCase(TestTransactionsPart2.allTests),
+	testCase(TestTransactionsPart3.allTests),
+	testCase(TestTransactionsPart4.allTests),
+	testCase(AuthTests.allTests)
 ])
 
