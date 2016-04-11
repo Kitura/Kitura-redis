@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestMoreCommands: XCTestCase {
-    public var allTests : [(String, () throws -> Void)] {
+    static var allTests : [(String, TestMoreCommands -> () throws -> Void)] {
         return [
             ("test_msetAndMget", test_msetAndMget),
             ("test_keyManipulation", test_keyManipulation),

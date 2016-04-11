@@ -27,7 +27,7 @@ import XCTest
 
 
 public class TestBasicCommands: XCTestCase {
-    public var allTests : [(String, () throws -> Void)] {
+    static var allTests : [(String, TestBasicCommands -> () throws -> Void)] {
         return [
             ("test_setAndGet", test_setAndGet),
             ("test_SetExistOptions", test_SetExistOptions),

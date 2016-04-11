@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestTransactionsPart4: XCTestCase {
-    public var allTests : [(String, () throws -> Void)] {
+    static var allTests : [(String, TestTransactionsPart4 -> () throws -> Void)] {
         return [
             ("test_hashSetAndGet", test_hashSetAndGet),
             ("test_Incr", test_Incr),
@@ -145,7 +145,7 @@ public class TestTransactionsPart4: XCTestCase {
                     let innerResponses = nestedResponses[2].asArray!
                     XCTAssertEqual(innerResponses.count/2, 3, "There should have been 3 fields in \(self.key1), there were \(innerResponses.count/2) fields")
                     let valuesMap = [self.field1:expData1, self.field2:expData2, self.field3:expData3]
-                    for idx in 0.stride(to: innerResponses.count-1, by:2) {
+                    for idx in stride(from: 0, to: innerResponses.count-1, by:2) {
                         XCTAssertNotNil(valuesMap[innerResponses[idx].asString!.asString], "Unknown field \(innerResponses[idx].asString!.asString)")
                         XCTAssertEqual(valuesMap[innerResponses[idx].asString!.asString], innerResponses[idx+1].asString!.asData, "Value of \(innerResponses[idx].asString!.asData) wasn't '\(valuesMap[innerResponses[idx].asString!.asString])'. It was '\(innerResponses[idx+1].asString!.asData)'")
                     }

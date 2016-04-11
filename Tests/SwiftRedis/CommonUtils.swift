@@ -30,8 +30,8 @@ var redis = Redis()
 
 func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
     if !redis.connected  {
-        let password = readPassword()
-        let host = "localhost"
+        let password = readFile("password.txt")
+        let host = readFile("host.txt")
 
         redis.connect(host, port: 6379) {(error: NSError?) in
             if authenticate {
@@ -47,21 +47,24 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
     }
 }
 
-func readPassword() -> String {
-        // Read in credentials an NSData
-        let passwordData = NSData(contentsOfFile: "Tests/SwiftRedis/password.txt")
-        XCTAssertNotNil(passwordData, "Failed to read in the password.txt file")
+func readFile(fileName: String) -> String {
+        // Read in a configuration file into an NSData
+        let fileData = NSData(contentsOfFile: "Tests/SwiftRedis/\(fileName)")
+        XCTAssertNotNil(fileData, "Failed to read in the \(fileName) file")
 
-        let password = String(data: passwordData!, encoding:NSUTF8StringEncoding)
+        let resultString = String(data: fileData!, encoding:NSUTF8StringEncoding)
 
         guard
-           let passwordLiteral = password
+           let resultLiteral = resultString
         else {
-            XCTFail("Error in password.txt.")
+            XCTFail("Error in \(fileName).")
             exit(1)
         }
-
-        return passwordLiteral
+#if os(Linux)
+        return resultLiteral.bridge().stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+#else
+        return resultLiteral.trimmingCharacters(in: NSCharacterSet.whitespaceAndNewline())
+#endif
     }
 
 // Dummy class for test framework

@@ -16,7 +16,7 @@
 
 import KituraSys
 
-import hiredis
+import CHiredis
 
 import Foundation
 
@@ -66,7 +66,7 @@ public class Redis {
         let contextPtr = redisConnect(ipAddress, port)
         var error: NSError? = nil
         if contextPtr != nil {
-            context = contextPtr.memory
+            context = contextPtr.pointee
             if context?.err != 0 {
                 redisFree(contextPtr)
                 error = createRedisError("Failed to connect to Redis server:")
@@ -803,7 +803,7 @@ public class Redis {
             
             switch(response) {
                 case .Array(let responses):
-                    for idx in 0.stride(to: responses.count-1, by:2) {
+                    for idx in stride(from: 0, to: responses.count-1, by: 2) {
                         switch(responses[idx]) {
                             case .StringValue(let field):
                                 switch(responses[idx+1]) {
@@ -1080,7 +1080,7 @@ public class Redis {
                 // TODO               redisFree(contextPtr!)
             }
             else {
-                response = redisReplyToRedisResponse(replyPtr.memory)
+                response = redisReplyToRedisResponse(replyPtr.pointee)
             }
         }
         else {
@@ -1116,7 +1116,7 @@ public class Redis {
                 response = RedisResponse.Error(createRedisErrorMessage("Failed to execute Redis command:"))
             }
             else {
-                response = redisReplyToRedisResponse(replyPtr.memory)
+                response = redisReplyToRedisResponse(replyPtr.pointee)
                 //freeReplyObject(origReplyPtr)
             }
         }
@@ -1145,7 +1145,7 @@ public class Redis {
             case REDIS_REPLY_ARRAY:
                 var arrayResponse = [RedisResponse]()
                 for idx in 0..<reply.elements {
-                    arrayResponse.append(redisReplyToRedisResponse(reply.element[idx].memory))
+                    arrayResponse.append(redisReplyToRedisResponse(reply.element[idx].pointee))
                 }
                 response = RedisResponse.Array(arrayResponse)
             case REDIS_REPLY_INTEGER:
@@ -1259,7 +1259,11 @@ public class Redis {
             withUnsafePointer(&context!.errstr) { ptr in
                 errPtr = UnsafePointer<Int8>(ptr)
             }
+#if os(Linux)
             return "\(redisError) \(String(UTF8String: errPtr)!)"
+#else
+            return "\(redisError) \(String(utf8String: errPtr)!)"
+#endif
         }
         else {
             return redisError

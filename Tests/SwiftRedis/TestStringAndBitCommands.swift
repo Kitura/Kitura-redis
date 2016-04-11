@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestStringAndBitCommands: XCTestCase {
-    public var allTests : [(String, () throws -> Void)] {
+    static var allTests : [(String, TestStringAndBitCommands -> () throws -> Void)] {
         return [
             ("test_StringManipulation", test_StringManipulation),
             ("test_bitPosAndCountCommands", test_bitPosAndCountCommands),
