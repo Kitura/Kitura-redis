@@ -30,10 +30,10 @@ var redis = Redis()
 
 func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
     if !redis.connected  {
-        let password = readFile("password.txt")
-        let host = readFile("host.txt")
+        let password = read(fileName: "password.txt")
+        let host = read(fileName: "host.txt")
 
-        redis.connect(host, port: 6379) {(error: NSError?) in
+        redis.connect(host: host, port: 6379) {(error: NSError?) in
             if authenticate {
                 redis.auth(password, callback: callback)
             }
@@ -47,7 +47,7 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
     }
 }
 
-func readFile(fileName: String) -> String {
+func read(fileName: String) -> String {
         // Read in a configuration file into an NSData
         let fileData = NSData(contentsOfFile: "Tests/SwiftRedis/\(fileName)")
         XCTAssertNotNil(fileData, "Failed to read in the \(fileName) file")
@@ -63,7 +63,7 @@ func readFile(fileName: String) -> String {
 #if os(Linux)
         return resultLiteral.bridge().stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
 #else
-        return resultLiteral.trimmingCharacters(in: NSCharacterSet.whitespaceAndNewline())
+        return resultLiteral.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines())
 #endif
     }
 
