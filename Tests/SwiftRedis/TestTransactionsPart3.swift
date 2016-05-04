@@ -27,19 +27,19 @@ public class TestTransactionsPart3: XCTestCase {
             ("test_expiration", test_expiration)
         ]
     }
-    
+
     let key1 = "test1"
     let key2 = "test2"
     let key3 = "test3"
     let key4 = "test4"
     let key5 = "test5"
-    
+
     let expVal1 = "Hi ho, hi ho"
     let expVal2 = "it's off to test"
     let expVal3 = "we go"
     let expVal4 = "Testing"
     let expVal5 = "testing 1 2 3"
-    
+
     func test_keyManipulation() {
         setupTests() {
             let multi = redis.multi()
@@ -48,9 +48,9 @@ public class TestTransactionsPart3: XCTestCase {
             multi.rename(self.key3, newKey: self.key2, exists: false)
             multi.rename(self.key3, newKey: self.key4, exists: false)
             multi.exists(self.key1, self.key2, self.key3, self.key4)
-            
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Status("OK"), "Failed to rename \(self.key1) to \(self.key3)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(self.expVal1)), "\(self.key3) should have been equal to \(self.expVal1). Was \(nestedResponses[2].asString?.asString)")
@@ -61,14 +61,14 @@ public class TestTransactionsPart3: XCTestCase {
             }
         }
     }
-    
+
     func test_Move() {
         setupTests() {
             let multi = redis.multi()
             multi.select(1).set(self.key1, value: self.expVal1).move(self.key1, toDB: 0)
             multi.get(self.key1).select(0).get(self.key1)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Select(1) didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Status("OK"), "set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Should have moved \(self.key1) to DB 0")
@@ -79,20 +79,20 @@ public class TestTransactionsPart3: XCTestCase {
             }
         }
     }
-    
+
     func test_expiration() {
         setupTests() {
             let expiration = 1.850
-            
+
             let multi = redis.multi()
             multi.set(self.key1, value: self.expVal1).ttl(self.key1)
             multi.expire(self.key1, inTime: expiration).ttl(self.key1).persist(self.key1)
             let timeFromNow = 120.0
             let date = NSDate(timeIntervalSinceNow: timeFromNow)
             multi.expire(self.key1, atDate: date).ttl(self.key1)
-            
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response, count: 7)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 7)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(-1), "\(self.key1) shouldn't have an expiration. It has \(nestedResponses[1].asInteger)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
@@ -104,8 +104,8 @@ public class TestTransactionsPart3: XCTestCase {
             }
         }
     }
-    
-    
+
+
     private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
         switch(response) {
         case .Array(let responses):
@@ -125,14 +125,14 @@ public class TestTransactionsPart3: XCTestCase {
             return nil
         }
     }
-    
+
     private func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-            
+
             redis.del(self.key1, self.key2, self.key3, self.key4) {(deleted: Int?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                
+
                 callback()
             }
         }

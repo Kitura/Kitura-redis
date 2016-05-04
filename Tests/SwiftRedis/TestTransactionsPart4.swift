@@ -28,19 +28,19 @@ public class TestTransactionsPart4: XCTestCase {
             ("test_binarySafeHsetAndHmset", test_binarySafeHsetAndHmset)
         ]
     }
-    
+
     let key1 = "test1"
-    
+
     let field1 = "f1"
     let field2 = "f2"
     let field3 = "f3"
     let field4 = "f4"
-    
+
     func test_hashSetAndGet() {
         setupTests() {
             let expVal1 = "testing, testing, 1 2 3"
             let expVal2 = "hi hi, hi ho, its off to test we go"
-            
+
             let multi = redis.multi()
             multi.hset(self.key1, field: self.field1, value: expVal1)
             multi.hset(self.key1, field: self.field1, value: expVal2).hget(self.key1, field: self.field1)
@@ -48,9 +48,9 @@ public class TestTransactionsPart4: XCTestCase {
             multi.hlen(self.key1).hset(self.key1, field: self.field1, value: expVal2, exists: false)
             multi.hdel(self.key1, fields: self.field1, self.field2).hget(self.key1, field: self.field1)
             multi.hset(self.key1, field: self.field1, value: expVal1, exists: false)
-            
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response, count: 10)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 10)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(1), "\(self.field1) wasn't a new field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(0), "\(self.field1) wasn't an existing field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(expVal2)), "\(self.key1) should have been equal to \(expVal2). Was \(nestedResponses[2].asString?.asString)")
@@ -65,26 +65,26 @@ public class TestTransactionsPart4: XCTestCase {
             }
         }
     }
-    
+
     func test_Incr() {
         setupTests() {
             let incInt = 10
             let incFloat: Float = 8.5
-            
+
             let multi = redis.multi()
             multi.hincr(self.key1, field: self.field3, by: incInt)
             multi.hincr(self.key1, field: self.field2, byFloat: incFloat)
-            
+
             // To test HSTRLEN one needs a Redis 3.2 server
             //
             //let expVal1 = "testing, testing, 1 2 3"
             //multi.hset(self.key1, field: self.field1, value: expVal1).hstrlen(self.key1, field: self.field1)
-            
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response, count: 2  /* Should be 4 if testing hstrlen */ )  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 2  /* Should be 4 if testing hstrlen */ )  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(Int64(incInt)), "Value of the field should be \(incInt), was \(nestedResponses[0].asInteger)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(String(incFloat))), "Value of the field should be \(incFloat). Was \(nestedResponses[1].asString?.asString)")
-            
+
                     // To test HSTRLEN one needs a Redis 3.2 server
                     //
                     //XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "\(self.field1) wasn't a new field in \(self.key1)")
@@ -93,21 +93,21 @@ public class TestTransactionsPart4: XCTestCase {
             }
         }
     }
-    
+
     func test_bulkCommands() {
         setupTests() {
             let expVal1 = "Hi ho, hi ho"
             let expVal2 = "it's off to test"
             let expVal3 = "we go"
-            
+
             let multi = redis.multi()
             multi.hmset(self.key1, fieldValuePairs: (self.field1, expVal1), (self.field2, expVal2), (self.field3, expVal3))
             multi.hget(self.key1, field: self.field1)
             multi.hmget(self.key1, fields: self.field1, self.field2, self.field4, self.field3)
             multi.hkeys(self.key1).hvals(self.key1).hgetall(self.key1)
-            
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Fields 1,2,3 should have been set")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(expVal1)), "\(self.key1).\(self.field1) wasn't set to \(expVal1). Was \(nestedResponses[1].asString?.asString)")
                     let innerResponses = nestedResponses[2].asArray!
@@ -123,7 +123,7 @@ public class TestTransactionsPart4: XCTestCase {
             }
         }
     }
-    
+
     func test_binarySafeHsetAndHmset() {
         setupTests() {
             var bytes: [UInt8] = [0xff, 0x00, 0xfe, 0x02]
@@ -132,14 +132,14 @@ public class TestTransactionsPart4: XCTestCase {
             let expData2 = NSData(bytes: bytes, length: bytes.count)
             bytes = [0xf0, 0xf1, 0xf2, 0xf3, 0xf4]
             let expData3 = NSData(bytes: bytes, length: bytes.count)
-            
+
             let multi = redis.multi()
             multi.hset(self.key1, field: self.field1, value: RedisString(expData1))
             multi.hmset(self.key1, fieldValuePairs: (self.field2, RedisString(expData2)), (self.field3, RedisString(expData3)))
             multi.hgetall(self.key1)
-                
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response, count: 3)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 3)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(1), "\(self.field1) wasn't a new field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Status("OK"), "Fields 1,2,3 should have been set")
                     let innerResponses = nestedResponses[2].asArray!
@@ -153,8 +153,8 @@ public class TestTransactionsPart4: XCTestCase {
             }
         }
     }
-    
-    
+
+
     private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
         switch(response) {
         case .Array(let responses):
@@ -174,14 +174,14 @@ public class TestTransactionsPart4: XCTestCase {
             return nil
         }
     }
-    
+
     private func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-            
+
             redis.del(self.key1) {(deleted: Int?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                
+
                 callback()
             }
         }
