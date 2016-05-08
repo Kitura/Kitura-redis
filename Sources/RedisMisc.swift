@@ -19,7 +19,7 @@ import KituraSys
 import Foundation
 
 
-public class RedisString {
+public class RedisString: CustomStringConvertible {
     private let data: NSData
 
     public init(_ data: NSData) {
@@ -39,9 +39,11 @@ public class RedisString {
     }
 
     public var asData: NSData { return data }
-    public var asString: String { return NSString(data: data, encoding: NSUTF8StringEncoding)!.bridge() }
+    public var asString: String { return String(data: data, encoding: NSUTF8StringEncoding)! }
     public var asInteger: Int { return Int(self.asString)! }
     public var asDouble: Double { return Double(self.asString)! }
+
+    public var description: String { return String(data: data, encoding: NSUTF8StringEncoding) ?? "A non-UTF-8 string"}
 }
 
 extension RedisString: Equatable {}
