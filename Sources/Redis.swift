@@ -16,8 +16,6 @@
 
 import KituraSys
 
-import CHiredis
-
 import Foundation
 
 // MARK: Redis
@@ -25,34 +23,21 @@ import Foundation
 public class Redis {
 
     ///
-    /// Context for the Hiredis module
+    /// REdis Serialization Protocol handle
     ///
-    private var context: redisContext?
+    private var respHandle: RedisResp?
 
     ///
     /// Whether the client is connected or not
     ///
     public var connected: Bool {
-        return context != nil
+        return respHandle != nil ? respHandle?.status == .Connected : false
     }
 
     ///
     /// Initializes a Redis instance
     ///
-    public init () {
-        context = nil
-    }
-
-    deinit {
-        if context != nil {
-            var contextPtr: UnsafeMutablePointer<redisContext>?
-            withUnsafeMutablePointer(&context) { ptr in
-                contextPtr = UnsafeMutablePointer<redisContext>(ptr)
-            }
-            redisFree(contextPtr!)
-        }
-        context = nil
-    }
+    public init () { }
 
     ///
     /// Connects to a redis server
@@ -63,17 +48,10 @@ public class Redis {
     ///
     public func connect (host: String, port: Int32, callback: (NSError?) -> Void) {
 
-        let contextPtr = redisConnect(host, port)
         var error: NSError? = nil
-        if contextPtr != nil {
-            context = contextPtr.pointee
-            if context?.err != 0 {
-                redisFree(contextPtr)
-                error = createRedisError("Failed to connect to Redis server:")
-                context = nil
-            }
-        }
-        else {
+
+        respHandle = RedisResp(host: host, port: port)
+        if  respHandle!.status != .Connected {
             error = createError("Failed to connect to Redis server", code: 2)
         }
         callback(error)
@@ -1055,38 +1033,18 @@ public class Redis {
         issueCommandInArray(stringArgs, callback: callback)
     }
 
-    // TODO: binary safe
     public func issueCommandInArray(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
-        var response: RedisResponse
-
-        if context != nil {
-            var contextPtr: UnsafeMutablePointer<redisContext>?
-            withUnsafeMutablePointer(&context) { ptr in
-                contextPtr = UnsafeMutablePointer<redisContext>(ptr)
-            }
-
-            var arrArgs = [NSData]()
-            var arrOfPtrsToArgs: [UnsafePointer<Int8>?] = []
-            for arg in stringArgs {
-                let cString = StringUtils.toNullTerminatedUtf8String(arg)!
-                arrArgs.append(cString)
-                arrOfPtrsToArgs.append(UnsafePointer<Int8>(cString.bytes))
-            }
-
-            let replyPtr = UnsafeMutablePointer<redisReply>(redisCommandArgv (contextPtr!, Int32(stringArgs.count), &arrOfPtrsToArgs, nil))
-
-            if replyPtr == nil {
-                response = RedisResponse.Error(createRedisErrorMessage("Failed to execute Redis command:"))
-                // TODO               redisFree(contextPtr!)
-            }
-            else {
-                response = redisReplyToRedisResponse(replyPtr!.pointee)
-            }
+        guard  let respHandle = respHandle  where respHandle.status == .Connected else {
+            callback(RedisResponse.Error("Not connected to Redis server"))
+            return
         }
-        else {
-            response = RedisResponse.Error("Not connected to Redis server")
+
+        guard  stringArgs.count > 0  else {
+            callback(RedisResponse.Error("Empty command"))
+            return
         }
-        callback(response)
+
+        respHandle.issueCommand(stringArgs, callback: callback)
     }
 
     public func issueCommand(_ stringArgs: RedisString..., callback: (RedisResponse) -> Void) {
@@ -1094,69 +1052,22 @@ public class Redis {
     }
 
     public func issueCommandInArray(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
-        var response: RedisResponse
-
-        if context != nil {
-            var contextPtr: UnsafeMutablePointer<redisContext>?
-            withUnsafeMutablePointer(&context) { ptr in
-                contextPtr = UnsafeMutablePointer<redisContext>(ptr)
-            }
-
-            var arrOfPtrsToArgs: [UnsafePointer<Int8>?] = []
-            var arrOfArgLengths = [Int]()
-            for arg in stringArgs {
-                arrOfPtrsToArgs.append(UnsafePointer<Int8>(arg.asData.bytes))
-                arrOfArgLengths.append(arg.asData.length)
-            }
-
-            let origReplyPtr = redisCommandArgv(contextPtr!, Int32(stringArgs.count), &arrOfPtrsToArgs, &arrOfArgLengths)
-            let replyPtr = UnsafeMutablePointer<redisReply>(origReplyPtr)
-
-            if replyPtr == nil {
-                response = RedisResponse.Error(createRedisErrorMessage("Failed to execute Redis command:"))
-            }
-            else {
-                response = redisReplyToRedisResponse(replyPtr!.pointee)
-                //freeReplyObject(origReplyPtr)
-            }
+        guard  let respHandle = respHandle  where respHandle.status == .Connected else {
+            callback(RedisResponse.Error("Not connected to Redis server"))
+            return
         }
-        else {
-            response = RedisResponse.Error("Not connected to Redis server")
+
+        guard  stringArgs.count > 0  else {
+            callback(RedisResponse.Error("Empty command"))
+            return
         }
-        callback(response)
+
+        respHandle.issueCommand(stringArgs, callback: callback)
     }
 
     //
     //  MARK: Helper functions
     //
-
-    private func redisReplyToRedisResponse(_ reply: redisReply) -> RedisResponse {
-        var response: RedisResponse
-        switch reply.type {
-            case REDIS_REPLY_STRING:
-                let data = NSData(bytesNoCopy: reply.str, length: Int(reply.len))
-                response = RedisResponse.StringValue(RedisString(data))
-            case REDIS_REPLY_STATUS:
-                let data = NSData(bytesNoCopy: reply.str, length: Int(reply.len))
-                response = RedisResponse.Status(StringUtils.fromUtf8String(data)!)
-            case REDIS_REPLY_ERROR:
-                let data = NSData(bytesNoCopy: reply.str, length: Int(reply.len))
-                response = RedisResponse.Error(StringUtils.fromUtf8String(data) ?? "")
-            case REDIS_REPLY_ARRAY:
-                var arrayResponse = [RedisResponse]()
-                for idx in 0..<reply.elements {
-                    arrayResponse.append(redisReplyToRedisResponse(reply.element[idx]!.pointee))
-                }
-                response = RedisResponse.Array(arrayResponse)
-            case REDIS_REPLY_INTEGER:
-                response = RedisResponse.IntegerValue(reply.integer)
-            case REDIS_REPLY_NIL:
-                response = RedisResponse.Nil
-            default:
-                response = RedisResponse.Error("Invalid reply from Redis server")
-        }
-        return response
-    }
 
     private func redisBoolResponseHandler(_ response: RedisResponse, callback: (Bool, error: NSError?) -> Void) {
         switch(response) {
@@ -1249,25 +1160,7 @@ public class Redis {
     }
 
     private func createRedisError(_ redisError: String) -> NSError {
-        let errorMessage = createRedisErrorMessage(redisError)
-        return createError(errorMessage, code: 1)
-    }
-
-    private func createRedisErrorMessage(_ redisError: String) -> String {
-        if  context != nil  {
-            var errPtr : UnsafePointer<Int8>? = nil
-            withUnsafePointer(&context!.errstr) { ptr in
-                errPtr = UnsafePointer<Int8>(ptr)
-            }
-#if os(Linux)
-            return "\(redisError) \(String(UTF8String: errPtr!)!)"
-#else
-            return "\(redisError) \(String(utf8String: errPtr!)!)"
-#endif
-        }
-        else {
-            return redisError
-        }
+        return createError(redisError, code: 1)
     }
 
 }
