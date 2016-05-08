@@ -20,6 +20,6 @@ let package = Package(
     name: "SwiftRedis",
     dependencies: [
         .Package(url: "https://github.com/IBM-Swift/CHiredis.git", majorVersion: 0, minor: 1),
-        .Package(url: "https://github.com/IBM-Swift/Kitura-sys.git", majorVersion: 0, minor: 11),
+        .Package(url: "https://github.com/IBM-Swift/Kitura-sys.git", majorVersion: 0, minor: 13),
     ]
 )

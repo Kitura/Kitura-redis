@@ -60,11 +60,7 @@ func read(fileName: String) -> String {
             XCTFail("Error in \(fileName).")
             exit(1)
         }
-#if os(Linux)
-        return resultLiteral.bridge().stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-#else
         return resultLiteral.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines())
-#endif
     }
 
 // Dummy class for test framework
