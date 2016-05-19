@@ -96,10 +96,14 @@ public class TestTransactionsPart3: XCTestCase {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(-1), "\(self.key1) shouldn't have an expiration. It has \(nestedResponses[1].asInteger)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
-                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(Int64(expiration*1000.0)), "ttl for \(self.key1) should be \(Int64(expiration*1000)). It was \(nestedResponses[3].asInteger)")
+                    var intResponse = nestedResponses[3].asInteger
+                    var expectedAsInt = Int64(expiration*1000.0)
+                    XCTAssert(expectedAsInt-100 <= intResponse  &&  intResponse <= expectedAsInt+100, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse)")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't reset")
                     XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
-                    XCTAssertLessThanOrEqual(nestedResponses[6].asInteger!, Int64(timeFromNow*1000), "ttl for \(self.key1) should be less than \(timeFromNow). It was \(nestedResponses[6].asInteger)")
+                    intResponse = nestedResponses[6].asInteger
+                    expectedAsInt = Int64(timeFromNow*1000.0)
+                    XCTAssert(expectedAsInt-100 <= intResponse  &&  intResponse <= expectedAsInt+100, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse)")
                 }
             }
         }

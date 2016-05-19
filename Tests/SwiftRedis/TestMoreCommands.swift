@@ -167,7 +167,7 @@ public class TestMoreCommands: XCTestCase {
                         redis.ttl(self.key1) {(ttl: NSTimeInterval?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                             XCTAssertNotNil(ttl, "ttl result shouldn't be nil")
-                            XCTAssertEqual(ttl!, expiration, "ttl for \(self.key1) should be \(expiration). It was \(ttl!)")
+                            XCTAssert(expiration-0.1 <= ttl! && ttl! <= expiration+0.1, "ttl for \(self.key1) should be approximately \(expiration). It was \(ttl!)")
                             
                             redis.persist(self.key1) {(persistant: Bool, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -182,7 +182,7 @@ public class TestMoreCommands: XCTestCase {
                                     redis.ttl(self.key1) {(ttl: NSTimeInterval?, error: NSError?) in
                                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                         XCTAssertNotNil(ttl, "ttl result shouldn't be nil")
-                                        XCTAssertLessThanOrEqual(ttl!, timeFromNow, "ttl for \(self.key1) should be less than \(timeFromNow). It was \(ttl!)")
+                                        XCTAssert(timeFromNow-0.1 <= ttl! && ttl! <= timeFromNow+0.1, "ttl for \(self.key1) should be approximately \(timeFromNow). It was \(ttl!)")
                                     }
                                 }
                             }
