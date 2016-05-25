@@ -1156,7 +1156,7 @@ public class Redis {
     }
 
     private func createError(_ errorMessage: String, code: Int) -> NSError {
-        return NSError(domain: "RedisDomain", code: code, userInfo: [NSLocalizedDescriptionKey : errorMessage])
+        return NSError(domain: "RedisDomain", code: code, userInfo: [NSLocalizedDescriptionKey as AnyObject as! NSObject : errorMessage as AnyObject])
     }
 
     private func createRedisError(_ redisError: String) -> NSError {
