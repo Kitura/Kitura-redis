@@ -21,6 +21,7 @@ import XCTest
 XCTMain([
 	testCase(TestBasicCommands.allTests),
 	testCase(TestBinarySafeCommands.allTests),
+	testCase(TestConnectCommands.allTests),
 	testCase(TestHashCommands.allTests),
 	testCase(TestIssueCommand.allTests),
 	testCase(TestListCommands.allTests),
