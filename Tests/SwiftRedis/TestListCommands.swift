@@ -29,7 +29,8 @@ import XCTest
 public class TestListCommands: XCTestCase {
     static var allTests : [(String, TestListCommands -> () throws -> Void)] {
         return [
-            ("test_lpushAndLpop", test_lpushAndLpop)
+            ("test_lpushAndLpop", test_lpushAndLpop),
+            ("test_binaryLpushAndLpop", test_binaryLpushAndLpop)
         ]
     }
     
@@ -51,8 +52,7 @@ public class TestListCommands: XCTestCase {
         localSetup() {
             let value1 = "testing 1 2 3"
             let value2 = "over the hill and through the woods"
-            let binaryValue1 = RedisString("testing 1 2 3")
-            let binaryValue2 = RedisString("over the hill and through the woods")
+            let value3 = "to grandmothers house we go"
             
             redis.lpush(self.key1, values: value1, value2) {(numberSet: Int?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -64,19 +64,56 @@ public class TestListCommands: XCTestCase {
                     XCTAssertNotNil(popedValue, "Result of lpop was nil, but \(self.key1) should exist")
                     XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(popedValue) for \(self.key1) instead of \(value2)")
                     
-                    redis.lpush(self.key2, values: binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
+                    redis.lpushx(self.key1, value: value3) {(numberSet: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssertNotNil(numberSet, "Result of lpush was nil, without an error")
-                        XCTAssertEqual(numberSet!, 2, "Failed to lpush \(self.key2)")
-                        
-                        redis.lpop(self.key2) {(popedValue: RedisString?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNotNil(popedValue, "Result of lpop was nil, but \(self.key2) should exist")
-                            XCTAssertEqual(popedValue!, binaryValue1, "Popped \(popedValue) for \(self.key2) instead of \(binaryValue1)")
+                        XCTAssertEqual(numberSet!, 2, "Failed to lpushx \(self.key1)")
                             
-                            redis.lpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
+                        redis.lpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            XCTAssertNil(popedValue, "Result of lpop was not nil, but \(self.key3) does not exist")
+                            
+                            redis.lpushx(self.key3, value: value3) {(numberSet: Int?, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                XCTAssertNil(popedValue, "Result of lpop was not nil, but \(self.key3) does not exist")
+                                XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
+                                XCTAssertEqual(numberSet!, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func test_binaryLpushAndLpop() {
+        localSetup() {
+            let binaryValue1 = RedisString("testing 1 2 3")
+            let binaryValue2 = RedisString("over the hill and through the woods")
+            let binaryValue3 = RedisString("to grandmothers house we go")
+            
+            redis.lpush(self.key2, values: binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                XCTAssertNotNil(numberSet, "Result of lpush was nil, without an error")
+                XCTAssertEqual(numberSet!, 2, "Failed to lpush \(self.key2)")
+                        
+                redis.lpop(self.key2) {(popedValue: RedisString?, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertNotNil(popedValue, "Result of lpop was nil, but \(self.key2) should exist")
+                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(popedValue) for \(self.key2) instead of \(binaryValue1)")
+                    
+                    redis.lpushx(self.key2, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
+                        XCTAssertEqual(numberSet!, 2, "Failed to lpushx to \(self.key2) returned \(numberSet!)")
+                            
+                        redis.lpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            XCTAssertNil(popedValue, "Result of lpop was not nil, but \(self.key3) does not exist")
+                            
+                            redis.lpushx(self.key3, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
+                                XCTAssertEqual(numberSet!, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
                             }
                         }
                     }

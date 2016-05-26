@@ -1032,7 +1032,7 @@ public class Redis {
     }
     
     ///
-    /// Push a set of values on to list
+    /// Push a set of values on to a list
     ///
     /// - Parameter key: the String parameter for the key
     /// - Parameter values: A variadic parameter of the values to be pushed on to the list
@@ -1042,7 +1042,7 @@ public class Redis {
     }
     
     ///
-    /// Push a set of values on to list
+    /// Push a set of values on to a list
     ///
     /// - Parameter key: the String parameter for the key
     /// - Parameter values: An array parameter of the values to be pushed on to the list
@@ -1058,7 +1058,7 @@ public class Redis {
     }
     
     ///
-    /// Push a set of values on to list
+    /// Push a set of values on to a list
     ///
     /// - Parameter key: the String parameter for the key
     /// - Parameter values: A variadic parameter of the values to be pushed on to the list
@@ -1068,7 +1068,7 @@ public class Redis {
     }
     
     ///
-    /// Push a set of values on to list
+    /// Push a set of values on to a list
     ///
     /// - Parameter key: the String parameter for the key
     /// - Parameter values: An array parameter of the values to be pushed on to the list
@@ -1079,6 +1079,30 @@ public class Redis {
             command.append(value)
         }
         issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Push a value on to a list, only if the list exists
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func lpushx(_ key: String, value: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("LPUSHX", key, value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Push a value on to a list, only if the list exists
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func lpushx(_ key: String, value: RedisString, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand(RedisString("LPUSHX"), RedisString(key), value) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
