@@ -30,7 +30,9 @@ public class TestListCommands: XCTestCase {
     static var allTests : [(String, TestListCommands -> () throws -> Void)] {
         return [
             ("test_lpushAndLpop", test_lpushAndLpop),
-            ("test_binaryLpushAndLpop", test_binaryLpushAndLpop)
+            ("test_binaryLpushAndLpop", test_binaryLpushAndLpop),
+            ("test_rpushAndRpop", test_rpushAndRpop),
+            ("test_binaryRpushAndRpop", test_binaryRpushAndRpop)
         ]
     }
     
@@ -66,7 +68,7 @@ public class TestListCommands: XCTestCase {
                     
                     redis.lpushx(self.key1, value: value3) {(numberSet: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(numberSet, "Result of lpush was nil, without an error")
+                        XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
                         XCTAssertEqual(numberSet!, 2, "Failed to lpushx \(self.key1)")
                             
                         redis.lpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
@@ -114,6 +116,80 @@ public class TestListCommands: XCTestCase {
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
                                 XCTAssertEqual(numberSet!, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func test_rpushAndRpop() {
+        localSetup() {
+            let value1 = "testing 1 2 3"
+            let value2 = "over the hill and through the woods"
+            let value3 = "to grandmothers house we go"
+            
+            redis.rpush(self.key1, values: value1, value2) {(numberSet: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                XCTAssertNotNil(numberSet, "Result of rpush was nil, without an error")
+                XCTAssertEqual(numberSet!, 2, "Failed to rpush \(self.key1)")
+                
+                redis.rpop(self.key1) {(popedValue: RedisString?, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertNotNil(popedValue, "Result of rpop was nil, but \(self.key1) should exist")
+                    XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(popedValue) for \(self.key1) instead of \(value2)")
+                    
+                    redis.rpushx(self.key1, value: value3) {(numberSet: Int?, error: NSError?) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
+                        XCTAssertEqual(numberSet!, 2, "Failed to rpushx \(self.key1)")
+                        
+                        redis.rpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            XCTAssertNil(popedValue, "Result of rpop was not nil, but \(self.key3) does not exist")
+                            
+                            redis.rpushx(self.key3, value: value3) {(numberSet: Int?, error: NSError?) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
+                                XCTAssertEqual(numberSet!, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func test_binaryRpushAndRpop() {
+        localSetup() {
+            let binaryValue1 = RedisString("testing 1 2 3")
+            let binaryValue2 = RedisString("over the hill and through the woods")
+            let binaryValue3 = RedisString("to grandmothers house we go")
+            
+            redis.rpush(self.key2, values: binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                XCTAssertNotNil(numberSet, "Result of rpush was nil, without an error")
+                XCTAssertEqual(numberSet!, 2, "Failed to rpush \(self.key2)")
+                
+                redis.rpop(self.key2) {(popedValue: RedisString?, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertNotNil(popedValue, "Result of rpop was nil, but \(self.key2) should exist")
+                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(popedValue) for \(self.key2) instead of \(binaryValue1)")
+                    
+                    redis.rpushx(self.key2, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
+                        XCTAssertEqual(numberSet!, 2, "Failed to rpushx to \(self.key2) returned \(numberSet!)")
+                        
+                        redis.rpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            XCTAssertNil(popedValue, "Result of rpop was not nil, but \(self.key3) does not exist")
+                            
+                            redis.rpushx(self.key3, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
+                                XCTAssertEqual(numberSet!, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
                             }
                         }
                     }

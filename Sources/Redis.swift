@@ -1106,6 +1106,93 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
+    
+    ///
+    /// Remove and return the last value of a list
+    ///
+    /// - Parameter key: the String parameter for the key
+    ///
+    public func rpop(_ key: String, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand("RPOP", key) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Append a set of values to a list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: A variadic parameter of the values to be pushed on to the list
+    ///
+    public func rpush(_ key: String, values: String..., callback: (Int?, error: NSError?) -> Void) {
+        rpushArrayOfValues(key, values: values, callback: callback)
+    }
+    
+    ///
+    /// Append a set of values to a list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func rpushArrayOfValues(_ key: String, values: [String], callback: (Int?, error: NSError?) -> Void) {
+        var command = ["RPUSH", key]
+        for value in values {
+            command.append(value)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Append a set of values to a list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: A variadic parameter of the values to be pushed on to the list
+    ///
+    public func rpush(_ key: String, values: RedisString..., callback: (Int?, error: NSError?) -> Void) {
+        rpushArrayOfValues(key, values: values, callback: callback)
+    }
+    
+    ///
+    /// Append a set of values to a list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func rpushArrayOfValues(_ key: String, values: [RedisString], callback: (Int?, error: NSError?) -> Void) {
+        var command = [RedisString("RPUSH"), RedisString(key)]
+        for value in values {
+            command.append(value)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Append a value to a list, only if the list exists
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func rpushx(_ key: String, value: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("RPUSHX", key, value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Append a value to a list, only if the list exists
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func rpushx(_ key: String, value: RedisString, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand(RedisString("RPUSHX"), RedisString(key), value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
 
     //
     //  MARK: Transaction support
