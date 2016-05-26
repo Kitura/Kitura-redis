@@ -31,7 +31,7 @@ public class Redis {
     /// Whether the client is connected or not
     ///
     public var connected: Bool {
-        return respHandle != nil ? respHandle?.status == .Connected : false
+        return respHandle != nil ? respHandle?.status == .connected : false
     }
 
     ///
@@ -51,7 +51,7 @@ public class Redis {
         var error: NSError? = nil
 
         respHandle = RedisResp(host: host, port: port)
-        if  respHandle!.status != .Connected {
+        if  respHandle!.status != .connected {
             error = createError("Failed to connect to Redis server", code: 2)
         }
         callback(error)
@@ -1034,7 +1034,7 @@ public class Redis {
     }
 
     public func issueCommandInArray(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
-        guard  let respHandle = respHandle  where respHandle.status == .Connected else {
+        guard  let respHandle = respHandle  where respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
             return
         }
@@ -1052,7 +1052,7 @@ public class Redis {
     }
 
     public func issueCommandInArray(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
-        guard  let respHandle = respHandle  where respHandle.status == .Connected else {
+        guard  let respHandle = respHandle  where respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
             return
         }
