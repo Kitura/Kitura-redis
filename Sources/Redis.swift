@@ -1015,6 +1015,73 @@ public class Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
+    
+    //
+    // MARK: List functions
+    //
+    
+    ///
+    /// Pop a value from a list
+    ///
+    /// - Parameter key: the String parameter for the key
+    ///
+    public func lpop(_ key: String, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand("LPOP", key) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Push a set of values on to list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: A variadic parameter of the values to be pushed on to the list
+    ///
+    public func lpush(_ key: String, values: String..., callback: (Int?, error: NSError?) -> Void) {
+        lpushArrayOfValues(key, values: values, callback: callback)
+    }
+    
+    ///
+    /// Push a set of values on to list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func lpushArrayOfValues(_ key: String, values: [String], callback: (Int?, error: NSError?) -> Void) {
+        var command = ["LPUSH", key]
+        for value in values {
+            command.append(value)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Push a set of values on to list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: A variadic parameter of the values to be pushed on to the list
+    ///
+    public func lpush(_ key: String, values: RedisString..., callback: (Int?, error: NSError?) -> Void) {
+        lpushArrayOfValues(key, values: values, callback: callback)
+    }
+    
+    ///
+    /// Push a set of values on to list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter values: An array parameter of the values to be pushed on to the list
+    ///
+    public func lpushArrayOfValues(_ key: String, values: [RedisString], callback: (Int?, error: NSError?) -> Void) {
+        var command = [RedisString("LPUSH"), RedisString(key)]
+        for value in values {
+            command.append(value)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
 
     //
     //  MARK: Transaction support

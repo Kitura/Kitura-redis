@@ -23,6 +23,7 @@ XCTMain([
 	testCase(TestBinarySafeCommands.allTests),
 	testCase(TestHashCommands.allTests),
 	testCase(TestIssueCommand.allTests),
+	testCase(TestListCommands.allTests),
 	testCase(TestMoreCommands.allTests),
 	testCase(TestStringAndBitCommands.allTests),
 	testCase(TestTransactionsPart1.allTests),
