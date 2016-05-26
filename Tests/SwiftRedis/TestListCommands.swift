@@ -32,7 +32,8 @@ public class TestListCommands: XCTestCase {
             ("test_lpushAndLpop", test_lpushAndLpop),
             ("test_binaryLpushAndLpop", test_binaryLpushAndLpop),
             ("test_rpushAndRpop", test_rpushAndRpop),
-            ("test_binaryRpushAndRpop", test_binaryRpushAndRpop)
+            ("test_binaryRpushAndRpop", test_binaryRpushAndRpop),
+            ("test_lrangeAndLrem", test_lrangeAndLrem)
         ]
     }
     
@@ -190,6 +191,55 @@ public class TestListCommands: XCTestCase {
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
                                 XCTAssertEqual(numberSet!, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func test_lrangeAndLrem() {
+        localSetup() {
+            let value1 = "testing 1 2 3"
+            let value2 = "over the hill and through the woods"
+            let value3 = "to grandmothers house we go"
+            let value4 = "singing away we go"
+            let binaryValue1 = RedisString("testing 1 2 3")
+            let binaryValue2 = RedisString("over the hill and through the woods")
+            let binaryValue3 = RedisString("to grandmothers house we go")
+            let binaryValue4 = RedisString("singing away we go")
+            
+            redis.lpush(self.key1, values: value1, value2, value3, value4) {(numberSet: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                
+                redis.lrange(self.key1, start: 1, end: 2) {(returnedValues: [RedisString?]?, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
+                    XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
+                    XCTAssertEqual(returnedValues![0], RedisString(value3), "Returned value #1 was \(returnedValues![0]) should have been \(value3)")
+                    XCTAssertEqual(returnedValues![1], RedisString(value2), "Returned value #2 was \(returnedValues![1]) should have been \(value2)")
+                    
+                    redis.lrem(self.key1, count: 3, value: value3) {(removedValues: Int?, error: NSError?) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(removedValues, "Result of lrem was nil, without an error")
+                        XCTAssertEqual(removedValues!, 1, "Number of values removed by lrem was \(removedValues!) should have been 1")
+                        
+                        redis.lpush(self.key2, values: binaryValue4, binaryValue3, binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            
+                            redis.lrange(self.key2, start: 1, end: 2) {(returnedValues: [RedisString?]?, error: NSError?) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
+                                XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
+                                XCTAssertEqual(returnedValues![0], binaryValue2, "Returned value #1 was \(returnedValues![0]) should have been \(binaryValue2)")
+                                XCTAssertEqual(returnedValues![1], binaryValue3, "Returned value #2 was \(returnedValues![1]) should have been \(binaryValue3)")
+                                
+                                redis.lrem(self.key1, count: 3, value: binaryValue2) {(removedValues: Int?, error: NSError?) in
+                                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                    XCTAssertNotNil(removedValues, "Result of lrem was nil, without an error")
+                                    XCTAssertEqual(removedValues!, 1, "Number of values removed by lrem was \(removedValues!) should have been 1")
+                                }
                             }
                         }
                     }

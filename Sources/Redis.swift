@@ -1108,6 +1108,45 @@ public class Redis {
     }
     
     ///
+    /// Retrieve a group of elements from a list as specified by a range
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter start: The index to start retrieving from
+    /// - Parameter end: The index to stop at
+    ///
+    public func lrange(_ key: String, start: Int, end: Int, callback: ([RedisString?]?, error: NSError?) -> Void) {
+        issueCommand("LRANGE", key, String(start), String(end)) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Remove a number of elements that match the supplied value from the list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter count: the number of elements to remove
+    /// - Parameter value: the value of the eleemnts to remove
+    ///
+    public func lrem(_ key: String, count: Int, value: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("LREM", key, String(count), value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Remove a number of elements that match the supplied value from the list
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter count: the number of elements to remove
+    /// - Parameter value: the value of the eleemnts to remove
+    ///
+    public func lrem(_ key: String, count: Int, value: RedisString, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand(RedisString("LREM"), RedisString(key), RedisString(count), value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
     /// Remove and return the last value of a list
     ///
     /// - Parameter key: the String parameter for the key
