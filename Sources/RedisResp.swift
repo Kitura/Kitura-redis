@@ -166,11 +166,16 @@ internal class RedisResp {
         var (arrayLength, newOffset) = try parseIntegerValue(buffer, offset: offset)
         var responses = [RedisResponse]()
         var response: RedisResponse
-        for _ in 0 ..< Int(arrayLength)  {
-            (response, newOffset) = try parseByPrefix(buffer, from: newOffset)
-            responses.append(response)
+        if  arrayLength >= 0  {
+            for _ in 0 ..< Int(arrayLength)  {
+                (response, newOffset) = try parseByPrefix(buffer, from: newOffset)
+                responses.append(response)
+            }
+            return (RedisResponse.Array(responses), newOffset)
         }
-        return (RedisResponse.Array(responses), newOffset)
+        else {
+            return (RedisResponse.Nil, newOffset)
+        }
     }
 
     private func parseBulkString(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {

@@ -1020,7 +1020,52 @@ public class Redis {
     // MARK: List functions
     //
     
+    ///
+    /// Retrieve an item from one of many lists, potentially blocking until one of the lists has an element
+    ///
+    /// - Parameter keys: the keys of the lists to check for an element
+    /// - Parameter timeout: Amount of time to wait or zero to wait for ever
+    ///
+    public func blpop(_ keys: String..., timeout: NSTimeInterval, callback: ([RedisString?]?, error: NSError?) -> Void) {
+        
+        var command = ["BLPOP"]
+        for key in keys {
+            command.append(key)
+        }
+        command.append(String(Int(timeout)))
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }///
+    /// Retrieve an item from the end of one of many lists, potentially blocking until one of the lists has an element
+    ///
+    /// - Parameter keys: the keys of the lists to check for an element
+    /// - Parameter timeout: Amount of time to wait or zero to wait for ever
+    ///
+    public func brpop(_ keys: String..., timeout: NSTimeInterval, callback: ([RedisString?]?, error: NSError?) -> Void) {
+        
+        var command = ["BRPOP"]
+        for key in keys {
+            command.append(key)
+        }
+        command.append(String(Int(timeout)))
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
     
+    ///
+    /// Remove and return the last value of a list and push it onto another list, blocking until there is an item to pop
+    ///
+    /// - Parameter source: The list to pop an item from
+    /// - Parameter destination: The list to push the poped item ontoParameter source: The list to pop an item from
+    /// - Parameter destination: The list to push the poped item onto
+    ///
+    public func brpoplpush(_ source: String, destination: String, timeout: NSTimeInterval, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand("BRPOPLPUSH", source, destination, String(Int(timeout))) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
     
     ///
     /// Retrieve an element from a list by index
@@ -1255,7 +1300,8 @@ public class Redis {
     ///
     /// Remove and return the last value of a list and push it onto another list
     ///
-    /// - Parameter key: the String parameter for the key
+    /// - Parameter source: The list to pop an item from
+    /// - Parameter destination: The list to push the poped item onto
     ///
     public func rpoplpush(_ source: String, destination: String, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("RPOPLPUSH", source, destination) {(response: RedisResponse) in
@@ -1452,10 +1498,11 @@ public class Redis {
 
     private func redisStringArrayResponseHandler(_ response: RedisResponse, callback: ([RedisString?]?, error: NSError?) -> Void) {
         var error: NSError? = nil
-        var strings = [RedisString?]()
+        var result: [RedisString?]?
 
         switch(response) {
         case .Array(let responses):
+            var strings = [RedisString?]()
             for innerResponse in responses {
                 switch(innerResponse) {
                 case .StringValue(let str):
@@ -1466,12 +1513,15 @@ public class Redis {
                     error = self.createUnexpectedResponseError(response)
                 }
             }
+            result = strings
+        case .Nil:
+            result = nil
         case .Error(let err):
             error = self.createError("Error: \(err)", code: 1)
         default:
             error = self.createUnexpectedResponseError(response)
         }
-        callback(error == nil ? strings : nil, error: error)
+        callback(error == nil ? result : nil, error: error)
     }
 
     private func createUnexpectedResponseError(_ response: RedisResponse) -> NSError {
