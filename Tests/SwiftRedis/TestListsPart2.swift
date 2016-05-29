@@ -32,7 +32,8 @@ public class TestListsPart2: XCTestCase {
             ("test_lindexLinsertAndLlen", test_lindexLinsertAndLlen),
             ("test_binaryLindexLinsertAndLlen", test_binaryLindexLinsertAndLlen),
             ("test_lsetAndLtrim", test_lsetAndLtrim),
-            ("test_binaryLsetAndLtrim", test_binaryLsetAndLtrim)
+            ("test_binaryLsetAndLtrim", test_binaryLsetAndLtrim),
+            ("test_rpoplpush", test_rpoplpush)
         ]
     }
     
@@ -125,7 +126,7 @@ public class TestListsPart2: XCTestCase {
                     
                     redis.lindex(self.key1, index: 1) {(valueReturned: RedisString?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(valueReturned, "Returned values of llen was nil, even though no error occurred.")
+                        XCTAssertNotNil(valueReturned, "Returned values of lindex was nil, even though no error occurred.")
                         XCTAssertEqual(valueReturned!, RedisString(value2), "lindex returned \(valueReturned!). It should have returned \(value2)")
                     
                         redis.ltrim(self.key1, start: 0, end: 0) {(wasOK: Bool, error: NSError?) in
@@ -159,7 +160,7 @@ public class TestListsPart2: XCTestCase {
                     
                     redis.lindex(self.key2, index: 1) {(valueReturned: RedisString?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(valueReturned, "Returned values of llen was nil, even though no error occurred.")
+                        XCTAssertNotNil(valueReturned, "Returned values of lindex was nil, even though no error occurred.")
                         XCTAssertEqual(valueReturned!, binaryValue1, "lindex returned \(valueReturned!). It should have returned \(binaryValue1)")
                         
                         redis.ltrim(self.key2, start: 0, end: 0) {(wasOK: Bool, error: NSError?) in
@@ -171,6 +172,36 @@ public class TestListsPart2: XCTestCase {
                                 XCTAssertNotNil(listLength, "Returned values of llen was nil, even though no error occurred.")
                                 XCTAssertEqual(listLength!, 1, "The length of the list was \(listLength!). It should have been 1.")
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func test_rpoplpush() {
+        localSetup() {
+            let value1 = "testing 1 2 3"
+            let value2 = "over the hill and through the woods"
+            let value3 = "to grandmothers house we go"
+            
+            redis.rpush(self.key1, values: value1, value2, value3) {(numberSet: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                
+                redis.rpoplpush(self.key1, destination: self.key2) {(valueReturned: RedisString?, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertNotNil(valueReturned, "Returned values of rpoplpush was nil, even though no error occurred.")
+                    XCTAssertEqual(valueReturned!, RedisString(value3), "rpoplpush returned \(valueReturned!). It should have returned \(value3)")
+                    
+                    redis.llen(self.key1) {(listLength: Int?, error: NSError?) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(listLength, "Returned values of llen was nil, even though no error occurred.")
+                        XCTAssertEqual(listLength!, 2, "The length of the list \(self.key1) was \(listLength!). It should have been 2.")
+                        
+                        redis.llen(self.key2) {(listLength: Int?, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            XCTAssertNotNil(listLength, "Returned values of llen was nil, even though no error occurred.")
+                            XCTAssertEqual(listLength!, 1, "The length of the list \(self.key2) was \(listLength!). It should have been 1.")
                         }
                     }
                 }

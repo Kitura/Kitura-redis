@@ -1253,6 +1253,17 @@ public class Redis {
     }
     
     ///
+    /// Remove and return the last value of a list and push it onto another list
+    ///
+    /// - Parameter key: the String parameter for the key
+    ///
+    public func rpoplpush(_ source: String, destination: String, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand("RPOPLPUSH", source, destination) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
     /// Append a set of values to a list
     ///
     /// - Parameter key: the String parameter for the key
