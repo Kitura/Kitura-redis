@@ -1020,6 +1020,59 @@ public class Redis {
     // MARK: List functions
     //
     
+    
+    
+    ///
+    /// Retrieve an element from a list by index
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter index: The index of the element to retrieve
+    ///
+    public func lindex(_ key: String, index: Int, callback: (RedisString?, error: NSError?) -> Void) {
+        issueCommand("LINDEX", key, String(index)) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Insert a value into a list before or after a pivot
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter before: Whether the value is inserted before or after the pivot
+    /// - Parameter pivot: The pivot around which the value will be inserted
+    /// - Parameter value: The value to be inserted
+    ///
+    public func linsert(_ key: String, before: Bool, pivot: String, value: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("LINSERT", key, (before ? "BEFORE" : "AFTER"), pivot, value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Insert a value into a list before or after a pivot
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter before: Whether the value is inserted before or after the pivot
+    /// - Parameter pivot: The pivot around which the value will be inserted
+    /// - Parameter value: The value to be inserted
+    ///
+    public func linsert(_ key: String, before: Bool, pivot: RedisString, value: RedisString, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand(RedisString("LINSERT"), RedisString(key), RedisString(before ? "BEFORE" : "AFTER"), pivot, value) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get the length of a list
+    ///
+    /// - Parameter key: the String parameter for the key
+    ///
+    public func llen(_ key: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("LLEN", key) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
     ///
     /// Pop a value from a list
     ///
