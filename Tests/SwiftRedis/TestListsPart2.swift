@@ -30,7 +30,9 @@ public class TestListsPart2: XCTestCase {
     static var allTests : [(String, TestListsPart2 -> () throws -> Void)] {
         return [
             ("test_lindexLinsertAndLlen", test_lindexLinsertAndLlen),
-            ("test_binaryLindexLinsertAndLlen", test_binaryLindexLinsertAndLlen)
+            ("test_binaryLindexLinsertAndLlen", test_binaryLindexLinsertAndLlen),
+            ("test_lsetAndLtrim", test_lsetAndLtrim),
+            ("test_binaryLsetAndLtrim", test_binaryLsetAndLtrim)
         ]
     }
     
@@ -101,6 +103,74 @@ public class TestListsPart2: XCTestCase {
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                             XCTAssertNotNil(retrievedValue, "Result of lindex was nil, but \(self.key1) should exist")
                             XCTAssertEqual(retrievedValue!, binaryValue3, "Result of lindex was \(retrievedValue!). It should have been \(binaryValue2)")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func test_lsetAndLtrim() {
+        localSetup() {
+            let value1 = "testing 1 2 3"
+            let value2 = "over the hill and through the woods"
+            let value3 = "to grandmothers house we go"
+            
+            redis.lpush(self.key1, values: value1, value3) {(numberSet: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                
+                redis.lset(self.key1, index: 1, value: value2) {(wasOK: Bool, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssert(wasOK, "lset failed")
+                    
+                    redis.lindex(self.key1, index: 1) {(valueReturned: RedisString?, error: NSError?) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(valueReturned, "Returned values of llen was nil, even though no error occurred.")
+                        XCTAssertEqual(valueReturned!, RedisString(value2), "lindex returned \(valueReturned!). It should have returned \(value2)")
+                    
+                        redis.ltrim(self.key1, start: 0, end: 0) {(wasOK: Bool, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            XCTAssert(wasOK, "ltrim failed")
+                     
+                            redis.llen(self.key1) {(listLength: Int?, error: NSError?) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(listLength, "Returned values of llen was nil, even though no error occurred.")
+                                XCTAssertEqual(listLength!, 1, "The length of the list was \(listLength!). It should have been 1.")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func test_binaryLsetAndLtrim() {
+        localSetup() {
+            let binaryValue1 = RedisString("testing 1 2 3")
+            let binaryValue2 = RedisString("over the hill and through the woods")
+            let binaryValue3 = RedisString("to grandmothers house we go")
+            
+            redis.lpush(self.key2, values: binaryValue3, binaryValue2) {(numberSet: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                
+                redis.lset(self.key2, index: 1, value: binaryValue1) {(wasOK: Bool, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssert(wasOK, "lset failed")
+                    
+                    redis.lindex(self.key2, index: 1) {(valueReturned: RedisString?, error: NSError?) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(valueReturned, "Returned values of llen was nil, even though no error occurred.")
+                        XCTAssertEqual(valueReturned!, binaryValue1, "lindex returned \(valueReturned!). It should have returned \(binaryValue1)")
+                        
+                        redis.ltrim(self.key2, start: 0, end: 0) {(wasOK: Bool, error: NSError?) in
+                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                            XCTAssert(wasOK, "ltrim failed")
+                            
+                            redis.llen(self.key2) {(listLength: Int?, error: NSError?) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(listLength, "Returned values of llen was nil, even though no error occurred.")
+                                XCTAssertEqual(listLength!, 1, "The length of the list was \(listLength!). It should have been 1.")
+                            }
                         }
                     }
                 }

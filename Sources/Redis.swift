@@ -1200,6 +1200,48 @@ public class Redis {
     }
     
     ///
+    /// Set a value in a list to a new value
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter index: the index of the value in the list to be updated
+    /// - Parameter value: The new value for the element of the list
+    ///
+    public func lset(_ key: String, index: Int, value: String, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("LSET", key, String(index), value) {(response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response)
+            callback(ok, error: error)
+        }
+    }
+    
+    ///
+    /// Set a value in a list to a new value
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter index: the index of the value in the list to be updated
+    /// - Parameter value: The new value for the element of the list
+    ///
+    public func lset(_ key: String, index: Int, value: RedisString, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand(RedisString("LSET"), RedisString(key), RedisString(index), value) {(response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response)
+            callback(ok, error: error)
+        }
+    }
+    
+    ///
+    /// Trim a list to a new size
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter start: the starting of the list to keep
+    /// - Parameter end: the ending point of the list to keep
+    ///
+    public func ltrim(_ key: String, start: Int, end: Int, callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("LTRIM", key, String(start), String(end)) {(response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response)
+            callback(ok, error: error)
+        }
+    }
+    
+    ///
     /// Remove and return the last value of a list
     ///
     /// - Parameter key: the String parameter for the key
