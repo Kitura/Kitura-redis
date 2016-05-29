@@ -24,7 +24,7 @@ XCTMain([
 	testCase(TestConnectCommands.allTests),
 	testCase(TestHashCommands.allTests),
 	testCase(TestIssueCommand.allTests),
-	testCase(TestListCommands.allTests),
+	testCase(TestListsPart1.allTests),
 	testCase(TestMoreCommands.allTests),
 	testCase(TestStringAndBitCommands.allTests),
 	testCase(TestTransactionsPart1.allTests),

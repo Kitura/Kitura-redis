@@ -26,8 +26,8 @@ import Foundation
 import XCTest
 
 
-public class TestListCommands: XCTestCase {
-    static var allTests : [(String, TestListCommands -> () throws -> Void)] {
+public class TestListsPart1: XCTestCase {
+    static var allTests : [(String, TestListsPart1 -> () throws -> Void)] {
         return [
             ("test_lpushAndLpop", test_lpushAndLpop),
             ("test_binaryLpushAndLpop", test_binaryLpushAndLpop),
