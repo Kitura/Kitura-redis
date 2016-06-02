@@ -17,16 +17,10 @@
 import KituraSys
 import Socket
 
-#if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
-    import Darwin
-    import Foundation
-#elseif os(Linux)
-    import Foundation
-    import Glibc
-#endif
+import Foundation
 
 internal enum RedisRespStatus {
-    case NotConnected, Connected, Error
+    case notConnected, connected, error
 }
 
 internal class RedisResp {
@@ -45,16 +39,16 @@ internal class RedisResp {
     ///
     /// State of connection
     ///
-    internal private(set) var status = RedisRespStatus.NotConnected
+    internal private(set) var status = RedisRespStatus.notConnected
 
     internal init(host: String, port: Int32) {
         do {
             socket = try Socket.create()
             try socket!.connect(to: host, port: port)
-            status = .Connected
+            status = .connected
         }
         catch {
-            status = .NotConnected
+            status = .notConnected
         }
     }
 
@@ -172,11 +166,16 @@ internal class RedisResp {
         var (arrayLength, newOffset) = try parseIntegerValue(buffer, offset: offset)
         var responses = [RedisResponse]()
         var response: RedisResponse
-        for _ in 0 ..< Int(arrayLength)  {
-            (response, newOffset) = try parseByPrefix(buffer, from: newOffset)
-            responses.append(response)
+        if  arrayLength >= 0  {
+            for _ in 0 ..< Int(arrayLength)  {
+                (response, newOffset) = try parseByPrefix(buffer, from: newOffset)
+                responses.append(response)
+            }
+            return (RedisResponse.Array(responses), newOffset)
         }
-        return (RedisResponse.Array(responses), newOffset)
+        else {
+            return (RedisResponse.Nil, newOffset)
+        }
     }
 
     private func parseBulkString(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
@@ -202,7 +201,7 @@ internal class RedisResp {
         let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
         let optStr = String(data: data, encoding: NSUTF8StringEncoding)
         guard  let str = optStr  else {
-            throw RedisRespError(code: .NotUTF8)
+            throw RedisRespError(code: .notUTF8)
         }
         return (RedisResponse.Error(str), eos+RedisResp.crLf.length)
     }
@@ -217,7 +216,7 @@ internal class RedisResp {
         let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
         let optStr = String(data: data, encoding: NSUTF8StringEncoding)
         guard  let str = optStr  else {
-            throw RedisRespError(code: .NotUTF8)
+            throw RedisRespError(code: .notUTF8)
         }
         return (RedisResponse.Status(str), eos+RedisResp.crLf.length)
     }
@@ -264,11 +263,11 @@ internal class RedisResp {
         let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
         let optStr = String(data: data, encoding: NSUTF8StringEncoding)
         guard  let str = optStr  else {
-            throw RedisRespError(code: .NotUTF8)
+            throw RedisRespError(code: .notUTF8)
         }
         let optInt = Int64(str)
         guard  let int = optInt  else {
-            throw RedisRespError(code: .NotInteger)
+            throw RedisRespError(code: .notInteger)
         }
         return (int, eos+RedisResp.crLf.length)
     }
@@ -294,7 +293,7 @@ internal class RedisResp {
 }
 
 private enum RedisRespErrorCode {
-    case EOF, NotInteger, NotUTF8
+    case EOF, notInteger, notUTF8
 }
 
 private struct RedisRespError: ErrorProtocol {
@@ -304,9 +303,9 @@ private struct RedisRespError: ErrorProtocol {
         switch(code) {
             case .EOF:
                 return "Unexpected EOF while parsing the response from the server"
-            case .NotInteger:
+            case .notInteger:
                 return "An integer value contained non-digit characters"
-            case .NotUTF8:
+            case .notUTF8:
                 return "A simple string or error message wasn't UTF-8 encoded"
         }
     }
