@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestTransactionsPart2: XCTestCase {
-    static var allTests : [(String, TestTransactionsPart2 -> () throws -> Void)] {
+    static var allTests : [(String, (TestTransactionsPart2) -> () throws -> Void)] {
         return [
             ("test_msetAndMget", test_msetAndMget),
             ("test_binarySafeMsetAndMget", test_binarySafeMsetAndMget),
