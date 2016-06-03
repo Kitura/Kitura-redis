@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestHashCommands: XCTestCase {
-    static var allTests : [(String, TestHashCommands -> () throws -> Void)] {
+    static var allTests : [(String, (TestHashCommands) -> () throws -> Void)] {
         return [
             ("test_hashSetAndGet", test_hashSetAndGet),
             ("test_Incr", test_Incr),
