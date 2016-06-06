@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestConnectCommands: XCTestCase {
-    static var allTests : [(String, TestConnectCommands -> () throws -> Void)] {
+    static var allTests : [(String, (TestConnectCommands) -> () throws -> Void)] {
         return [
             ("test_pingAndEcho", test_pingAndEcho),
             ("test_select", test_select)

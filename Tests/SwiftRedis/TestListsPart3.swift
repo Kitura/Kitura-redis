@@ -28,7 +28,7 @@ import XCTest
 
 
 public class TestListsPart3: XCTestCase {
-    static var allTests : [(String, TestListsPart3 -> () throws -> Void)] {
+    static var allTests : [(String, (TestListsPart3) -> () throws -> Void)] {
         return [
             ("test_blpopBrpopAndBrpoplpushEmptyLists", test_blpopBrpopAndBrpoplpushEmptyLists),
             ("test_blpop", test_blpop),
