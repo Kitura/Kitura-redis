@@ -94,7 +94,7 @@ public class TestListsPart3: XCTestCase {
         extendedSetup() {
             let value1 = "testing 1 2 3"
                     
-            self.queue.queueAsync() { [unowned self] in
+            self.queue.enqueueAsynchronously() { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key2, values: value1) {(listSize: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -115,7 +115,7 @@ public class TestListsPart3: XCTestCase {
     func test_brpop() {
         extendedSetup() {
             let value2 = "over the hill and through the woods"
-            self.queue.queueAsync() { [unowned self] in
+            self.queue.enqueueAsynchronously() { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key3, values: value2) {(listSize: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -137,7 +137,7 @@ public class TestListsPart3: XCTestCase {
         extendedSetup() {
             let value3 = "to grandmothers house we go"
             
-            self.queue.queueAsync() { [unowned self] in
+            self.queue.enqueueAsynchronously() { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key1, values: value3) {(listSize: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
