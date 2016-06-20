@@ -31,7 +31,7 @@ public class AuthTests: XCTestCase {
     let host = read(fileName: "host.txt")
     let password = read(fileName: "password.txt")
 
-    static var allTests : [(String, AuthTests -> () throws -> Void)] {
+    static var allTests : [(String, (AuthTests) -> () throws -> Void)] {
         return [
             ("test_ConnectWithAuth", test_ConnectWithAuth)
         ]

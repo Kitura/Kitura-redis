@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestBinarySafeCommands: XCTestCase {
-    static var allTests : [(String, TestBinarySafeCommands -> () throws -> Void)] {
+    static var allTests : [(String, (TestBinarySafeCommands) -> () throws -> Void)] {
         return [
             ("test_setWithBinary", test_setWithBinary),
             ("test_SetExistOptionsWithBinary", test_SetExistOptionsWithBinary),

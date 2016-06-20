@@ -27,7 +27,7 @@ import XCTest
 
 
 public class TestListsPart2: XCTestCase {
-    static var allTests : [(String, TestListsPart2 -> () throws -> Void)] {
+    static var allTests : [(String, (TestListsPart2) -> () throws -> Void)] {
         return [
             ("test_lindexLinsertAndLlen", test_lindexLinsertAndLlen),
             ("test_binaryLindexLinsertAndLlen", test_binaryLindexLinsertAndLlen),

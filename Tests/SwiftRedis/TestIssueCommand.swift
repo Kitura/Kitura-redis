@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 class TestIssueCommand: XCTestCase {
-    static var allTests : [(String, TestIssueCommand -> () throws -> Void)] {
+    static var allTests : [(String, (TestIssueCommand) -> () throws -> Void)] {
         return [
             ("test_SetAndGet", test_SetAndGet)
         ]
