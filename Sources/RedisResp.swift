@@ -44,7 +44,7 @@ internal class RedisResp {
     internal init(host: String, port: Int32) {
         do {
             socket = try Socket.create()
-            try socket!.connect(to: host, port: port)
+            try socket?.connect(to: host, port: port)
             status = .connected
         }
         catch {
