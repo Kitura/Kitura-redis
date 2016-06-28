@@ -46,15 +46,11 @@ public class Redis {
     /// - Parameter port: port number
     /// - Parameter callback: callback function for on completion
     ///
-    public func connect (host: String, port: Int32, callback: (NSError?) -> Void) {
-
-        var error: NSError? = nil
-
-        respHandle = RedisResp(host: host, port: port)
-        if  respHandle!.status != .connected {
-            error = createError("Failed to connect to Redis server", code: 2)
+    public func connect(host: String, port: Int32) throws {
+        respHandle =  RedisResp(host: host, port: port)
+        guard respHandle?.status == .connected else {
+            throw createError("Failed to connect to Redis server", code: 2)
         }
-        callback(error)
     }
 
     ///
