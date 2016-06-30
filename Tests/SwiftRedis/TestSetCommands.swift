@@ -47,7 +47,7 @@ public class TestSetCommands: XCTestCase {
         let expectation1 = expectation(withDescription: "Add score(s) and member(s) to the set")
         
         setupTests {
-            redis.zadd(self.key1,fieldPairs: [(1,"one"), (2,"two"), (3, "three")]) {
+            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
                 (result: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
@@ -76,14 +76,14 @@ public class TestSetCommands: XCTestCase {
     func test_ZRem() {
         let expectation1 = expectation(withDescription: "Removes the specified members fromt the set")
         setupTests {
-            redis.zadd(self.key1,fieldPairs: [(1,"one"), (2,"two"), (3, "three")]) {
+            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
                 XCTAssertNotNil(totalElementAdd)
                 XCTAssertEqual(totalElementAdd, 3)
-                
-                redis.zrem(self.key1, members: ["two","three"], callback: {
+        
+                redis.zrem(self.key1, member: "two", members: "three", callback: {
                     (totalElementRem: Int?, zRemError: NSError?) in
                     
                     XCTAssertNil(zRemError)
@@ -99,7 +99,7 @@ public class TestSetCommands: XCTestCase {
     func test_ZRemrangebyscore() {
         let expectation1 = expectation(withDescription: "Removes all elements from the sorted set")
         setupTests {
-            redis.zadd(self.key1,fieldPairs: [(1,"one"), (2,"two"), (3, "three")]) {
+            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
@@ -121,7 +121,7 @@ public class TestSetCommands: XCTestCase {
     func test_ZRange() {
         let expectation1 = expectation(withDescription: "Returns the specified range of elements from the sorted set")
         setupTests {
-            redis.zadd(self.key1,fieldPairs: [(1,"one"), (2,"two"), (3, "three")]) {
+            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
@@ -144,7 +144,7 @@ public class TestSetCommands: XCTestCase {
     func test_ZCard() {
         let expectation1 = expectation(withDescription: "Returns the sorted set cardinality of the sorted set ")
         setupTests {
-            redis.zadd(self.key1,fieldPairs: [(1,"one"), (2,"two"), (3, "three")]) {
+            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)

@@ -1034,13 +1034,15 @@ public class Redis {
     ///
     /// - Parameter key: the String parameter for the key
     /// - Parameter member: a String parameter for the member
+    /// - Parameter members: a  variadic parameter containing the members
     /// - Parameter callback: a function returning the number of members removed from the sorted set
     ///
-    public func zrem(_ key: String, members: [String], callback: (Int?, error: NSError?) -> Void) {
+    public func zrem(_ key: String, member: String, members: String..., callback: (Int?, error: NSError?) -> Void) {
         var command = ["ZREM"]
         command.append(key)
-        for member in members {
-            command.append(member)
+        command.append(member)
+        for element in members {
+            command.append(element)
         }
         issueCommandInArray(command) { (response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
@@ -1072,13 +1074,17 @@ public class Redis {
     ///
     ///
     /// - Parameter key: the String parameter for the key
-    /// - Parameter fieldPairs: list of tuples of score and member
+    /// - Parameter score: the Integer parameter for score
+    /// - Parameter member: the String parameter for the member
+    /// - Parameter tuples: a tuple variadic parameter containing a score and member
     /// - Parameter callback: a function returning the number of elements added to the sorted sets
     
-    public func zadd(_ key: String, fieldPairs: [(Int, String)], callback: (Int?, error: NSError?) -> Void) {
+    public func zadd(_ key: String, score: Int, member: String, tuples: (Int,String)..., callback: (Int?, error: NSError?) -> Void) {
         var command = ["ZADD"]
         command.append(key)
-        for tuple in fieldPairs {
+        command.append(String(score))
+        command.append(member)
+        for tuple in tuples {
             command.append(String(tuple.0))
             command.append(tuple.1)
         }
