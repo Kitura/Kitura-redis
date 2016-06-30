@@ -30,8 +30,13 @@ var redis = Redis()
 
 func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
     if !redis.connected  {
-        let password = read(fileName: "password.txt")
-        let host = read(fileName: "host.txt")
+//        let bundle = NSBundle.main()
+//        let path1 = bundle.pathForResource("password", ofType: "txt")
+//        guard let path = path1 else { callback(nil); return } //TODO: throw error here
+//            let password = read(fileName: path)
+        let password = ""
+        let host = "localhost"
+//        let host = read(fileName: "host.txt")
 
         redis.connect(host: host, port: 6379) {(error: NSError?) in
             if authenticate {
