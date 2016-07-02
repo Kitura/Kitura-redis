@@ -61,7 +61,10 @@ internal class RedisResp {
         buffer.append(RedisResp.crLf)
 
         for arg in stringArgs {
-            addAsBulkString(StringUtils.toUtf8String(arg)!, to: buffer)
+            // NSString.data(encoding:) which is called by StringUtils.toUtf8String will return nil on Linux on an empty string
+            // eventually this needs to be changed in swift-corelibs-foundation
+            // the "?? NSData()" ensures that an empty NSData is added if the "arg" is empty
+            addAsBulkString(StringUtils.toUtf8String(arg) ?? NSData(), to: buffer)
         }
 
         do {
