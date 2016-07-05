@@ -26,7 +26,8 @@ public class TestSetCommands: XCTestCase {
             ("test_ZRem", test_ZRem),
             ("test_ZRemrangebyscore", test_ZRemrangebyscore),
             ("test_ZRange", test_ZRange),
-            ("test_ZCard",test_ZCard)
+            ("test_ZCard",test_ZCard),
+            ("test_flushDB", test_flushDB)
         ]
     }
     
@@ -47,7 +48,7 @@ public class TestSetCommands: XCTestCase {
         let expectation1 = expectation(withDescription: "Add score(s) and member(s) to the set")
         
         setupTests {
-            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
+            redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (result: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
@@ -76,14 +77,14 @@ public class TestSetCommands: XCTestCase {
     func test_ZRem() {
         let expectation1 = expectation(withDescription: "Removes the specified members fromt the set")
         setupTests {
-            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
+            redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
                 XCTAssertNotNil(totalElementAdd)
                 XCTAssertEqual(totalElementAdd, 3)
         
-                redis.zrem(self.key1, member: "two", members: "three", callback: {
+                redis.zrem(self.key1,  members: "two", "three", callback: {
                     (totalElementRem: Int?, zRemError: NSError?) in
                     
                     XCTAssertNil(zRemError)
@@ -99,7 +100,7 @@ public class TestSetCommands: XCTestCase {
     func test_ZRemrangebyscore() {
         let expectation1 = expectation(withDescription: "Removes all elements from the sorted set")
         setupTests {
-            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
+            redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
@@ -121,7 +122,7 @@ public class TestSetCommands: XCTestCase {
     func test_ZRange() {
         let expectation1 = expectation(withDescription: "Returns the specified range of elements from the sorted set")
         setupTests {
-            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
+            redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
@@ -144,7 +145,7 @@ public class TestSetCommands: XCTestCase {
     func test_ZCard() {
         let expectation1 = expectation(withDescription: "Returns the sorted set cardinality of the sorted set ")
         setupTests {
-            redis.zadd(self.key1, score: 1, member: "one", tuples: (2,"two"), (3, "three")) {
+            redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
@@ -159,6 +160,37 @@ public class TestSetCommands: XCTestCase {
                     expectation1.fulfill()
                 })
             }
+        }
+        waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+    }
+    
+    func test_flushDB() {
+        let expectation1 = expectation(withDescription: "Delete all the keys of the currently selected DB")
+        setupTests {
+            redis.zadd(self.key1, tuples: (1,"one"), (2,"two")) {
+                (retrievedTotalElementAdded: Int?, error: NSError?) in
+                
+                XCTAssertNil(error)
+                XCTAssertNotNil(retrievedTotalElementAdded)
+                XCTAssertEqual(retrievedTotalElementAdded, 2)
+                
+            }
+            redis.flushdb(){
+                (result: Bool?, flushError: NSError?) in
+                
+                XCTAssertNotNil(result)
+                XCTAssertTrue(result!)
+                XCTAssertNil(flushError)
+                
+                
+                redis.zcard(self.key1, callback: {
+                    (retrievedTotalElements: Int?, zCardError: NSError?) in
+                    
+                    XCTAssertNil(zCardError)
+                    XCTAssertEqual(retrievedTotalElements, 0, "The cardinality of the sorted set should be 0. It was \(retrievedTotalElements)")
+                })
+            }
+            expectation1.fulfill()
         }
         waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
     }

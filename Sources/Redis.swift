@@ -1033,14 +1033,24 @@ public class Redis {
     /// An error is returned when key exists and does not hold a sorted set.
     ///
     /// - Parameter key: the String parameter for the key
-    /// - Parameter member: a String parameter for the member
-    /// - Parameter members: a  variadic parameter containing the members
+    /// - Parameter members: a  variadic parameter containing the member(s)
     /// - Parameter callback: a function returning the number of members removed from the sorted set
     ///
-    public func zrem(_ key: String, member: String, members: String..., callback: (Int?, error: NSError?) -> Void) {
+    public func zrem(_ key: String, members: String..., callback: (Int?, error: NSError?) -> Void) {
+        zremArrayOfMembers(key, members: members, callback: callback)
+    }
+    
+    ///
+    /// Removes the specified members from the sorted set stored at key. Non existing members are ignored.
+    /// An error is returned when key exists and does not hold a sorted set.
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter members: a  variadic parameter containing the member(s)
+    /// - Parameter callback: a function returning the number of members removed from the sorted set
+    ///
+    public func zremArrayOfMembers(_ key: String, members: [String], callback: (Int?, error: NSError?) -> Void) {
         var command = ["ZREM"]
         command.append(key)
-        command.append(member)
         for element in members {
             command.append(element)
         }
@@ -1048,11 +1058,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    //        issueCommand("ZREM", key, member) {(response: RedisResponse) in
-    //            self.redisIntegerResponseHandler(response,callback: callback)
-    
-    
-    
+
     ///
     /// Returns the specified range of elements in the sorted set stored at key
     ///
@@ -1074,16 +1080,25 @@ public class Redis {
     ///
     ///
     /// - Parameter key: the String parameter for the key
-    /// - Parameter score: the Integer parameter for score
-    /// - Parameter member: the String parameter for the member
-    /// - Parameter tuples: a tuple variadic parameter containing a score and member
+    /// - Parameter tuples: a tuple variadic parameter containing a score(s) and member(s)
     /// - Parameter callback: a function returning the number of elements added to the sorted sets
     
-    public func zadd(_ key: String, score: Int, member: String, tuples: (Int,String)..., callback: (Int?, error: NSError?) -> Void) {
+    public func zadd(_ key: String, tuples: (Int,String)..., callback: (Int?, error: NSError?) -> Void) {
+        zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
+    }
+    
+    ///
+    /// Return the number of elements added to the sorted sets, not including elements already existing for which the score was
+    /// updated.
+    ///
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter tuples: a tuple variadic parameter containing a score(s) and member(s)
+    /// - Parameter callback: a function returning the number of elements added to the sorted sets
+    
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int,String)], callback: (Int?, error: NSError?) -> Void) {
         var command = ["ZADD"]
         command.append(key)
-        command.append(String(score))
-        command.append(member)
         for tuple in tuples {
             command.append(String(tuple.0))
             command.append(tuple.1)
@@ -1100,7 +1115,7 @@ public class Redis {
     /// - Parameter key: the String parameter for the key
     /// - Parameter min: the String parameter for the min
     /// - Parameter max: the String parameter for the max
-    /// - Parameter callback: a function returning removes all elements in the sroted set
+    /// - Parameter callback: a function returning removes all elements in the sorted set
     
     public func zremrangebyscore(_ key: String, min: String, max: String, callback: (Int?, error: NSError?) -> Void) {
         issueCommand("ZREMRANGEBYSCORE",key, min, max) { (response) in
@@ -1108,7 +1123,21 @@ public class Redis {
         }
     }
     
+    ///
+    /// Delete all the keys of the currently selected DB. This command never fails.
+    ///
+    ///
+    /// - Parameter callback: a function returning response
+    ///
+    public func flushdb(callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("FLUSHDB") { (response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response)
+            callback(ok, error: error)
+        }
+    }
     
+    
+
     //
     // MARK: List functions
     //
