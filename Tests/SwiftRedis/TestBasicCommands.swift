@@ -33,7 +33,8 @@ public class TestBasicCommands: XCTestCase {
             ("test_SetExistOptions", test_SetExistOptions),
             ("test_SetExpireOptions", test_SetExpireOptions),
             ("test_incrDecr", test_incrDecr),
-            ("test_incrFloats", test_incrFloats)
+            ("test_incrFloats", test_incrFloats),
+            ("test_empty", test_empty)
         ]
     }
     
@@ -207,6 +208,22 @@ public class TestBasicCommands: XCTestCase {
                     XCTAssertNotNil(newValue, "Result of an INCRBYFLOAT shouldn't be nil")
                     XCTAssertEqual(theValue+Double(incValue), newValue!.asDouble, "The returned value wasn't \(theValue+Double(incValue))")
                     theValue = newValue!.asDouble
+                }
+            }
+        }
+    }
+
+    func test_empty() {
+        localSetup() {
+            let emptyValue = ""
+
+            redis.set(self.key1, value: emptyValue) {(wasSet: Bool, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                XCTAssert(wasSet, "Failed to set \(self.key1)")
+
+                redis.get(self.key1) {(returnedValue: RedisString?, error: NSError?) in
+                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertEqual(returnedValue!.asString, emptyValue, "Returned value was not '\(emptyValue)'")
                 }
             }
         }
