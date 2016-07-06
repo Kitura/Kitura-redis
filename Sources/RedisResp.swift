@@ -14,9 +14,7 @@
  * limitations under the License.
  **/
 
-import KituraSys
 import Socket
-
 import Foundation
 
 internal enum RedisRespStatus {
@@ -29,12 +27,12 @@ internal class RedisResp {
     private var socket: Socket?
 
     // Mark: Prebuilt constant UTF8 strings (these strings are all proper UTF-8 strings)
-    private static let asterisk = StringUtils.toUtf8String("*")!
-    private static let colon = StringUtils.toUtf8String(":")!
-    private static let crLf = StringUtils.toUtf8String("\r\n")!
-    private static let dollar = StringUtils.toUtf8String("$")!
-    private static let minus = StringUtils.toUtf8String("-")!
-    private static let plus = StringUtils.toUtf8String("+")!
+    private static let asterisk = RedisString("*").asData
+    private static let colon = RedisString(":").asData
+    private static let crLf = RedisString("\r\n").asData
+    private static let dollar = RedisString("$").asData
+    private static let minus = RedisString("-").asData
+    private static let plus = RedisString("+").asData
 
     ///
     /// State of connection
@@ -61,10 +59,7 @@ internal class RedisResp {
         buffer.append(RedisResp.crLf)
 
         for arg in stringArgs {
-            // NSString.data(encoding:) which is called by StringUtils.toUtf8String will return nil on Linux on an empty string
-            // eventually this needs to be changed in swift-corelibs-foundation
-            // the "?? NSData()" ensures that an empty NSData is added if the "arg" is empty
-            addAsBulkString(StringUtils.toUtf8String(arg) ?? NSData(), to: buffer)
+            addAsBulkString(RedisString(arg).asData, to: buffer)
         }
 
         do {
@@ -291,7 +286,7 @@ internal class RedisResp {
     }
 
     private func add(_ text: String, to buffer: NSMutableData) {
-        buffer.append(StringUtils.toUtf8String(text)!)
+        buffer.append(RedisString(text).asData)
     }
 }
 

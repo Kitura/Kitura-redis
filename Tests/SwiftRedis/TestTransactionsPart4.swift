@@ -42,12 +42,12 @@ public class TestTransactionsPart4: XCTestCase {
             let expVal2 = "hi hi, hi ho, its off to test we go"
 
             let multi = redis.multi()
-            multi.hset(self.key1, field: self.field1, value: expVal1)
-            multi.hset(self.key1, field: self.field1, value: expVal2).hget(self.key1, field: self.field1)
-            multi.hexists(self.key1, field: self.field2).hset(self.key1, field: self.field2, value: expVal1)
-            multi.hlen(self.key1).hset(self.key1, field: self.field1, value: expVal2, exists: false)
-            multi.hdel(self.key1, fields: self.field1, self.field2).hget(self.key1, field: self.field1)
-            multi.hset(self.key1, field: self.field1, value: expVal1, exists: false)
+            let _ = multi.hset(self.key1, field: self.field1, value: expVal1)
+            let _ = multi.hset(self.key1, field: self.field1, value: expVal2).hget(self.key1, field: self.field1)
+            let _ = multi.hexists(self.key1, field: self.field2).hset(self.key1, field: self.field2, value: expVal1)
+            let _ = multi.hlen(self.key1).hset(self.key1, field: self.field1, value: expVal2, exists: false)
+            let _ = multi.hdel(self.key1, fields: self.field1, self.field2).hget(self.key1, field: self.field1)
+            let _ = multi.hset(self.key1, field: self.field1, value: expVal1, exists: false)
 
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 10)  {
@@ -72,8 +72,8 @@ public class TestTransactionsPart4: XCTestCase {
             let incFloat: Float = 8.5
 
             let multi = redis.multi()
-            multi.hincr(self.key1, field: self.field3, by: incInt)
-            multi.hincr(self.key1, field: self.field2, byFloat: incFloat)
+            let _ = multi.hincr(self.key1, field: self.field3, by: incInt)
+            let _ = multi.hincr(self.key1, field: self.field2, byFloat: incFloat)
 
             // To test HSTRLEN one needs a Redis 3.2 server
             //
@@ -101,10 +101,10 @@ public class TestTransactionsPart4: XCTestCase {
             let expVal3 = "we go"
 
             let multi = redis.multi()
-            multi.hmset(self.key1, fieldValuePairs: (self.field1, expVal1), (self.field2, expVal2), (self.field3, expVal3))
-            multi.hget(self.key1, field: self.field1)
-            multi.hmget(self.key1, fields: self.field1, self.field2, self.field4, self.field3)
-            multi.hkeys(self.key1).hvals(self.key1).hgetall(self.key1)
+            let _ = multi.hmset(self.key1, fieldValuePairs: (self.field1, expVal1), (self.field2, expVal2), (self.field3, expVal3))
+            let _ = multi.hget(self.key1, field: self.field1)
+            let _ = multi.hmget(self.key1, fields: self.field1, self.field2, self.field4, self.field3)
+            let _ = multi.hkeys(self.key1).hvals(self.key1).hgetall(self.key1)
 
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
@@ -134,9 +134,9 @@ public class TestTransactionsPart4: XCTestCase {
             let expData3 = NSData(bytes: bytes, length: bytes.count)
 
             let multi = redis.multi()
-            multi.hset(self.key1, field: self.field1, value: RedisString(expData1))
-            multi.hmset(self.key1, fieldValuePairs: (self.field2, RedisString(expData2)), (self.field3, RedisString(expData3)))
-            multi.hgetall(self.key1)
+            let _ = multi.hset(self.key1, field: self.field1, value: RedisString(expData1))
+            let _ = multi.hmset(self.key1, fieldValuePairs: (self.field2, RedisString(expData2)), (self.field3, RedisString(expData3)))
+            let _ = multi.hgetall(self.key1)
 
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 3)  {

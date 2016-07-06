@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-import KituraSys
-
 import Foundation
 
 // MARK: Redis
