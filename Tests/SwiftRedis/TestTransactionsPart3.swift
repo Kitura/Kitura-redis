@@ -43,11 +43,11 @@ public class TestTransactionsPart3: XCTestCase {
     func test_keyManipulation() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.mset((self.key1, self.expVal1), (self.key2, self.expVal2))
-            let _ = multi.rename(self.key1, newKey: self.key3).get(self.key3)
-            let _ = multi.rename(self.key3, newKey: self.key2, exists: false)
-            let _ = multi.rename(self.key3, newKey: self.key4, exists: false)
-            let _ = multi.exists(self.key1, self.key2, self.key3, self.key4)
+            multi.mset((self.key1, self.expVal1), (self.key2, self.expVal2))
+            multi.rename(self.key1, newKey: self.key3).get(self.key3)
+            multi.rename(self.key3, newKey: self.key2, exists: false)
+            multi.rename(self.key3, newKey: self.key4, exists: false)
+            multi.exists(self.key1, self.key2, self.key3, self.key4)
 
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
@@ -65,8 +65,8 @@ public class TestTransactionsPart3: XCTestCase {
     func test_Move() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.select(1).set(self.key1, value: self.expVal1).move(self.key1, toDB: 0)
-            let _ = multi.get(self.key1).select(0).get(self.key1)
+            multi.select(1).set(self.key1, value: self.expVal1).move(self.key1, toDB: 0)
+            multi.get(self.key1).select(0).get(self.key1)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Select(1) didn't return an 'OK'")
@@ -85,11 +85,11 @@ public class TestTransactionsPart3: XCTestCase {
             let expiration = 1.850
 
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: self.expVal1).ttl(self.key1)
-            let _ = multi.expire(self.key1, inTime: expiration).ttl(self.key1).persist(self.key1)
+            multi.set(self.key1, value: self.expVal1).ttl(self.key1)
+            multi.expire(self.key1, inTime: expiration).ttl(self.key1).persist(self.key1)
             let timeFromNow = 120.0
             let date = NSDate(timeIntervalSinceNow: timeFromNow)
-            let _ = multi.expire(self.key1, atDate: date).ttl(self.key1)
+            multi.expire(self.key1, atDate: date).ttl(self.key1)
 
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 7)  {

@@ -44,11 +44,11 @@ public class TestTransactionsPart2: XCTestCase {
     func test_msetAndMget() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.mset((self.key1, self.expVal1), (self.key2, self.expVal2)).get(self.key1)
-            let _ = multi.mget(self.key1, self.key3, self.key2)
-            let _ = multi.mset((self.key2, self.expVal2), (self.key3, self.expVal3), (self.key4, self.expVal4), exists: false)
-            let _ = multi.del(self.key2)
-            let _ = multi.mset((self.key2, self.expVal2), (self.key3, self.expVal3), (self.key4, self.expVal4), exists: false)
+            multi.mset((self.key1, self.expVal1), (self.key2, self.expVal2)).get(self.key1)
+            multi.mget(self.key1, self.key3, self.key2)
+            multi.mset((self.key2, self.expVal2), (self.key3, self.expVal3), (self.key4, self.expVal4), exists: false)
+            multi.del(self.key2)
+            multi.mset((self.key2, self.expVal2), (self.key3, self.expVal3), (self.key4, self.expVal4), exists: false)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
@@ -79,11 +79,11 @@ public class TestTransactionsPart2: XCTestCase {
             let expDat4 = NSData(bytes: bytes, length: bytes.count)
 
             let multi = redis.multi()
-            let _ = multi.mset((self.key1, RedisString(expDat1)), (self.key2, RedisString(expDat2))).get(self.key1)
-            let _ = multi.mget(self.key1, self.key3, self.key2)
-            let _ = multi.mset((self.key2, RedisString(expDat2)), (self.key3, RedisString(expDat3)), (self.key4, RedisString(expDat4)), exists: false)
-            let _ = multi.del(self.key2)
-            let _ = multi.mset((self.key2, RedisString(expDat2)), (self.key3, RedisString(expDat3)), (self.key4, RedisString(expDat4)), exists: false)
+            multi.mset((self.key1, RedisString(expDat1)), (self.key2, RedisString(expDat2))).get(self.key1)
+            multi.mget(self.key1, self.key3, self.key2)
+            multi.mset((self.key2, RedisString(expDat2)), (self.key3, RedisString(expDat3)), (self.key4, RedisString(expDat4)), exists: false)
+            multi.del(self.key2)
+            multi.mset((self.key2, RedisString(expDat2)), (self.key3, RedisString(expDat3)), (self.key4, RedisString(expDat4)), exists: false)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
@@ -106,9 +106,9 @@ public class TestTransactionsPart2: XCTestCase {
     func test_StringManipulation() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: self.expVal1).append(self.key1, value: self.expVal2).strlen(self.key1)
-            let _ = multi.getrange(self.key1, start: 7, end: 11).setrange(self.key1, offset: 7, value: self.updVal1)
-            let _ = multi.get(self.key1)
+            multi.set(self.key1, value: self.expVal1).append(self.key1, value: self.expVal2).strlen(self.key1)
+            multi.getrange(self.key1, start: 7, end: 11).setrange(self.key1, offset: 7, value: self.updVal1)
+            multi.get(self.key1)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
@@ -130,10 +130,10 @@ public class TestTransactionsPart2: XCTestCase {
             let expVal1 = NSData(bytes: bytes, length: bytes.count)
 
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: RedisString(expVal1))
-            let _ = multi.bitpos(self.key1, bit: true).bitpos(self.key1, bit: true, start: 2)
-            let _ = multi.bitpos(self.key1, bit: true, start: 1, end: 2)
-            let _ = multi.bitcount(self.key1).bitcount(self.key1, start: 2, end: 2)
+            multi.set(self.key1, value: RedisString(expVal1))
+            multi.bitpos(self.key1, bit: true).bitpos(self.key1, bit: true, start: 2)
+            multi.bitpos(self.key1, bit: true, start: 1, end: 2)
+            multi.bitcount(self.key1).bitcount(self.key1, start: 2, end: 2)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
@@ -153,8 +153,8 @@ public class TestTransactionsPart2: XCTestCase {
             let expVal1 = NSData(bytes: bytes, length: bytes.count)
 
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: RedisString(expVal1)).getbit(self.key1, offset: 14)
-            let _ = multi.setbit(self.key1, offset: 13, value: true).get(self.key1)
+            multi.set(self.key1, value: RedisString(expVal1)).getbit(self.key1, offset: 14)
+            multi.setbit(self.key1, offset: 13, value: true).get(self.key1)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 4)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
@@ -177,11 +177,11 @@ public class TestTransactionsPart2: XCTestCase {
             let expVal2 = NSData(bytes: bytes, length: bytes.count)
 
             let multi = redis.multi()
-            let _ = multi.mset((self.key1, RedisString(expVal1)), (self.key2, RedisString(expVal2)))
-            let _ = multi.bitop(self.key3, and: self.key1, self.key2).get(self.key3)
-            let _ = multi.bitop(self.key3, or: self.key1, self.key2).get(self.key3)
-            let _ = multi.bitop(self.key3, xor: self.key1, self.key2).get(self.key3)
-            let _ = multi.bitop(self.key3, not: self.key1).get(self.key3)
+            multi.mset((self.key1, RedisString(expVal1)), (self.key2, RedisString(expVal2)))
+            multi.bitop(self.key3, and: self.key1, self.key2).get(self.key3)
+            multi.bitop(self.key3, or: self.key1, self.key2).get(self.key3)
+            multi.bitop(self.key3, xor: self.key1, self.key2).get(self.key3)
+            multi.bitop(self.key3, not: self.key1).get(self.key3)
 
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 9)  {

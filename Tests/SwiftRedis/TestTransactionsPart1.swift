@@ -39,8 +39,8 @@ public class TestTransactionsPart1: XCTestCase {
     func testSetPlusGetAndDel() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: self.expVal1).getSet(self.key1, value: self.expVal2)
-            let _ = multi.get(self.key1).del(self.key1).get(self.key1)
+            multi.set(self.key1, value: self.expVal1).getSet(self.key1, value: self.expVal2)
+            multi.get(self.key1).del(self.key1).get(self.key1)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 5)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set didn't return an 'OK'")
@@ -61,7 +61,7 @@ public class TestTransactionsPart1: XCTestCase {
             let expData2 = RedisString(NSData(bytes: bytes, length: bytes.count))
 
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: expData1).getSet(self.key1, value: expData2).get(self.key1)
+            multi.set(self.key1, value: expData1).getSet(self.key1, value: expData2).get(self.key1)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 3)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set didn't return an 'OK'")
@@ -75,11 +75,11 @@ public class TestTransactionsPart1: XCTestCase {
     func testSetExistsOptions() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.set(self.key2, value: self.expVal1, exists: true).get(self.key2)
-            let _ = multi.set(self.key2, value: self.expVal1, exists: false).get(self.key2)
-            let _ = multi.set(self.key2, value: self.expVal2, exists: false)
-            let _ = multi.del(self.key2)
-            let _ = multi.set(self.key2, value: self.expVal2, exists: false).get(self.key2)
+            multi.set(self.key2, value: self.expVal1, exists: true).get(self.key2)
+            multi.set(self.key2, value: self.expVal1, exists: false).get(self.key2)
+            multi.set(self.key2, value: self.expVal2, exists: false)
+            multi.del(self.key2)
+            multi.set(self.key2, value: self.expVal2, exists: false).get(self.key2)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 8)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Nil, "Shouldn't have set \(self.key2)")
@@ -98,7 +98,7 @@ public class TestTransactionsPart1: XCTestCase {
     func testSetExpirationOption() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: self.expVal1, expiresIn: 2.750).get(self.key1)
+            multi.set(self.key1, value: self.expVal1, expiresIn: 2.750).get(self.key1)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 2)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Failed to set \(self.key1)")
@@ -123,9 +123,9 @@ public class TestTransactionsPart1: XCTestCase {
             let fltInc: Float = 8.5
 
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: String(intValue)).incr(self.key1, by: intInc).decr(self.key1)
-            let _ = multi.set(self.key2, value: String(dblValue)).incr(self.key2, byFloat: fltInc)
-            let _ = multi.get(self.key1).get(self.key2)
+            multi.set(self.key1, value: String(intValue)).incr(self.key1, by: intInc).decr(self.key1)
+            multi.set(self.key2, value: String(dblValue)).incr(self.key2, byFloat: fltInc)
+            multi.get(self.key1).get(self.key2)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 7)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set of \(self.key1) didn't return an 'OK'")
@@ -141,8 +141,8 @@ public class TestTransactionsPart1: XCTestCase {
     func testConnectionCommands() {
         setupTests() {
             let multi = redis.multi()
-            let _ = multi.set(self.key1, value: self.expVal1).select(1).get(self.key1)
-            let _ = multi.set(self.key1, value: self.expVal2).select(0).get(self.key1)
+            multi.set(self.key1, value: self.expVal1).select(1).get(self.key1)
+            multi.set(self.key1, value: self.expVal2).select(0).get(self.key1)
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set didn't return an 'OK'")
