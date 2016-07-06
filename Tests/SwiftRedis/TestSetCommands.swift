@@ -35,7 +35,7 @@ public class TestSetCommands: XCTestCase {
     let key1 = "test1"
     
     func setupTests(callback: () -> Void) {
-        connectRedis(authenticate: false) {(error: NSError?) in
+        connectRedis() {(error: NSError?) in
             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
             
             redis.del(self.key1) {(deleted: Int?, error: NSError?) in
