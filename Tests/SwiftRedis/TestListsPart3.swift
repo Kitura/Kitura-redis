@@ -15,6 +15,7 @@
  **/
 
 import SwiftRedis
+import KituraSys
 
 #if os(Linux)
     import Glibc
@@ -24,21 +25,6 @@ import SwiftRedis
 
 import Foundation
 import XCTest
-import Dispatch
-
-// This can be eliminated once Swift3 DispatchQueue is available
-class Queue {
-
-    private let osQueue: dispatch_queue_t
-
-    init(label: String) {
-        osQueue = dispatch_queue_create(label, DISPATCH_QUEUE_CONCURRENT)
-    }
-
-    func async(_ block: () -> Void) {
-        dispatch_async(osQueue, block)
-    }
-}
 
 
 public class TestListsPart3: XCTestCase {
@@ -53,9 +39,7 @@ public class TestListsPart3: XCTestCase {
 
     let secondConnection = Redis()
     
-    // This can be eliminated once Swift3 DispatchQueue is available
-    // let queue = DispatchQueue(label: "unblocker")
-    let queue = Queue(label: "unblocker")
+    let queue = Queue(type: .parallel, label: "unblocker")
 
     var key1: String { return "test1" }
     var key2: String { return "test2" }
@@ -111,7 +95,7 @@ public class TestListsPart3: XCTestCase {
         extendedSetup() {
             let value1 = "testing 1 2 3"
                     
-            self.queue.async() { [unowned self] in
+            self.queue.enqueueAsynchronously() { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key2, values: value1) {(listSize: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -132,7 +116,7 @@ public class TestListsPart3: XCTestCase {
     func test_brpop() {
         extendedSetup() {
             let value2 = "over the hill and through the woods"
-            self.queue.async() { [unowned self] in
+            self.queue.enqueueAsynchronously() { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key3, values: value2) {(listSize: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -154,7 +138,7 @@ public class TestListsPart3: XCTestCase {
         extendedSetup() {
             let value3 = "to grandmothers house we go"
             
-            self.queue.async() { [unowned self] in
+            self.queue.enqueueAsynchronously() { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key1, values: value3) {(listSize: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")

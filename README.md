@@ -7,7 +7,7 @@
 
 KituraRedis is a Swift library for interacting with a Redis database using.
 
-It is dependent on the [BlueSocket](https://github.com/IBM-Swift/BlueSocket.git) module.
+It is dependent on the [BlueSocket](https://github.com/IBM-Swift/BlueSocket.git)  and [KituraSyS](https://github.com/IBM-Swift/Kitura-sys.git) modules.
 
 ## Build:
 
