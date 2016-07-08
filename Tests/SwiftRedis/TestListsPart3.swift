@@ -36,10 +36,11 @@ public class TestListsPart3: XCTestCase {
             ("test_brpoplpush", test_brpoplpush)
         ]
     }
-    
+
     let secondConnection = Redis()
-    let queue = Queue(type: .parallel, label: "unblocker")
     
+    let queue = Queue(type: .parallel, label: "unblocker")
+
     var key1: String { return "test1" }
     var key2: String { return "test2" }
     var key3: String { return "test3" }
