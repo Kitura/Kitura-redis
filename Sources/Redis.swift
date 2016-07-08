@@ -21,24 +21,24 @@ import Foundation
 // MARK: Redis
 
 public class Redis {
-
+    
     ///
     /// REdis Serialization Protocol handle
     ///
     private var respHandle: RedisResp?
-
+    
     ///
     /// Whether the client is connected or not
     ///
     public var connected: Bool {
         return respHandle != nil ? respHandle?.status == .connected : false
     }
-
+    
     ///
     /// Initializes a Redis instance
     ///
     public init () { }
-
+    
     ///
     /// Connects to a redis server
     ///
@@ -47,16 +47,16 @@ public class Redis {
     /// - Parameter callback: callback function for on completion
     ///
     public func connect (host: String, port: Int32, callback: (NSError?) -> Void) {
-
+        
         var error: NSError? = nil
-
+        
         respHandle = RedisResp(host: host, port: port)
         if  respHandle!.status != .connected {
             error = createError("Failed to connect to Redis server", code: 2)
         }
         callback(error)
     }
-
+    
     ///
     /// Authenticate against the server
     ///
@@ -64,13 +64,13 @@ public class Redis {
     /// - Parameter callback: callback function that is called after authenticating
     ///
     public func auth(_ pswd: String, callback: (NSError?) -> Void) {
-
+        
         issueCommand("AUTH", pswd) {(response: RedisResponse) in
             let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
             callback(error)
         }
     }
-
+    
     ///
     /// Selects the database to use
     ///
@@ -78,13 +78,13 @@ public class Redis {
     /// - Parameter callback: callback function for after the database is selected
     ///
     public func select(_ db: Int, callback: (NSError?) -> Void) {
-
+        
         issueCommand("SELECT", String(db)) {(response: RedisResponse) in
             let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
             callback(error)
         }
     }
-
+    
     ///
     /// Ping the server to test if a connection is still alive
     ///
@@ -92,7 +92,7 @@ public class Redis {
     /// - Parameter callback: callback function for after the pong is received
     ///
     public func ping(_ pingStr: String?=nil, callback: (NSError?) -> Void) {
-
+        
         var command = ["PING"]
         if  let pingStr = pingStr  {
             command.append(pingStr)
@@ -120,7 +120,7 @@ public class Redis {
             }
         }
     }
-
+    
     ///
     /// Echos a message
     ///
@@ -128,12 +128,12 @@ public class Redis {
     /// - Parameter callback: callback function with the response
     ///
     public func echo(_ str: String, callback: (RedisString?, error: NSError?) -> Void) {
-
+        
         issueCommand("ECHO", str) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Get the value of key.
     ///
@@ -141,12 +141,12 @@ public class Redis {
     /// - Parameter callback: callback function with the value
     ///
     public func get(_ key: String, callback: (RedisString?, error: NSError?) -> Void) {
-
+        
         issueCommand("GET", key) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Atomically sets key to value and returns the old value stored at key.
     ///
@@ -159,7 +159,7 @@ public class Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Atomically sets key to value and returns the old value stored at key.
     ///
@@ -172,7 +172,7 @@ public class Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Set key to hold the string value. If key already holds a value, it is overwritten.
     ///
@@ -183,7 +183,7 @@ public class Redis {
     /// - Parameter callback: callback function after setting the value
     ///
     public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
-
+        
         var command = ["SET", key, value]
         if  let exists = exists  {
             command.append(exists ? "XX" : "NX")
@@ -197,7 +197,7 @@ public class Redis {
             callback(ok, error: error)
         }
     }
-
+    
     ///
     /// Set key to hold the string value. If key already holds a value, it is overwritten.
     ///
@@ -208,7 +208,7 @@ public class Redis {
     /// - Parameter callback: callback function after setting the value
     ///
     public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
-
+        
         var command = [RedisString("SET"), RedisString(key), value]
         if  let exists = exists  {
             command.append(RedisString(exists ? "XX" : "NX"))
@@ -222,7 +222,7 @@ public class Redis {
             callback(ok, error: error)
         }
     }
-
+    
     ///
     /// Removes the specified keys. A key is ignored if it does not exist
     ///
@@ -230,7 +230,7 @@ public class Redis {
     /// - Parameter callback: callback function after deleting item
     ///
     public func del(_ keys: String..., callback: (Int?, error: NSError?) -> Void) {
-
+        
         var command = ["DEL"]
         for key in keys {
             command.append(key)
@@ -239,7 +239,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Increments the number stored at key by an increment. If the key does not exist, it is set
     /// to 0 before performing the operation.
@@ -250,12 +250,12 @@ public class Redis {
     /// - Parameter callback: callback containing the value of the key after the increment
     ///
     public func incr(_ key: String, by: Int=1, callback: (Int?, error: NSError?) -> Void) {
-
+        
         issueCommand("INCRBY", key, String(by)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Increments the floating point number stored at key by an increment.
     /// If the key does not exist, it is set to 0 before performing the operation.
@@ -266,12 +266,12 @@ public class Redis {
     /// - Parameter callback: callback containing the value of the key after the increment
     ///
     public func incr(_ key: String, byFloat: Float, callback: (RedisString?, error: NSError?) -> Void) {
-
+        
         issueCommand("INCRBYFLOAT", key, String(byFloat)) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Decrements the integer number stored at key by an value.
     /// If the key does not exist, it is set to 0 before performing the operation.
@@ -286,7 +286,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns the value of all specified keys.
     ///
@@ -294,7 +294,7 @@ public class Redis {
     /// - Parameter callback: function returning a list of values
     ////
     public func mget(_ keys: String..., callback: ([RedisString?]?, error: NSError?) -> Void) {
-
+        
         var command = ["MGET"]
         for key in keys {
             command.append(key)
@@ -303,7 +303,7 @@ public class Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Sets a set key value pairs in the database
     ///
@@ -314,7 +314,7 @@ public class Redis {
     public func mset(_ keyValuePairs: (String, String)..., exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
         msetArrayOfKeyValues(keyValuePairs, exists: exists, callback: callback)
     }
-
+    
     ///
     /// Sets a set key value pairs in the database
     ///
@@ -338,7 +338,7 @@ public class Redis {
             }
         }
     }
-
+    
     ///
     /// Sets the given keys to their respective values. MSET replaces existing values with new values
     ///
@@ -349,7 +349,7 @@ public class Redis {
     public func mset(_ keyValuePairs: (String, RedisString)..., exists: Bool=true, callback: (Bool, error: NSError?) -> Void) {
         msetArrayOfKeyValues(keyValuePairs, exists: exists, callback: callback)
     }
-
+    
     ///
     /// Sets the given keys to their respective values. MSET replaces existing values with new values
     ///
@@ -373,7 +373,7 @@ public class Redis {
             }
         }
     }
-
+    
     ///
     /// If the key already exists and is a string, this command appends the value at the end of the string
     ///
@@ -386,7 +386,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns the substring of the string value stored at key, determined by the offsets start and end.
     /// Negative offsets can be used in order to provide an offset starting from the end of the string.
@@ -401,7 +401,7 @@ public class Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Overwrites part of the string stored at key, starting at the specified offset, for the entire length of value
     ///
@@ -409,13 +409,13 @@ public class Redis {
     /// - Parameter offset: Integer index for the start of the string
     /// - Parameter callback: a callback returning the length of the string after it was modified by the command
     ///
-
+    
     public func setrange(_ key: String, offset: Int, value: String, callback: (Int?, error: NSError?) -> Void) {
         issueCommand("SETRANGE", key, String(offset), value) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns the length of the string value stored at key
     ///
@@ -427,7 +427,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns the bit value at offset in the string value stored at key.
     ///
@@ -440,7 +440,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Sets or clears the bit value at offset in the string value stored at key.
     ///
@@ -454,7 +454,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Count the number of set bits (population counting) in a string.
     ///
@@ -466,7 +466,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Count the number of set bits (population counting) in a string.
     ///
@@ -480,7 +480,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Return the position of the first bit set to 1 or 0 in a string
     ///
@@ -493,7 +493,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Return the position of the first bit set to 1 or 0 in a string
     ///
@@ -507,7 +507,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Return the position of the first bit set to 1 or 0 in a string
     ///
@@ -522,7 +522,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Perform a bitwise AND operation between multiple keys and store the result in the destination key.
     ///
@@ -539,7 +539,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Perform a bitwise OR operation between multiple keys and store the result in the destination key.
     ///
@@ -556,7 +556,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Perform a bitwise XOR operation between multiple keys and store the result in the destination key.
     ///
@@ -573,7 +573,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Perform a bitwise NOT operation between multiple keys and store the result in the destination key.
     ///
@@ -586,7 +586,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns if a key exists
     ///
@@ -602,7 +602,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Move key from the currently selected database to the specified destination database.
     /// When key already exists in the destination database, or it does not exist in the source database,
@@ -616,7 +616,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Renames key to newKey. It returns an error when the source and destination names are the same,
     /// or when key does not exist. If newKey already exists it is overwritten, when this happens RENAME
@@ -640,7 +640,7 @@ public class Redis {
             }
         }
     }
-
+    
     ///
     /// Set a timeout on key. After the timeout has exprired, the key will automatically be deleted. A key with an
     /// associated timeout is often said to be volatile in Redis terminology.
@@ -656,7 +656,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Set a timeout on key. After the timeout has exprired, the key will automatically be deleted. A key with an
     /// associated timeout is often said to be volatile in Redis terminology.
@@ -672,7 +672,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Remove the existing timeout on key, turning the key from volatile (a key with an expire set)
     /// to persistent (a key that will never expire as no timeout is associated)
@@ -685,7 +685,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Like TTL this command returns the remaining time to live of a key that has an expire set,
     /// with the sole difference that TTL returns the amount of remaining time in seconds while PTTL
@@ -699,25 +699,25 @@ public class Redis {
     public func ttl(_ key: String, callback: (NSTimeInterval?, error: NSError?) -> Void) {
         issueCommand("PTTL", key) {(response: RedisResponse) in
             switch(response) {
-                case .IntegerValue(let num):
-                    if  num >= 0  {
-                        callback(NSTimeInterval(Double(num)/1000.0), error: nil)
-                    }
-                    else {
-                        callback(NSTimeInterval(num), error: nil)
-                    }
-                case .Error(let error):
-                    callback(nil, error: self.createError("Error: \(error)", code: 1))
-                default:
-                    callback(nil, error: self.createUnexpectedResponseError(response))
+            case .IntegerValue(let num):
+                if  num >= 0  {
+                    callback(NSTimeInterval(Double(num)/1000.0), error: nil)
+                }
+                else {
+                    callback(NSTimeInterval(num), error: nil)
+                }
+            case .Error(let error):
+                callback(nil, error: self.createError("Error: \(error)", code: 1))
+            default:
+                callback(nil, error: self.createUnexpectedResponseError(response))
             }
         }
     }
-
+    
     //
     // MARK: Hash functions
     //
-
+    
     ///
     /// Removes the specified fields from the hash stored at key. Specified fields that do not
     /// exist within this hash are ignored. If key does not exist, it is treated as an empty hash
@@ -737,7 +737,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns if field is an existing field in the hash stored at key
     ///
@@ -751,7 +751,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns the value associated with field in the hash stored at key.
     ///
@@ -765,7 +765,7 @@ public class Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns all fields and values of the hash stored at key. In the returned value, every field
     /// name is followed by its value, so the length of the reply is twice the size of the hash.
@@ -778,31 +778,31 @@ public class Redis {
         issueCommand("HGETALL", key) {(response: RedisResponse) in
             var values = [String: RedisString]()
             var error: NSError? = nil
-
+            
             switch(response) {
-                case .Array(let responses):
-                    for idx in stride(from: 0, to: responses.count-1, by: 2) {
-                        switch(responses[idx]) {
-                            case .StringValue(let field):
-                                switch(responses[idx+1]) {
-                                    case .StringValue(let value):
-                                        values[field.asString] = value
-                                    default:
-                                        error = self.createUnexpectedResponseError(response)
-                                }
-                            default:
-                                error = self.createUnexpectedResponseError(response)
+            case .Array(let responses):
+                for idx in stride(from: 0, to: responses.count-1, by: 2) {
+                    switch(responses[idx]) {
+                    case .StringValue(let field):
+                        switch(responses[idx+1]) {
+                        case .StringValue(let value):
+                            values[field.asString] = value
+                        default:
+                            error = self.createUnexpectedResponseError(response)
                         }
+                    default:
+                        error = self.createUnexpectedResponseError(response)
                     }
-                case .Error(let err):
-                    error = self.createError("Error: \(err)", code: 1)
-                default:
-                    error = self.createUnexpectedResponseError(response)
+                }
+            case .Error(let err):
+                error = self.createError("Error: \(err)", code: 1)
+            default:
+                error = self.createUnexpectedResponseError(response)
             }
             callback(values, error: error)
         }
     }
-
+    
     ///
     /// Increments the number stored at field in the hash stored at key by increment
     ///
@@ -815,7 +815,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Increments the number stored at field in the hash stored at key by floating point increment
     ///
@@ -828,7 +828,7 @@ public class Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns all field names in the hash stored at key
     ///
@@ -839,7 +839,7 @@ public class Redis {
         issueCommand("HKEYS", key) {(response: RedisResponse) in
             var error: NSError? = nil
             var strings = [String]()
-
+            
             switch(response) {
             case .Array(let responses):
                 for innerResponse in responses {
@@ -858,7 +858,7 @@ public class Redis {
             callback(error == nil ? strings : nil, error: error)
         }
     }
-
+    
     ///
     /// Returns the number of fields contained in the hash stored at key
     ///
@@ -870,7 +870,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns the values associated with the specified fields in the hash stored at key.
     ///
@@ -887,7 +887,7 @@ public class Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
@@ -900,7 +900,7 @@ public class Redis {
     public func hmset(_ key: String, fieldValuePairs: (String, String)..., callback: (Bool, error: NSError?) -> Void) {
         hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
     }
-
+    
     ///
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
@@ -921,7 +921,7 @@ public class Redis {
             callback(ok, error: error)
         }
     }
-
+    
     ///
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
@@ -934,7 +934,7 @@ public class Redis {
     public func hmset(_ key: String, fieldValuePairs: (String, RedisString)..., callback: (Bool, error: NSError?) -> Void) {
         hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
     }
-
+    
     ///
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
@@ -955,7 +955,7 @@ public class Redis {
             callback(ok, error: error)
         }
     }
-
+    
     ///
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
@@ -972,7 +972,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
@@ -989,7 +989,7 @@ public class Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns the string length of the value associated with field in the hash stored at key.
     /// if the key or the field do not exist, 0 is returned.
@@ -1003,7 +1003,7 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     ///
     /// Returns all values in the hash stored at key.
     ///
@@ -1016,6 +1016,128 @@ public class Redis {
         }
     }
     
+    ///
+    /// Returns the sorted set cardinality (number of elements) of the sorted set stored at key.
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter callback: a function returning the sorted set cardinality of the sorted set
+    ///
+    public func zcard(_ key: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("ZCARD", key) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Removes the specified members from the sorted set stored at key. Non existing members are ignored.
+    /// An error is returned when key exists and does not hold a sorted set.
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter members: a  variadic parameter containing the member(s)
+    /// - Parameter callback: a function returning the number of members removed from the sorted set
+    ///
+    public func zrem(_ key: String, members: String..., callback: (Int?, error: NSError?) -> Void) {
+        zremArrayOfMembers(key, members: members, callback: callback)
+    }
+    
+    ///
+    /// Removes the specified members from the sorted set stored at key. Non existing members are ignored.
+    /// An error is returned when key exists and does not hold a sorted set.
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter members: a  variadic parameter containing the member(s)
+    /// - Parameter callback: a function returning the number of members removed from the sorted set
+    ///
+    public func zremArrayOfMembers(_ key: String, members: [String], callback: (Int?, error: NSError?) -> Void) {
+        var command = ["ZREM"]
+        command.append(key)
+        for element in members {
+            command.append(element)
+        }
+        issueCommandInArray(command) { (response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
+    ///
+    /// Returns the specified range of elements in the sorted set stored at key
+    ///
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter start: the start of index of the set
+    /// - Parameter stop:  the end of the index of the set
+    /// - Parameter callback: a function returning the array of specified range of elements in the sorted set
+    ///
+    public func zrange(_ key: String, start: Int, stop: Int, callback: ([RedisString?]?, error: NSError?) -> Void) {
+        issueCommand("ZRANGE", key, String(start), String(stop)) { (response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Return the number of elements added to the sorted sets, not including elements already existing for which the score was
+    /// updated.
+    ///
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter tuples: a tuple variadic parameter containing a score(s) and member(s)
+    /// - Parameter callback: a function returning the number of elements added to the sorted sets
+    
+    public func zadd(_ key: String, tuples: (Int,String)..., callback: (Int?, error: NSError?) -> Void) {
+        zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
+    }
+    
+    ///
+    /// Return the number of elements added to the sorted sets, not including elements already existing for which the score was
+    /// updated.
+    ///
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter tuples: a tuple variadic parameter containing a score(s) and member(s)
+    /// - Parameter callback: a function returning the number of elements added to the sorted sets
+    
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int,String)], callback: (Int?, error: NSError?) -> Void) {
+        var command = ["ZADD"]
+        command.append(key)
+        for tuple in tuples {
+            command.append(String(tuple.0))
+            command.append(tuple.1)
+        }
+        issueCommandInArray(command) { (response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Removes all elements in the sorted set stored at key with a score between min and max (inclusive).
+    ///
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter min: the String parameter for the min
+    /// - Parameter max: the String parameter for the max
+    /// - Parameter callback: a function returning removes all elements in the sorted set
+    
+    public func zremrangebyscore(_ key: String, min: String, max: String, callback: (Int?, error: NSError?) -> Void) {
+        issueCommand("ZREMRANGEBYSCORE",key, min, max) { (response) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Delete all the keys of the currently selected DB. This command never fails.
+    ///
+    ///
+    /// - Parameter callback: a function returning response
+    ///
+    public func flushdb(callback: (Bool, error: NSError?) -> Void) {
+        issueCommand("FLUSHDB") { (response: RedisResponse) in
+            let (ok, error) = self.redisOkResponseHandler(response)
+            callback(ok, error: error)
+        }
+    }
+    
+    
+
     //
     // MARK: List functions
     //
@@ -1384,76 +1506,76 @@ public class Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-
+    
     //
     //  MARK: Transaction support
     //
-
+    
     public func multi() -> RedisMulti {
         return RedisMulti(redis: self)
     }
-
-
+    
+    
     //
     //  MARK: Base API functions
     //
-
+    
     public func issueCommand(_ stringArgs: String..., callback: (RedisResponse) -> Void) {
         issueCommandInArray(stringArgs, callback: callback)
     }
-
+    
     public func issueCommandInArray(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
         guard  let respHandle = respHandle  where respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
             return
         }
-
+        
         guard  stringArgs.count > 0  else {
             callback(RedisResponse.Error("Empty command"))
             return
         }
-
+        
         respHandle.issueCommand(stringArgs, callback: callback)
     }
-
+    
     public func issueCommand(_ stringArgs: RedisString..., callback: (RedisResponse) -> Void) {
         issueCommandInArray(stringArgs, callback: callback)
     }
-
+    
     public func issueCommandInArray(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
         guard  let respHandle = respHandle  where respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
             return
         }
-
+        
         guard  stringArgs.count > 0  else {
             callback(RedisResponse.Error("Empty command"))
             return
         }
-
+        
         respHandle.issueCommand(stringArgs, callback: callback)
     }
-
+    
     //
     //  MARK: Helper functions
     //
-
+    
     private func redisBoolResponseHandler(_ response: RedisResponse, callback: (Bool, error: NSError?) -> Void) {
         switch(response) {
-            case .IntegerValue(let num):
-                if  num == 0  || num == 1 {
-                    callback(num == 1, error: nil)
-                }
-                else {
-                    callback(false, error: createUnexpectedResponseError(response))
-                }
-            case .Error(let error):
-                callback(false, error: createError("Error: \(error)", code: 1))
-            default:
+        case .IntegerValue(let num):
+            if  num == 0  || num == 1 {
+                callback(num == 1, error: nil)
+            }
+            else {
                 callback(false, error: createUnexpectedResponseError(response))
+            }
+        case .Error(let error):
+            callback(false, error: createError("Error: \(error)", code: 1))
+        default:
+            callback(false, error: createUnexpectedResponseError(response))
         }
     }
-
+    
     private func redisIntegerResponseHandler(_ response: RedisResponse, callback: (Int?, error: NSError?) -> Void) {
         switch(response) {
         case .IntegerValue(let num):
@@ -1464,42 +1586,42 @@ public class Redis {
             callback(nil, error: createUnexpectedResponseError(response))
         }
     }
-
+    
     private func redisOkResponseHandler(_ response: RedisResponse, nilOk: Bool=true) -> (Bool, NSError?) {
         switch(response) {
-            case .Status(let str):
-                if  str == "OK"  {
-                    return (true, nil)
-                }
-                else {
-                    return (false, createError("Status result other than 'OK' received from Redis", code: 2))
+        case .Status(let str):
+            if  str == "OK"  {
+                return (true, nil)
             }
-            case .Nil:
-                return (false, nilOk ? nil : createUnexpectedResponseError(response))
-            case .Error(let error):
-                return (false, createError("Error: \(error)", code: 1))
-            default:
-                return (false, createUnexpectedResponseError(response))
+            else {
+                return (false, createError("Status result other than 'OK' received from Redis", code: 2))
+            }
+        case .Nil:
+            return (false, nilOk ? nil : createUnexpectedResponseError(response))
+        case .Error(let error):
+            return (false, createError("Error: \(error)", code: 1))
+        default:
+            return (false, createUnexpectedResponseError(response))
         }
     }
-
+    
     private func redisStringResponseHandler(_ response: RedisResponse, callback: (RedisString?, error: NSError?) -> Void) {
         switch(response) {
-            case .StringValue(let str):
-                callback(str, error: nil)
-            case .Nil:
-                callback(nil, error: nil)
-            case .Error(let error):
-                callback(nil, error: createError("Error: \(error)", code: 1))
-            default:
-                callback(nil, error: createUnexpectedResponseError(response))
+        case .StringValue(let str):
+            callback(str, error: nil)
+        case .Nil:
+            callback(nil, error: nil)
+        case .Error(let error):
+            callback(nil, error: createError("Error: \(error)", code: 1))
+        default:
+            callback(nil, error: createUnexpectedResponseError(response))
         }
     }
-
+    
     private func redisStringArrayResponseHandler(_ response: RedisResponse, callback: ([RedisString?]?, error: NSError?) -> Void) {
         var error: NSError? = nil
         var result: [RedisString?]?
-
+        
         switch(response) {
         case .Array(let responses):
             var strings = [RedisString?]()
@@ -1523,23 +1645,23 @@ public class Redis {
         }
         callback(error == nil ? result : nil, error: error)
     }
-
+    
     private func createUnexpectedResponseError(_ response: RedisResponse) -> NSError {
         return createError("Unexpected result received from Redis \(response)", code: 2)
     }
-
+    
     private func createError(_ errorMessage: String, code: Int) -> NSError {
-#if os(Linux)
-        let userInfo: [String: Any]
-#else
-        let userInfo: [String: String]
-#endif
+        #if os(Linux)
+            let userInfo: [String: Any]
+        #else
+            let userInfo: [String: String]
+        #endif
         userInfo = [NSLocalizedDescriptionKey: errorMessage]
         return NSError(domain: "RedisDomain", code: code, userInfo: userInfo)
     }
-
+    
     private func createRedisError(_ redisError: String) -> NSError {
         return createError(redisError, code: 1)
     }
-
+    
 }
