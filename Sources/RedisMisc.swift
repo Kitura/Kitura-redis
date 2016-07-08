@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-import KituraSys
-
 import Foundation
 
 
@@ -27,7 +25,10 @@ public class RedisString: CustomStringConvertible {
     }
 
     public convenience init(_ value: String) {
-        self.init(StringUtils.toUtf8String(value)!)
+        // String.data(encoding:) will return nil on Linux on an empty string
+        // eventually this needs to be changed in swift-corelibs-foundation
+        // the "?? NSData()" ensures that an empty NSData is added if the "arg" is empty
+        self.init(value.data(using: NSUTF8StringEncoding) ?? NSData())
     }
 
     public convenience init(_ value: Int) {
