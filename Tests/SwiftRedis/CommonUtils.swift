@@ -52,7 +52,11 @@ func read(fileName: String) -> String {
         let fileData = NSData(contentsOfFile: "Tests/SwiftRedis/\(fileName)")
         XCTAssertNotNil(fileData, "Failed to read in the \(fileName) file")
 
+    #if os(Linux)
         let resultString = String(data: fileData!, encoding:NSUTF8StringEncoding)
+    #else
+        let resultString = String(data: fileData! as Data, encoding: String.Encoding.utf8)
+    #endif
 
         guard
            let resultLiteral = resultString
@@ -60,7 +64,11 @@ func read(fileName: String) -> String {
             XCTFail("Error in \(fileName).")
             exit(1)
         }
+    #if os(Linux)
         return resultLiteral.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines())
+    #else
+        return resultLiteral.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+    #endif
     }
 
 // Dummy class for test framework

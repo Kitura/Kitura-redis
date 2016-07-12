@@ -155,7 +155,7 @@ public class TestMoreCommands: XCTestCase {
             redis.set(self.key1, value: self.expVal1) {(wasSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 
-                redis.ttl(self.key1) {(ttl: NSTimeInterval?, error: NSError?) in
+                redis.ttl(self.key1) {(ttl: TimeIntervalType?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(ttl, "ttl result shouldn't be nil")
                     XCTAssertEqual(ttl, -1.0, "\(self.key1) shouldn't have an expiration. It has \(ttl!)")
@@ -164,7 +164,7 @@ public class TestMoreCommands: XCTestCase {
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssert(expirationSet, "Expiration for \(self.key1) wasn't set")
                         
-                        redis.ttl(self.key1) {(ttl: NSTimeInterval?, error: NSError?) in
+                        redis.ttl(self.key1) {(ttl: TimeIntervalType?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                             XCTAssertNotNil(ttl, "ttl result shouldn't be nil")
                             XCTAssert(expiration-0.1 <= ttl! && ttl! <= expiration+0.1, "ttl for \(self.key1) should be approximately \(expiration). It was \(ttl!)")
@@ -179,7 +179,7 @@ public class TestMoreCommands: XCTestCase {
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                     XCTAssert(expirationSet, "Expiration for \(self.key1) wasn't set")
                                     
-                                    redis.ttl(self.key1) {(ttl: NSTimeInterval?, error: NSError?) in
+                                    redis.ttl(self.key1) {(ttl: TimeIntervalType?, error: NSError?) in
                                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                         XCTAssertNotNil(ttl, "ttl result shouldn't be nil")
                                         XCTAssert(timeFromNow-0.1 <= ttl! && ttl! <= timeFromNow+0.1, "ttl for \(self.key1) should be approximately \(timeFromNow). It was \(ttl!)")

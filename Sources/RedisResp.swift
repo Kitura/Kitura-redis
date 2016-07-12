@@ -53,13 +53,25 @@ internal class RedisResp {
     internal func issueCommand(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
 
-        let buffer = NSMutableData()
+        #if os(Linux)
+            let buffer = NSMutableData()
+        #else
+            var buffer = Data()
+        #endif
         buffer.append(RedisResp.asterisk)
-        add(stringArgs.count, to: buffer)
+        #if os(Linux)
+            add(stringArgs.count, to: buffer)
+        #else
+            add(stringArgs.count, to: &buffer)
+        #endif
         buffer.append(RedisResp.crLf)
 
         for arg in stringArgs {
-            addAsBulkString(RedisString(arg).asData, to: buffer)
+            #if os(Linux)
+                addAsBulkString(RedisString(arg).asData, to: buffer)
+            #else
+                addAsBulkString(RedisString(arg).asData, to: &buffer)
+            #endif
         }
 
         do {
@@ -78,14 +90,25 @@ internal class RedisResp {
     internal func issueCommand(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
 
-        let buffer = NSMutableData()
-
+        #if os(Linux)
+            let buffer = NSMutableData()
+        #else
+            var buffer = Data()
+        #endif
         buffer.append(RedisResp.asterisk)
-        add(stringArgs.count, to: buffer)
+        #if os(Linux)
+            add(stringArgs.count, to: buffer)
+        #else
+            add(stringArgs.count, to: &buffer)
+        #endif
         buffer.append(RedisResp.crLf)
 
         for arg in stringArgs {
-            addAsBulkString(arg.asData, to: buffer)
+            #if os(Linux)
+                addAsBulkString(arg.asData, to: buffer)
+            #else
+                addAsBulkString(arg.asData, to: &buffer)
+            #endif
         }
 
         do {
@@ -180,14 +203,24 @@ internal class RedisResp {
         let (strLen64, newOffset) = try parseIntegerValue(buffer, offset: offset)
         if  strLen64 >= 0  {
             let strLen = Int(strLen64)
-            while  newOffset+strLen+RedisResp.crLf.length > buffer.length  {
+            #if os(Linux)
+                let totalLength = newOffset+strLen+RedisResp.crLf.length
+            #else
+                let totalLength = newOffset+strLen+RedisResp.crLf.count
+            #endif
+            while  totalLength > buffer.length  {
                 let length = try socket?.read(into: buffer)
                 if  length == 0  {
                     throw RedisRespError(code: .EOF)
                 }
             }
             let data = NSData(bytes: buffer.bytes+newOffset, length: strLen)
-            return (RedisResponse.StringValue(RedisString(data)), newOffset+strLen+RedisResp.crLf.length)
+            #if os(Linux)
+                let redisString = RedisString(data)
+            #else
+                let redisString = RedisString(data as Data)
+            #endif
+            return (RedisResponse.StringValue(redisString), totalLength)
         }
         else {
             return (RedisResponse.Nil, newOffset)
@@ -197,11 +230,17 @@ internal class RedisResp {
     private func parseError(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
         let eos = try find(buffer, from: offset, data: RedisResp.crLf)
         let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
-        let optStr = String(data: data, encoding: NSUTF8StringEncoding)
+        #if os(Linux)
+            let optStr = String(data: data, encoding: NSUTF8StringEncoding)
+            let length = eos+RedisResp.crLf.length
+        #else
+            let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
+            let length = eos+RedisResp.crLf.count
+        #endif
         guard  let str = optStr  else {
             throw RedisRespError(code: .notUTF8)
         }
-        return (RedisResponse.Error(str), eos+RedisResp.crLf.length)
+        return (RedisResponse.Error(str), length)
     }
 
     private func parseInteger(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
@@ -212,11 +251,17 @@ internal class RedisResp {
     private func parseSimpleString(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
         let eos = try find(buffer, from: offset, data: RedisResp.crLf)
         let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
-        let optStr = String(data: data, encoding: NSUTF8StringEncoding)
+        #if os(Linux)
+            let optStr = String(data: data, encoding: NSUTF8StringEncoding)
+            let length = eos+RedisResp.crLf.length
+        #else
+            let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
+            let length = eos+RedisResp.crLf.count
+        #endif
         guard  let str = optStr  else {
             throw RedisRespError(code: .notUTF8)
         }
-        return (RedisResponse.Status(str), eos+RedisResp.crLf.length)
+        return (RedisResponse.Status(str), length)
     }
 
     // Mark: Parser helper functions
@@ -259,7 +304,13 @@ internal class RedisResp {
     private func parseIntegerValue(_ buffer: NSMutableData, offset: Int) throws -> (Int64, Int) {
         let eos = try find(buffer, from: offset, data: RedisResp.crLf)
         let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
-        let optStr = String(data: data, encoding: NSUTF8StringEncoding)
+        #if os(Linux)
+            let optStr = String(data: data, encoding: NSUTF8StringEncoding)
+            let length = eos+RedisResp.crLf.length
+        #else
+            let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
+            let length = eos+RedisResp.crLf.count
+        #endif
         guard  let str = optStr  else {
             throw RedisRespError(code: .notUTF8)
         }
@@ -267,20 +318,21 @@ internal class RedisResp {
         guard  let int = optInt  else {
             throw RedisRespError(code: .notInteger)
         }
-        return (int, eos+RedisResp.crLf.length)
+        return (int, length)
     }
 
     // Mark: helper functions
 
+    #if os(Linux)
     private func addAsBulkString(_ cString: NSData, to buffer: NSMutableData) {
         buffer.append(RedisResp.dollar)
         add(cString.length, to: buffer)
         buffer.append(RedisResp.crLf)
-
+    
         buffer.append(cString)
         buffer.append(RedisResp.crLf)
     }
-
+    
     private func add(_ number: Int, to buffer: NSMutableData) {
         add(String(number), to: buffer)
     }
@@ -288,6 +340,25 @@ internal class RedisResp {
     private func add(_ text: String, to buffer: NSMutableData) {
         buffer.append(RedisString(text).asData)
     }
+    #else
+    private func addAsBulkString(_ cString: Data, to buffer: inout Data) {
+        buffer.append(RedisResp.dollar)
+        add(cString.count, to: &buffer)
+        buffer.append(RedisResp.crLf)
+        
+        buffer.append(cString)
+        buffer.append(RedisResp.crLf)
+    }
+    
+    private func add(_ number: Int, to buffer: inout Data) {
+        add(String(number), to: &buffer)
+    }
+    
+    private func add(_ text: String, to buffer: inout Data) {
+        buffer.append(RedisString(text).asData)
+    }
+    #endif
+
 }
 
 private enum RedisRespErrorCode {

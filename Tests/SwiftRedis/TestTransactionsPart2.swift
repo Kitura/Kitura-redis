@@ -70,14 +70,30 @@ public class TestTransactionsPart2: XCTestCase {
     func test_binarySafeMsetAndMget() {
         setupTests() {
             var bytes: [UInt8] = [0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6]
-            let expDat1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expDat1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expDat1 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6]
-            let expDat2 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expDat2 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expDat2 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6]
-            let expDat3 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expDat3 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expDat3 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6]
-            let expDat4 = NSData(bytes: bytes, length: bytes.count)
-
+            #if os(Linux)
+                let expDat4 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expDat4 = Data(bytes: bytes, count: bytes.count)
+            #endif
+            
             let multi = redis.multi()
             multi.mset((self.key1, RedisString(expDat1)), (self.key2, RedisString(expDat2))).get(self.key1)
             multi.mget(self.key1, self.key3, self.key2)
@@ -127,7 +143,11 @@ public class TestTransactionsPart2: XCTestCase {
     func test_bitPosAndCountCommands() {
         setupTests() {
             let bytes: [UInt8] = [0x00, 0x01, 0x01, 0x00]
-            let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal1 = Data(bytes: bytes, count: bytes.count)
+            #endif
 
             let multi = redis.multi()
             multi.set(self.key1, value: RedisString(expVal1))
@@ -150,7 +170,11 @@ public class TestTransactionsPart2: XCTestCase {
     func test_bitSetAndGetCommands() {
         setupTests() {
             var bytes: [UInt8] = [0x00, 0x01, 0x01, 0x00]
-            let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal1 = Data(bytes: bytes, count: bytes.count)
+            #endif
 
             let multi = redis.multi()
             multi.set(self.key1, value: RedisString(expVal1)).getbit(self.key1, offset: 14)
@@ -172,9 +196,17 @@ public class TestTransactionsPart2: XCTestCase {
     func test_bitOpCommands() {
         setupTests() {
             var bytes: [UInt8] = [0x00, 0x01, 0x01, 0x04]
-            let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal1 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0x00, 0x08, 0x08, 0x04]
-            let expVal2 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal2 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal2 = Data(bytes: bytes, count: bytes.count)
+            #endif
 
             let multi = redis.multi()
             multi.mset((self.key1, RedisString(expVal1)), (self.key2, RedisString(expVal2)))
