@@ -81,8 +81,12 @@ public class TestStringAndBitCommands: XCTestCase {
     func test_bitPosAndCountCommands() {
         setupTests() {
             let bytes: [UInt8] = [0x00, 0x01, 0x01, 0x00]
-            let expVal1 = NSData(bytes: bytes, length: bytes.count)
-            
+            #if os(Linux)
+                let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal1 = Data(bytes: bytes, count: bytes.count)
+            #endif
+           
             redis.set(self.key1, value: RedisString(expVal1)) {(wasSet: Bool,  error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     
@@ -122,7 +126,11 @@ public class TestStringAndBitCommands: XCTestCase {
     func test_bitSetAndGetCommands() {
         setupTests() {
             var bytes: [UInt8] = [0x00, 0x01, 0x01, 0x00]
-            let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal1 = Data(bytes: bytes, count: bytes.count)
+            #endif
             redis.set(self.key1, value: RedisString(expVal1)) {(wasSet: Bool,  error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     
@@ -150,9 +158,17 @@ public class TestStringAndBitCommands: XCTestCase {
     func test_bitOpCommands() {
         setupTests() {
             var bytes: [UInt8] = [0x00, 0x01, 0x01, 0x04]
-            let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal1 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0x00, 0x08, 0x08, 0x04]
-            let expVal2 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal2 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal2 = Data(bytes: bytes, count: bytes.count)
+            #endif
             
             redis.mset((self.key1, RedisString(expVal1)), (self.key2, RedisString(expVal2))) {(wasSet: Bool,  error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")

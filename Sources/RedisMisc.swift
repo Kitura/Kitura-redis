@@ -18,17 +18,32 @@ import Foundation
 
 
 public class RedisString: CustomStringConvertible {
+    #if os(Linux)
     private let data: NSData
+    #else
+    private let data: Data
+    #endif
 
+    #if os(Linux)
     public init(_ data: NSData) {
+    self.data = data
+    }
+    #else
+    public init(_ data: Data) {
         self.data = data
     }
-
+    #endif
+    
     public convenience init(_ value: String) {
         // String.data(encoding:) will return nil on Linux on an empty string
         // eventually this needs to be changed in swift-corelibs-foundation
         // the "?? NSData()" ensures that an empty NSData is added if the "arg" is empty
-        self.init(value.data(using: NSUTF8StringEncoding) ?? NSData())
+        #if os(Linux)
+            let data = value.data(using: NSUTF8StringEncoding) ?? NSData()
+        #else
+            let data = value.data(using: String.Encoding.utf8) ?? Data()
+        #endif
+        self.init(data)
     }
 
     public convenience init(_ value: Int) {
@@ -39,12 +54,29 @@ public class RedisString: CustomStringConvertible {
         self.init(String(value))
     }
 
+    #if os(Linux)
     public var asData: NSData { return data }
-    public var asString: String { return String(data: data, encoding: NSUTF8StringEncoding)! }
+    #else
+    public var asData: Data { return data }
+    #endif
+    public var asString: String {
+        #if os(Linux)
+            return String(data: data, encoding: NSUTF8StringEncoding)!
+        #else
+            return String(data: data, encoding: String.Encoding.utf8)!
+        #endif
+    }
     public var asInteger: Int { return Int(self.asString)! }
     public var asDouble: Double { return Double(self.asString)! }
 
-    public var description: String { return String(data: data, encoding: NSUTF8StringEncoding) ?? "A non-UTF-8 string"}
+    public var description: String {
+        #if os(Linux)
+            let text = String(data: data, encoding: NSUTF8StringEncoding)
+        #else
+            let text = String(data: data, encoding: String.Encoding.utf8)
+        #endif
+        return text ?? "A non-UTF-8 string"
+    }
 }
 
 extension RedisString: Equatable {}

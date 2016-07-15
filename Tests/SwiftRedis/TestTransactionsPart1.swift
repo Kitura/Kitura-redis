@@ -56,9 +56,17 @@ public class TestTransactionsPart1: XCTestCase {
     func testBinarySafeSetAndGet() {
         setupTests() {
             var bytes: [UInt8] = [0xff, 0x00, 0xfe, 0x02]
-            let expData1 = RedisString(NSData(bytes: bytes, length: bytes.count))
+            #if os(Linux)
+                let expData1 = RedisString(NSData(bytes: bytes, length: bytes.count))
+            #else
+                let expData1 = RedisString(Data(bytes: bytes, count: bytes.count))
+            #endif
             bytes = [0x00, 0x44, 0x88, 0xcc]
-            let expData2 = RedisString(NSData(bytes: bytes, length: bytes.count))
+            #if os(Linux)
+                let expData2 = RedisString(NSData(bytes: bytes, length: bytes.count))
+            #else
+                let expData2 = RedisString(Data(bytes: bytes, count: bytes.count))
+            #endif
 
             let multi = redis.multi()
             multi.set(self.key1, value: expData1).getSet(self.key1, value: expData2).get(self.key1)

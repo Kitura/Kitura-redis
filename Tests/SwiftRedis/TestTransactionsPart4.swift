@@ -127,11 +127,23 @@ public class TestTransactionsPart4: XCTestCase {
     func test_binarySafeHsetAndHmset() {
         setupTests() {
             var bytes: [UInt8] = [0xff, 0x00, 0xfe, 0x02]
-            let expData1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expData1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expData1 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0x00, 0x01, 0x02, 0x03, 0x04]
-            let expData2 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expData2 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expData2 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xf0, 0xf1, 0xf2, 0xf3, 0xf4]
-            let expData3 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expData3 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expData3 = Data(bytes: bytes, count: bytes.count)
+            #endif
 
             let multi = redis.multi()
             multi.hset(self.key1, field: self.field1, value: RedisString(expData1))

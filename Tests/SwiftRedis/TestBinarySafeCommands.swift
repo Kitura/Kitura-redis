@@ -38,13 +38,21 @@ public class TestBinarySafeCommands: XCTestCase {
     func test_setWithBinary() {
         self.setupTests() {
             var bytes: [UInt8] = [0xff, 0x00, 0xfe, 0x02]
-            let expData = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expData = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expData = Data(bytes: bytes, count: bytes.count)
+            #endif
             redis.set(self.key1, value: RedisString(expData)) {(wasSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssert(wasSet, "\(self.key1) wasn't set")
                 
                 bytes = [0x00, 0x01, 0x02, 0x03, 0x04]
-                let newData = NSData(bytes: bytes, length: bytes.count)
+                #if os(Linux)
+                    let newData = NSData(bytes: bytes, length: bytes.count)
+                #else
+                    let newData = Data(bytes: bytes, count: bytes.count)
+                #endif
                 redis.getSet(self.key1, value: RedisString(newData)) {(oldValue: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(oldValue, "oldValue wasn't suppose to be nil")
@@ -63,9 +71,17 @@ public class TestBinarySafeCommands: XCTestCase {
     func test_SetExistOptionsWithBinary() {
         setupTests() {
             var bytes: [UInt8] = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77]
-            let expectedValue = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expectedValue = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expectedValue = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa]
-            let newValue = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let newValue = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let newValue = Data(bytes: bytes, count: bytes.count)
+            #endif
             
             redis.set(self.key2, value: RedisString(expectedValue), exists: true) {(wasSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -111,7 +127,11 @@ public class TestBinarySafeCommands: XCTestCase {
     func test_SetExpireOptionsWithBinary() {
         setupTests() {
             let bytes: [UInt8] = [0x00, 0xff, 0x01, 0xfe, 0x02, 0xfd, 0x03, 0xfc, 0x04, 0xfb]
-            let expectedValue = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expectedValue = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expectedValue = Data(bytes: bytes, count: bytes.count)
+            #endif
             
             redis.set(self.key3, value: RedisString(expectedValue), expiresIn: 2.0) {(wasSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -152,15 +172,35 @@ public class TestBinarySafeCommands: XCTestCase {
     func test_BinarySafeMsetAndMget() {
         setupTests() {
             var bytes: [UInt8] = [0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6]
-            let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal1 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal1 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6]
-            let expVal2 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal2 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal2 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6]
-            let expVal3 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal3 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal3 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6]
-            let expVal4 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal4 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal4 = Data(bytes: bytes, count: bytes.count)
+            #endif
             bytes = [0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6]
-            let expVal5 = NSData(bytes: bytes, length: bytes.count)
+            #if os(Linux)
+                let expVal5 = NSData(bytes: bytes, length: bytes.count)
+            #else
+                let expVal5 = Data(bytes: bytes, count: bytes.count)
+            #endif
             
             redis.mset((self.key1, RedisString(expVal1)), (self.key2, RedisString(expVal2)), (self.key3, RedisString(expVal3))) {(wereSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -175,12 +215,12 @@ public class TestBinarySafeCommands: XCTestCase {
                         XCTAssertNotNil(values, "Received a nil values array")
                         XCTAssertEqual(values!.count, 4, "Values array didn't have four elements. Had \(values!.count) elements")
                         XCTAssertNotNil(values![0], "Values array [0] was nil")
-                        XCTAssertEqual(values![0]!.asData, expVal1, "Values array [0] wasn't equal to \(expVal1), was \(values![0]!)")
+                        XCTAssertEqual(values![0]?.asData, expVal1, "Values array [0] wasn't equal to \(expVal1), was \(values![0]!)")
                         XCTAssertNotNil(values![1], "Values array [1] was nil")
-                        XCTAssertEqual(values![1]!.asData, expVal2, "Values array [1] wasn't equal to \(expVal2), was \(values![1]!)")
+                        XCTAssertEqual(values![1]?.asData, expVal2, "Values array [1] wasn't equal to \(expVal2), was \(values![1]!)")
                         XCTAssertNil(values![2], "Values array [2] wasn't nil. Was \(values![2])")
                         XCTAssertNotNil(values![3], "Values array [3] was nil")
-                        XCTAssertEqual(values![3]!.asData, expVal3, "Values array [3] wasn't equal to \(expVal3), was \(values![3]!)")
+                        XCTAssertEqual(values![3]?.asData, expVal3, "Values array [3] wasn't equal to \(expVal3), was \(values![3]!)")
                         
                         redis.mset((self.key3, RedisString(expVal3)), (self.key4, RedisString(expVal4)), (self.key5, RedisString(expVal5)), exists: false) {(wereSet: Bool, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")

@@ -128,7 +128,7 @@ public class RedisMulti {
     }
 
     @discardableResult
-    public func expire(_ key: String, inTime: NSTimeInterval) -> RedisMulti {
+    public func expire(_ key: String, inTime: TimeIntervalType) -> RedisMulti {
         queuedCommands.append([RedisString("PEXPIRE"), RedisString(key), RedisString(Int(inTime * 1000.0))])
         return self
     }
@@ -366,7 +366,7 @@ public class RedisMulti {
     }
 
     @discardableResult
-    public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil) -> RedisMulti {
+    public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: TimeIntervalType?=nil) -> RedisMulti {
         var command = [RedisString("SET"), RedisString(key), RedisString(value)]
         if  let exists = exists  {
             command.append(RedisString(exists ? "XX" : "NX"))
@@ -380,7 +380,7 @@ public class RedisMulti {
     }
 
     @discardableResult
-    public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: NSTimeInterval?=nil) -> RedisMulti {
+    public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: TimeIntervalType?=nil) -> RedisMulti {
         var command = [RedisString("SET"), RedisString(key), value]
         if  let exists = exists  {
             command.append(RedisString(exists ? "XX" : "NX"))
