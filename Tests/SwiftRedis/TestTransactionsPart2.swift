@@ -151,17 +151,21 @@ public class TestTransactionsPart2: XCTestCase {
 
             let multi = redis.multi()
             multi.set(self.key1, value: RedisString(expVal1))
+            multi.bitcount(self.key1).bitcount(self.key1, start: 2, end: 2)
+            /* Removed tests of bitpos - not in Redis 2.8.0
             multi.bitpos(self.key1, bit: true).bitpos(self.key1, bit: true, start: 2)
             multi.bitpos(self.key1, bit: true, start: 1, end: 2)
-            multi.bitcount(self.key1).bitcount(self.key1, start: 2, end: 2)
+            */
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 3)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(15), "Bit position should have been 15, was \(nestedResponses[1].asInteger)")
-                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(23), "Bit position should have been 23, was \(nestedResponses[1].asInteger)")
-                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(15), "Bit position should have been 15, was \(nestedResponses[3].asInteger)")
-                    XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(2), "Bit count should have been 2, was \(nestedResponses[4].asInteger)")
-                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(1), "Bit count should have been 1, was \(nestedResponses[5].asInteger)")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(2), "Bit count should have been 2, was \(nestedResponses[4].asInteger)")
+                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Bit count should have been 1, was \(nestedResponses[5].asInteger)")
+                    /* Removed tests of bitpos - not in Redis 2.8.0
+                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(15), "Bit position should have been 15, was \(nestedResponses[1].asInteger)")
+                    XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(23), "Bit position should have been 23, was \(nestedResponses[1].asInteger)")
+                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(15), "Bit position should have been 15, was \(nestedResponses[3].asInteger)")
+                    */
                 }
             }
         }
