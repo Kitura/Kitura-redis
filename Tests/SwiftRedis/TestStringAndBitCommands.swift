@@ -89,7 +89,9 @@ public class TestStringAndBitCommands: XCTestCase {
            
             redis.set(self.key1, value: RedisString(expVal1)) {(wasSet: Bool,  error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    
+                
+                /* bitpos was added in redis 2.8.7 
+ 
                 redis.bitpos(self.key1, bit: true) {(position: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(position, "Position result shouldn't be nil")
@@ -104,7 +106,9 @@ public class TestStringAndBitCommands: XCTestCase {
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                             XCTAssertNotNil(position, "Position result shouldn't be nil")
                             XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(position)")
-                                
+ 
+                    */
+ 
                             redis.bitcount(self.key1) {(count: Int?, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(count, "Count result shouldn't be nil")
@@ -116,9 +120,9 @@ public class TestStringAndBitCommands: XCTestCase {
                                     XCTAssertEqual(count!, 1, "Bit count should have been 1, was \(count)")
                                 }
                             }
-                        }
+                     /*   }
                     }
-                }
+                } */
             }
         }
     }

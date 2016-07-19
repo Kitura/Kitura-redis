@@ -33,17 +33,19 @@ public class TestConnectCommands: XCTestCase {
             
             redis.ping() {(error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                
+                /* Changed for Redis 2.8.0
                 let pingText = "Hello, hello, hello, hi there"
                 redis.ping(pingText) {(error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    
+                */
                     let echoText = "Echo, echo, echo......"
                     redis.echo(echoText) {(text: RedisString?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssertNotNil(text, "Received a nil for echo text")
                         XCTAssertEqual(text!.asString, echoText, "Echo returned '\(text!)'. Should have returned '\(echoText)'.")
                     }
-                }
+               /* } */
             }
         }
     }
