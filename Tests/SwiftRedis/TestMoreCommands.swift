@@ -84,7 +84,7 @@ public class TestMoreCommands: XCTestCase {
     
     func test_keyManipulation() {
         setupTests() {
-            redis.mset((self.key1, self.expVal1), (self.key2, self.expVal2)) {(werSet: Bool, error: NSError?) in
+            redis.mset((self.key1, self.expVal1), (self.key2, self.expVal2)) {(wereSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 
                 redis.rename(self.key1, newKey: self.key3) {(renamed: Bool, error: NSError?) in
@@ -104,10 +104,16 @@ public class TestMoreCommands: XCTestCase {
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssert(renamed, "Should have renamed \(self.key3) to \(self.key4)")
                                 
-                                redis.exists(self.key1, self.key2, self.key3, self.key4) {(count: Int?, error: NSError?) in
+                                redis.exists(self.key1) {(count: Int?, error: NSError?) in
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                     XCTAssertNotNil(count, "Count of keys should not be nil")
-                                    XCTAssertEqual(count!, 2, "Only two keys are suppose to exist, reported \(count!)")
+                                    XCTAssertEqual(count!, 0, "\(self.key1) should not exist")
+                                    
+                                    redis.exists(self.key4) {(count: Int?, error: NSError?) in
+                                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                        XCTAssertNotNil(count, "Count of keys should not be nil")
+                                        XCTAssertEqual(count!, 1, "\(self.key4) should exist")
+                                    }
                                 }
                             }
                         }

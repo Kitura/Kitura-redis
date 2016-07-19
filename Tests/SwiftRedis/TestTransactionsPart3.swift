@@ -47,16 +47,17 @@ public class TestTransactionsPart3: XCTestCase {
             multi.rename(self.key1, newKey: self.key3).get(self.key3)
             multi.rename(self.key3, newKey: self.key2, exists: false)
             multi.rename(self.key3, newKey: self.key4, exists: false)
-            multi.exists(self.key1, self.key2, self.key3, self.key4)
+            multi.exists(self.key1).exists(self.key4)
 
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 7)  {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Status("OK"), "Failed to rename \(self.key1) to \(self.key3)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(self.expVal1)), "\(self.key3) should have been equal to \(self.expVal1). Was \(nestedResponses[2].asString?.asString)")
                     XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(0), "Shouldn't have renamed \(self.key3) to \(self.key2)")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "Should have renamed \(self.key3) to \(self.key4)")
-                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(2), "Only two keys are suppose to exist, reported \(nestedResponses[5].asInteger)")
+                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(0), "\(self.key1) shouldn't exist")
+                    XCTAssertEqual(nestedResponses[6], RedisResponse.IntegerValue(1), "\(self.key4) should exist")
                 }
             }
         }
