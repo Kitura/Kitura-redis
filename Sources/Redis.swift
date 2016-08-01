@@ -1530,7 +1530,7 @@ public class Redis {
     }
     
     public func issueCommandInArray(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
-        guard  let respHandle = respHandle  where respHandle.status == .connected else {
+        guard  let respHandle = respHandle, respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
             return
         }
@@ -1548,7 +1548,7 @@ public class Redis {
     }
     
     public func issueCommandInArray(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
-        guard  let respHandle = respHandle  where respHandle.status == .connected else {
+        guard  let respHandle = respHandle, respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
             return
         }
