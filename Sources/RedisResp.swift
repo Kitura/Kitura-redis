@@ -365,7 +365,7 @@ private enum RedisRespErrorCode {
     case EOF, notInteger, notUTF8
 }
 
-private struct RedisRespError: ErrorProtocol {
+private struct RedisRespError: Error {
     private let code: RedisRespErrorCode
 
     func description() -> String {
