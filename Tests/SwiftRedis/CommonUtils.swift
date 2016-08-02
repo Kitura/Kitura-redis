@@ -49,14 +49,11 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
 
 func read(fileName: String) -> String {
         // Read in a configuration file into an NSData
-        let fileData = NSData(contentsOfFile: "Tests/SwiftRedis/\(fileName)")
+    do {
+        let fileData = try Data(contentsOf: URL(fileURLWithPath: "Tests/SwiftRedis/\(fileName)"))
         XCTAssertNotNil(fileData, "Failed to read in the \(fileName) file")
 
-    #if os(Linux)
-        let resultString = String(data: fileData!, encoding:NSUTF8StringEncoding)
-    #else
-        let resultString = String(data: fileData! as Data, encoding: String.Encoding.utf8)
-    #endif
+        let resultString = String(data: fileData, encoding: String.Encoding.utf8)
 
         guard
            let resultLiteral = resultString
@@ -64,12 +61,13 @@ func read(fileName: String) -> String {
             XCTFail("Error in \(fileName).")
             exit(1)
         }
-    #if os(Linux)
-        return resultLiteral.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines())
-    #else
         return resultLiteral.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-    #endif
     }
+    catch {
+        XCTFail("Error in \(fileName).")
+        exit(1)
+    }
+}
 
 // Dummy class for test framework
 class CommonUtils { }

@@ -191,27 +191,16 @@ public class TestHashCommands: XCTestCase {
     func test_binarySafeHsetAndHmset() {
         setupTests() {
             var bytes: [UInt8] = [0xff, 0x00, 0xfe, 0x02]
-            #if os(Linux)
-                let expData1 = NSData(bytes: bytes, length: bytes.count)
-            #else
-                let expData1 = Data(bytes: bytes, count: bytes.count)
-            #endif
+            let expData1 = Data(bytes: bytes, count: bytes.count)
+
             redis.hset(self.key1, field: self.field1, value: RedisString(expData1)) {(wasSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssert(wasSet, "\(self.key1).\(self.field1) wasn't set")
                 
                 bytes = [0x00, 0x01, 0x02, 0x03, 0x04]
-                #if os(Linux)
-                    let expData2 = NSData(bytes: bytes, length: bytes.count)
-                #else
-                    let expData2 = Data(bytes: bytes, count: bytes.count)
-                #endif
+                let expData2 = Data(bytes: bytes, count: bytes.count)
                 bytes = [0xf0, 0xf1, 0xf2, 0xf3, 0xf4]
-                #if os(Linux)
-                    let expData3 = NSData(bytes: bytes, length: bytes.count)
-                #else
-                    let expData3 = Data(bytes: bytes, count: bytes.count)
-                #endif
+                let expData3 = Data(bytes: bytes, count: bytes.count)
                 
                 redis.hmset(self.key1, fieldValuePairs: (self.field2, RedisString(expData2)), (self.field3, RedisString(expData3))){(wereSet: Bool, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
