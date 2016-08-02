@@ -18,12 +18,6 @@ import Foundation
 
 // MARK: Redis
 
-#if os(Linux)
-    public typealias TimeIntervalType = NSTimeInterval
-#else
-    public typealias TimeIntervalType = TimeInterval
-#endif
-
 public class Redis {
     
     ///
@@ -187,7 +181,7 @@ public class Redis {
     /// - Parameter expiresIn: Set the specified expire time, in milliseconds
     /// - Parameter callback: callback function after setting the value
     ///
-    public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: TimeIntervalType?=nil, callback: (Bool, error: NSError?) -> Void) {
+    public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: TimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
         
         var command = ["SET", key, value]
         if  let exists = exists  {
@@ -212,7 +206,7 @@ public class Redis {
     /// - Parameter expiresIn: Set the specified expire time, in milliseconds
     /// - Parameter callback: callback function after setting the value
     ///
-    public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: TimeIntervalType?=nil, callback: (Bool, error: NSError?) -> Void) {
+    public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: TimeInterval?=nil, callback: (Bool, error: NSError?) -> Void) {
         
         var command = [RedisString("SET"), RedisString(key), value]
         if  let exists = exists  {
@@ -656,7 +650,7 @@ public class Redis {
     /// - Parameter inTime: number of milliseconds expiration time
     /// - Parameter callback: callback function containing the value 1 if the timeout was set.
     ///
-    public func expire(_ key: String, inTime: TimeIntervalType, callback: (Bool, error: NSError?) -> Void) {
+    public func expire(_ key: String, inTime: TimeInterval, callback: (Bool, error: NSError?) -> Void) {
         issueCommand("PEXPIRE", key, String(Int(inTime * 1000.0))) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
         }
@@ -701,15 +695,15 @@ public class Redis {
     ///   -2 if the key does not exist
     ///   -1 if the key exists but no associated expire.
     ///
-    public func ttl(_ key: String, callback: (TimeIntervalType?, error: NSError?) -> Void) {
+    public func ttl(_ key: String, callback: (TimeInterval?, error: NSError?) -> Void) {
         issueCommand("PTTL", key) {(response: RedisResponse) in
             switch(response) {
             case .IntegerValue(let num):
                 if  num >= 0  {
-                    callback(TimeIntervalType(Double(num)/1000.0), error: nil)
+                    callback(TimeInterval(Double(num)/1000.0), error: nil)
                 }
                 else {
-                    callback(TimeIntervalType(num), error: nil)
+                    callback(TimeInterval(num), error: nil)
                 }
             case .Error(let error):
                 callback(nil, error: self.createError("Error: \(error)", code: 1))
@@ -1153,7 +1147,7 @@ public class Redis {
     /// - Parameter keys: the keys of the lists to check for an element
     /// - Parameter timeout: Amount of time to wait or zero to wait for ever
     ///
-    public func blpop(_ keys: String..., timeout: TimeIntervalType, callback: ([RedisString?]?, error: NSError?) -> Void) {
+    public func blpop(_ keys: String..., timeout: TimeInterval, callback: ([RedisString?]?, error: NSError?) -> Void) {
         
         var command = ["BLPOP"]
         for key in keys {
@@ -1169,7 +1163,7 @@ public class Redis {
     /// - Parameter keys: the keys of the lists to check for an element
     /// - Parameter timeout: Amount of time to wait or zero to wait for ever
     ///
-    public func brpop(_ keys: String..., timeout: TimeIntervalType, callback: ([RedisString?]?, error: NSError?) -> Void) {
+    public func brpop(_ keys: String..., timeout: TimeInterval, callback: ([RedisString?]?, error: NSError?) -> Void) {
         
         var command = ["BRPOP"]
         for key in keys {
@@ -1188,7 +1182,7 @@ public class Redis {
     /// - Parameter destination: The list to push the poped item ontoParameter source: The list to pop an item from
     /// - Parameter destination: The list to push the poped item onto
     ///
-    public func brpoplpush(_ source: String, destination: String, timeout: TimeIntervalType, callback: (RedisString?, error: NSError?) -> Void) {
+    public func brpoplpush(_ source: String, destination: String, timeout: TimeInterval, callback: (RedisString?, error: NSError?) -> Void) {
         issueCommand("BRPOPLPUSH", source, destination, String(Int(timeout))) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
