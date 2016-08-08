@@ -45,7 +45,7 @@ public class TestSetCommands: XCTestCase {
     }
     
     func test_ZAdd() {
-        let expectation1 = expectation(withDescription: "Add score(s) and member(s) to the set")
+        let expectation1 = expectation(description: "Add score(s) and member(s) to the set")
         
         setupTests {
             redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
@@ -71,11 +71,11 @@ public class TestSetCommands: XCTestCase {
                 
             }
         }
-        waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+        waitForExpectations(timeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
     }
     
     func test_ZRem() {
-        let expectation1 = expectation(withDescription: "Removes the specified members fromt the set")
+        let expectation1 = expectation(description: "Removes the specified members fromt the set")
         setupTests {
             redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
@@ -93,12 +93,12 @@ public class TestSetCommands: XCTestCase {
                 })
             }
         }
-        waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+        waitForExpectations(timeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
     }
     
     
     func test_ZRemrangebyscore() {
-        let expectation1 = expectation(withDescription: "Removes all elements from the sorted set")
+        let expectation1 = expectation(description: "Removes all elements from the sorted set")
         setupTests {
             redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
@@ -116,11 +116,11 @@ public class TestSetCommands: XCTestCase {
                 })
             }
         }
-        waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+        waitForExpectations(timeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
     }
     
     func test_ZRange() {
-        let expectation1 = expectation(withDescription: "Returns the specified range of elements from the sorted set")
+        let expectation1 = expectation(description: "Returns the specified range of elements from the sorted set")
         setupTests {
             redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (totalElementAdd: Int?, error: NSError?) in
@@ -139,11 +139,11 @@ public class TestSetCommands: XCTestCase {
                 })
             }
         }
-        waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+        waitForExpectations(timeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
     }
     
     func test_ZCard() {
-        let expectation1 = expectation(withDescription: "Returns the sorted set cardinality of the sorted set ")
+        let expectation1 = expectation(description: "Returns the sorted set cardinality of the sorted set ")
         setupTests {
             redis.zadd(self.key1, tuples: (1,"one"), (2,"two"), (3, "three")) {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
@@ -161,11 +161,11 @@ public class TestSetCommands: XCTestCase {
                 })
             }
         }
-        waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+        waitForExpectations(timeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
     }
     
     func test_flushDB() {
-        let expectation1 = expectation(withDescription: "Delete all the keys of the currently selected DB")
+        let expectation1 = expectation(description: "Delete all the keys of the currently selected DB")
         setupTests {
             redis.zadd(self.key1, tuples: (1,"one"), (2,"two")) {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
@@ -192,7 +192,7 @@ public class TestSetCommands: XCTestCase {
             }
             expectation1.fulfill()
         }
-        waitForExpectations(withTimeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+        waitForExpectations(timeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
     }
     
     

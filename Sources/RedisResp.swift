@@ -53,25 +53,13 @@ internal class RedisResp {
     internal func issueCommand(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
 
-        #if os(Linux)
-            let buffer = NSMutableData()
-        #else
-            var buffer = Data()
-        #endif
+        var buffer = Data()
         buffer.append(RedisResp.asterisk)
-        #if os(Linux)
-            add(stringArgs.count, to: buffer)
-        #else
-            add(stringArgs.count, to: &buffer)
-        #endif
+        add(stringArgs.count, to: &buffer)
         buffer.append(RedisResp.crLf)
 
         for arg in stringArgs {
-            #if os(Linux)
-                addAsBulkString(RedisString(arg).asData, to: buffer)
-            #else
-                addAsBulkString(RedisString(arg).asData, to: &buffer)
-            #endif
+            addAsBulkString(RedisString(arg).asData, to: &buffer)
         }
 
         do {
@@ -90,27 +78,15 @@ internal class RedisResp {
     internal func issueCommand(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
 
-        #if os(Linux)
-            let buffer = NSMutableData()
-        #else
-            var buffer = Data()
-        #endif
+        var buffer = Data()
         buffer.append(RedisResp.asterisk)
-        #if os(Linux)
-            add(stringArgs.count, to: buffer)
-        #else
-            add(stringArgs.count, to: &buffer)
-        #endif
+        add(stringArgs.count, to: &buffer)
         buffer.append(RedisResp.crLf)
 
         for arg in stringArgs {
-            #if os(Linux)
-                addAsBulkString(arg.asData, to: buffer)
-            #else
-                addAsBulkString(arg.asData, to: &buffer)
-            #endif
+            addAsBulkString(arg.asData, to: &buffer)
         }
-
+        
         do {
             try socket.write(from: buffer)
 
@@ -127,12 +103,12 @@ internal class RedisResp {
     // Mark: Parsing Functions
 
     private func readAndParseResponse(callback: (RedisResponse) -> Void) {
-        let buffer = NSMutableData()
+        var buffer = Data()
         var offset = 0
         var response: RedisResponse = RedisResponse.Nil
 
         do {
-            (response, offset) = try parseByPrefix(buffer, from: offset)
+            (response, offset) = try parseByPrefix(&buffer, from: offset)
             callback(response)
         }
         catch let error as Socket.Error {
@@ -146,32 +122,32 @@ internal class RedisResp {
         }
     }
 
-    private func parseByPrefix(_ buffer: NSMutableData, from: Int) throws -> (RedisResponse, Int) {
+    private func parseByPrefix(_ buffer: inout Data, from: Int) throws -> (RedisResponse, Int) {
         var response: RedisResponse
 
-        var (matched, offset) = try compare(buffer, at: from, with: RedisResp.plus)
+        var (matched, offset) = try compare(&buffer, at: from, with: RedisResp.plus)
         if  matched {
-            (response, offset) = try parseSimpleString(buffer, offset: offset)
+            (response, offset) = try parseSimpleString(&buffer, offset: offset)
         }
         else {
-            (matched, offset) = try compare(buffer, at: from, with: RedisResp.colon)
+            (matched, offset) = try compare(&buffer, at: from, with: RedisResp.colon)
             if  matched {
-                (response, offset) = try parseInteger(buffer, offset: offset)
+                (response, offset) = try parseInteger(&buffer, offset: offset)
             }
             else {
-                (matched, offset) = try compare(buffer, at: from, with: RedisResp.dollar)
+                (matched, offset) = try compare(&buffer, at: from, with: RedisResp.dollar)
                 if  matched {
-                    (response, offset) = try parseBulkString(buffer, offset: offset)
+                    (response, offset) = try parseBulkString(&buffer, offset: offset)
                 }
                 else {
-                    (matched, offset) = try compare(buffer, at: from, with: RedisResp.asterisk)
+                    (matched, offset) = try compare(&buffer, at: from, with: RedisResp.asterisk)
                     if  matched {
-                        (response, offset) = try parseArray(buffer, offset: offset)
+                        (response, offset) = try parseArray(&buffer, offset: offset)
                     }
                     else {
-                        (matched, offset) = try compare(buffer, at: from, with: RedisResp.minus)
+                        (matched, offset) = try compare(&buffer, at: from, with: RedisResp.minus)
                         if  matched {
-                            (response, offset) = try parseError(buffer, offset: offset)
+                            (response, offset) = try parseError(&buffer, offset: offset)
                         }
                         else {
                             response = RedisResponse.Error("Unknown response type")
@@ -183,13 +159,13 @@ internal class RedisResp {
         return (response, offset)
     }
 
-    private func parseArray(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
-        var (arrayLength, newOffset) = try parseIntegerValue(buffer, offset: offset)
+    private func parseArray(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
+        var (arrayLength, newOffset) = try parseIntegerValue(&buffer, offset: offset)
         var responses = [RedisResponse]()
         var response: RedisResponse
         if  arrayLength >= 0  {
             for _ in 0 ..< Int(arrayLength)  {
-                (response, newOffset) = try parseByPrefix(buffer, from: newOffset)
+                (response, newOffset) = try parseByPrefix(&buffer, from: newOffset)
                 responses.append(response)
             }
             return (RedisResponse.Array(responses), newOffset)
@@ -199,27 +175,19 @@ internal class RedisResp {
         }
     }
 
-    private func parseBulkString(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
-        let (strLen64, newOffset) = try parseIntegerValue(buffer, offset: offset)
+    private func parseBulkString(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
+        let (strLen64, newOffset) = try parseIntegerValue(&buffer, offset: offset)
         if  strLen64 >= 0  {
             let strLen = Int(strLen64)
-            #if os(Linux)
-                let totalLength = newOffset+strLen+RedisResp.crLf.length
-            #else
-                let totalLength = newOffset+strLen+RedisResp.crLf.count
-            #endif
-            while  totalLength > buffer.length  {
-                let length = try socket?.read(into: buffer)
+            let totalLength = newOffset+strLen+RedisResp.crLf.count
+            while  totalLength > buffer.count  {
+                let length = try socket?.read(into: &buffer)
                 if  length == 0  {
                     throw RedisRespError(code: .EOF)
                 }
             }
-            let data = NSData(bytes: buffer.bytes+newOffset, length: strLen)
-            #if os(Linux)
-                let redisString = RedisString(data)
-            #else
-                let redisString = RedisString(data as Data)
-            #endif
+            let data = buffer.subdata(in: newOffset..<newOffset+strLen)
+            let redisString = RedisString(data)
             return (RedisResponse.StringValue(redisString), totalLength)
         }
         else {
@@ -227,37 +195,27 @@ internal class RedisResp {
         }
     }
 
-    private func parseError(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
-        let eos = try find(buffer, from: offset, data: RedisResp.crLf)
-        let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
-        #if os(Linux)
-            let optStr = String(data: data, encoding: NSUTF8StringEncoding)
-            let length = eos+RedisResp.crLf.length
-        #else
-            let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
-            let length = eos+RedisResp.crLf.count
-        #endif
+    private func parseError(_ buffer:  inout Data, offset: Int) throws -> (RedisResponse, Int) {
+        let eos = try find(&buffer, from: offset, data: RedisResp.crLf)
+        let data = buffer.subdata(in: offset..<eos)
+        let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
+        let length = eos+RedisResp.crLf.count
         guard  let str = optStr  else {
             throw RedisRespError(code: .notUTF8)
         }
         return (RedisResponse.Error(str), length)
     }
 
-    private func parseInteger(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
-        let (int, newOffset) = try parseIntegerValue(buffer, offset: offset)
+    private func parseInteger(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
+        let (int, newOffset) = try parseIntegerValue(&buffer, offset: offset)
         return (RedisResponse.IntegerValue(int), newOffset)
     }
 
-    private func parseSimpleString(_ buffer: NSMutableData, offset: Int) throws -> (RedisResponse, Int) {
-        let eos = try find(buffer, from: offset, data: RedisResp.crLf)
-        let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
-        #if os(Linux)
-            let optStr = String(data: data, encoding: NSUTF8StringEncoding)
-            let length = eos+RedisResp.crLf.length
-        #else
-            let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
-            let length = eos+RedisResp.crLf.count
-        #endif
+    private func parseSimpleString(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
+        let eos = try find(&buffer, from: offset, data: RedisResp.crLf)
+        let data = buffer.subdata(in: offset..<eos)
+        let optStr = String(data: data, encoding: String.Encoding.utf8)
+        let length = eos+RedisResp.crLf.count
         guard  let str = optStr  else {
             throw RedisRespError(code: .notUTF8)
         }
@@ -266,51 +224,48 @@ internal class RedisResp {
 
     // Mark: Parser helper functions
 
-    private func compare(_ buffer: NSMutableData, at offset: Int, with: NSData) throws -> (Bool, Int) {
-        while  offset+with.length >= buffer.length  {
-            let length = try socket?.read(into: buffer)
+    private func compare(_ buffer: inout Data, at offset: Int, with: Data) throws -> (Bool, Int) {
+        while  offset+with.count >= buffer.count  {
+            let length = try socket?.read(into: &buffer)
             if  length == 0  {
                 throw RedisRespError(code: .EOF)
             }
         }
-
-        if  memcmp(UnsafePointer<Int8>(buffer.bytes)+offset, UnsafePointer<Int8>(with.bytes), with.length)  == 0  {
-            return (true, offset+with.length)
+        
+        let range = buffer.range(of: with, options: [], in: offset..<offset+with.count)
+        if range != nil {
+            return (true, offset+with.count)
         }
         else {
             return (false, offset)
         }
     }
 
-    private func find(_ buffer: NSMutableData, from: Int, data: NSData) throws -> Int {
-        var notFound = true
+    private func find(_ buffer: inout Data, from: Int, data: Data) throws -> Int {
         var offset = from
+        var notFound = true
 
         while notFound {
-            while  notFound  &&  offset+data.length <= buffer.length  {
-                notFound = memcmp(UnsafePointer<Int8>(buffer.bytes)+offset, UnsafePointer<Int8>(data.bytes), data.length)  != 0
-                offset += 1
+            let range = buffer.range(of: data, options: [], in: offset..<buffer.count)
+            if range != nil {
+                offset = (range?.lowerBound)!
+                notFound = false
             }
-            if  notFound  {
-                let length = try socket?.read(into: buffer)
+            else  {
+                let length = try socket?.read(into: &buffer)
                 if  length == 0  {
                     throw RedisRespError(code: .EOF)
                 }
             }
         }
-        return offset-1
+        return offset
     }
 
-    private func parseIntegerValue(_ buffer: NSMutableData, offset: Int) throws -> (Int64, Int) {
-        let eos = try find(buffer, from: offset, data: RedisResp.crLf)
-        let data = NSData(bytes: buffer.bytes+offset, length: eos-offset)
-        #if os(Linux)
-            let optStr = String(data: data, encoding: NSUTF8StringEncoding)
-            let length = eos+RedisResp.crLf.length
-        #else
-            let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
-            let length = eos+RedisResp.crLf.count
-        #endif
+    private func parseIntegerValue(_ buffer: inout Data, offset: Int) throws -> (Int64, Int) {
+        let eos = try find(&buffer, from: offset, data: RedisResp.crLf)
+        let data = buffer.subdata(in: offset..<eos)
+        let optStr = String(data: data as Data, encoding: String.Encoding.utf8)
+        let length = eos+RedisResp.crLf.count
         guard  let str = optStr  else {
             throw RedisRespError(code: .notUTF8)
         }
@@ -323,24 +278,6 @@ internal class RedisResp {
 
     // Mark: helper functions
 
-    #if os(Linux)
-    private func addAsBulkString(_ cString: NSData, to buffer: NSMutableData) {
-        buffer.append(RedisResp.dollar)
-        add(cString.length, to: buffer)
-        buffer.append(RedisResp.crLf)
-    
-        buffer.append(cString)
-        buffer.append(RedisResp.crLf)
-    }
-    
-    private func add(_ number: Int, to buffer: NSMutableData) {
-        add(String(number), to: buffer)
-    }
-
-    private func add(_ text: String, to buffer: NSMutableData) {
-        buffer.append(RedisString(text).asData)
-    }
-    #else
     private func addAsBulkString(_ cString: Data, to buffer: inout Data) {
         buffer.append(RedisResp.dollar)
         add(cString.count, to: &buffer)
@@ -357,7 +294,6 @@ internal class RedisResp {
     private func add(_ text: String, to buffer: inout Data) {
         buffer.append(RedisString(text).asData)
     }
-    #endif
 
 }
 
@@ -365,7 +301,7 @@ private enum RedisRespErrorCode {
     case EOF, notInteger, notUTF8
 }
 
-private struct RedisRespError: ErrorProtocol {
+private struct RedisRespError: Error {
     private let code: RedisRespErrorCode
 
     func description() -> String {
