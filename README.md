@@ -7,11 +7,11 @@
 
 KituraRedis is a Swift library for interacting with a Redis database using.
 
-It is dependent on the [BlueSocket](https://github.com/IBM-Swift/BlueSocket.git)  and [KituraSyS](https://github.com/IBM-Swift/Kitura-sys.git) modules.
+It is dependent on the [BlueSocket](https://github.com/IBM-Swift/BlueSocket.git) and [KituraSyS](https://github.com/IBM-Swift/Kitura-sys.git) modules.
 
 ## Build:
 
-  - `swift build` (Mac OS X)
+  - `swift build` (macOS)
   - `swift build -Xcc -fblocks` (Linux)
 
 ## Running Tests:
@@ -22,7 +22,7 @@ This example uses Docker to run Redis detached with the required password define
   - `swift test`
 
 ## Usage:
-```
+```swift
 import Foundation
 import SwiftRedis
 
