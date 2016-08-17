@@ -1,4 +1,4 @@
 .build/
 Packages/
 /SwiftRedis.xcodeproj
-
+*.DS_Store

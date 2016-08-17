@@ -50,7 +50,7 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
 func read(fileName: String) -> String {
         // Read in a configuration file into an NSData
     do {
-        let fileData = try Data(contentsOf: URL(fileURLWithPath: "Tests/SwiftRedis/\(fileName)"))
+        let fileData = try Data(contentsOf: URL(fileURLWithPath: "Tests/SwiftRedisTests/\(fileName)"))
         XCTAssertNotNil(fileData, "Failed to read in the \(fileName) file")
 
         let resultString = String(data: fileData, encoding: String.Encoding.utf8)

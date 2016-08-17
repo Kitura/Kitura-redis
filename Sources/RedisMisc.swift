@@ -18,7 +18,7 @@ import Foundation
 
 
 public class RedisString: CustomStringConvertible {
-    private let data: Data
+    fileprivate let data: Data
 
     public init(_ data: Data) {
         self.data = data
