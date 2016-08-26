@@ -39,7 +39,7 @@ public class TestListsPart3: XCTestCase {
 
     let secondConnection = Redis()
     
-    let queue = DispatchQueue(label: "unblocker", attributes:  .concurrent)
+    let queue = DispatchQueue(label: "unblocker", attributes:  DispatchQueue.Attributes.concurrent)
 
     var key1: String { return "test1" }
     var key2: String { return "test2" }
