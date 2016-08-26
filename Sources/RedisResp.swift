@@ -301,8 +301,8 @@ private enum RedisRespErrorCode {
     case EOF, notInteger, notUTF8
 }
 
-private struct RedisRespError: Error {
-    private let code: RedisRespErrorCode
+fileprivate struct RedisRespError: Error {
+    fileprivate let code: RedisRespErrorCode
 
     func description() -> String {
         switch(code) {

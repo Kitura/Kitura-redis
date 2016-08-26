@@ -422,7 +422,7 @@ public class RedisMulti {
     //  Run the transaction *
     // **********************
 
-    public func exec(_ callback: (RedisResponse) -> Void) {
+    public func exec(_ callback: @escaping (RedisResponse) -> Void) {
         redis.issueCommand("MULTI") {(multiResponse: RedisResponse) in
             switch(multiResponse) {
                 case .Status(let status):
