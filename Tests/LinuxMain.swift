@@ -16,7 +16,7 @@
 
 import XCTest
 
-@testable import SwiftRedisTestSuite
+@testable import SwiftRedisTests
 
 XCTMain([
 	testCase(TestBasicCommands.allTests),
