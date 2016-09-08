@@ -240,6 +240,23 @@ public class Redis {
     }
     
     ///
+    /// Removes the specified keys. A key is ignored if it does not exist
+    ///
+    /// - Parameter keys: Variadic parameter as a list of Strings
+    /// - Parameter callback: callback function after deleting item
+    ///
+    public func del(_ keys: RedisString..., callback: (Int?, NSError?) -> Void) {
+        
+        var command = [RedisString("DEL")]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
     /// Increments the number stored at key by an increment. If the key does not exist, it is set
     /// to 0 before performing the operation.
     /// **Note this is a string operation since Redis does not have a dedicated integer type**
