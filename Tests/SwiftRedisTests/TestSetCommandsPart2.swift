@@ -672,7 +672,7 @@ public class TestSetCommandsPart2: XCTestCase {
             redis.spop(self.key1) {
                 (memberPopped: RedisString?, error: NSError?) in
                 
-                XCTAssertNil(error "Error: \(error)")
+                XCTAssertNil(error, "Error: \(error)")
                 XCTAssertNotNil(memberPopped)
                 
                 redis.scard(self.key1) {
@@ -691,7 +691,7 @@ public class TestSetCommandsPart2: XCTestCase {
             redis.spop(self.key2, count: 2) {
                 (memberPopped: [RedisString?]?, error: NSError?) in
                 
-                XCTAssertNil(error "Error: \(error)")
+                XCTAssertNil(error, "Error: \(error)")
                 XCTAssertNotNil(memberPopped)
                 
                 redis.scard(self.key2) {
@@ -738,7 +738,7 @@ public class TestSetCommandsPart2: XCTestCase {
             redis.spop(self.redisKey2, count: 2) {
                 (memberPopped: [RedisString?]?, error: NSError?) in
                 
-                XCTAssertNil(error "Error: \(error)")
+                XCTAssertNil(error, "Error: \(error)")
                 XCTAssertNotNil(memberPopped)
                 
                 redis.scard(self.redisKey2) {
