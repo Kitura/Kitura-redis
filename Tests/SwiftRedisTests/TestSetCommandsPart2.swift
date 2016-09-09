@@ -697,7 +697,7 @@ public class TestSetCommandsPart2: XCTestCase {
                 redis.scard(self.key2) {
                     (retrievedTotalMembers: Int?, error: NSError?) in
                     XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
+                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
                 }
             }
             
@@ -744,7 +744,7 @@ public class TestSetCommandsPart2: XCTestCase {
                 redis.scard(self.redisKey2) {
                     (retrievedTotalMembers: Int?, error: NSError?) in
                     XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
+                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
                 }
             }
             
