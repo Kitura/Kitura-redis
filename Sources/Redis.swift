@@ -133,6 +133,28 @@ public class Redis {
     }
     
     ///
+    /// Returns information and statistics about the server
+    ///
+    /// Returns: Bulk string reply: as a collection of text lines.
+    ///
+    public func info(callback: (RedisString?, NSError?) -> Void) {
+        issueCommand("INFO") {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Returns information and statistics about the server
+    ///
+    /// Returns: Dictionary reply: Dictionary of field and result
+    ///
+    public func info(callback: @escaping ([String: String]?, NSError?) -> Void) {
+        issueCommand("INFO") {(response: RedisResponse) in
+            self.redisDictionaryResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
     /// Get the value of key.
     ///
     /// - Parameter key: String for the key name
@@ -2474,6 +2496,33 @@ public class Redis {
         } else {
             callback(nil, nil, error)
         }
+    }
+    
+    private func redisDictionaryResponseHandler(_ response: RedisResponse, callback: ([String: String]?, NSError?) -> Void) {
+        switch(response){
+        case .StringValue(let str):
+            callback(parseString(str), nil)
+        case .Nil:
+            callback(nil, nil)
+        case .Error(let error):
+            callback(nil, _: createError("Error: \(error)", code: 1))
+        default:
+            callback(nil, _: createUnexpectedResponseError(response))
+        }
+    }
+    
+    private func parseString(_ str: RedisString) -> [String: String]? {
+        let convertedStr = str.asString
+        let newline = "\r\n"
+        let strArray = convertedStr.components(separatedBy: newline)
+        var infoDict: [String: String] = [:]
+        for val in strArray {
+            let pos = val.range(of: ":")
+            if let pos = pos {
+                infoDict[val.substring(to: pos.lowerBound)] = val.substring(from: pos.upperBound)
+            }
+        }
+        return infoDict
     }
     
     private func createUnexpectedResponseError(_ response: RedisResponse) -> NSError {

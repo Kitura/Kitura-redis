@@ -71,6 +71,8 @@ public class TestSetCommandsPart2: XCTestCase {
     let redismember3 = RedisString("insert reference with redis here")
     let redismember4 = RedisString("insert redisstring here")
     
+    let redisVersions = ["2.6", "2.8", "3.0"]
+    
     func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -682,25 +684,38 @@ public class TestSetCommandsPart2: XCTestCase {
                 }
             }
             
-            redis.sadd(self.key2, members: self.member1, self.member2, self.member3) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.spop(self.key2, count: 2) {
-                (memberPopped: [RedisString?]?, error: NSError?) in
+            redis.info() {
+                (info: [String: String]?, error: NSError?) in
                 
-                XCTAssertNil(error, "Error: \(error)")
-                XCTAssertNotNil(memberPopped)
-                
-                redis.scard(self.key2) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
-                    XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                if let info = info, let version = info["redis_version"] {
+                    
+                    //Get the major and minor from the version
+                    let minorMicro = version.substring(from: (version.range(of: ".")?.upperBound)!)
+                    let minor = minorMicro.substring(to: (minorMicro.range(of: ".")?.lowerBound)!)
+                    let majorMinor = version.substring(to: (version.range(of: ".")?.upperBound)!)+minor
+
+                    if !self.redisVersions.contains(majorMinor) {
+                        redis.sadd(self.key2, members: self.member1, self.member2, self.member3) {
+                            (retrievedTotalElementAdded: Int?, error: NSError?) in
+                            XCTAssertNil(error)
+                            XCTAssertEqual(retrievedTotalElementAdded, 3)
+                        }
+                        
+                        redis.spop(self.key2, count: 2) {
+                            (memberPopped: [RedisString?]?, error: NSError?) in
+                            
+                            XCTAssertNil(error, "Error: \(error)")
+                            XCTAssertNotNil(memberPopped)
+                            
+                            redis.scard(self.key2) {
+                                (retrievedTotalMembers: Int?, error: NSError?) in
+                                XCTAssertNil(error)
+                                XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                            }
+                        }
+                    }
                 }
             }
-            
             expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
@@ -719,7 +734,7 @@ public class TestSetCommandsPart2: XCTestCase {
             redis.spop(self.redisKey1) {
                 (memberPopped: RedisString?, error: NSError?) in
                 
-                XCTAssertNil(error, "Error: \(error)")
+                XCTAssertNil(error)
                 XCTAssertNotNil(memberPopped)
                 
                 redis.scard(self.redisKey1) {
@@ -729,22 +744,36 @@ public class TestSetCommandsPart2: XCTestCase {
                 }
             }
             
-            redis.sadd(self.redisKey2, members: self.redismember1, self.redismember2, self.redismember3) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.spop(self.redisKey2, count: 2) {
-                (memberPopped: [RedisString?]?, error: NSError?) in
+            redis.info() {
+                (info: [String: String]?, error: NSError?) in
                 
-                XCTAssertNil(error, "Error: \(error)")
-                XCTAssertNotNil(memberPopped)
-                
-                redis.scard(self.redisKey2) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
-                    XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                if let info = info, let version = info["redis_version"] {
+                    
+                    //Get the major and minor from the version
+                    let minorMicro = version.substring(from: (version.range(of: ".")?.upperBound)!)
+                    let minor = minorMicro.substring(to: (minorMicro.range(of: ".")?.lowerBound)!)
+                    let majorMinor = version.substring(to: (version.range(of: ".")?.upperBound)!)+minor
+                    
+                    if !self.redisVersions.contains(majorMinor) {
+                        redis.sadd(self.redisKey2, members: self.redismember1, self.redismember2, self.redismember3) {
+                            (retrievedTotalElementAdded: Int?, error: NSError?) in
+                            XCTAssertNil(error)
+                            XCTAssertEqual(retrievedTotalElementAdded, 3)
+                        }
+                        
+                        redis.spop(self.redisKey2, count: 2) {
+                            (memberPopped: [RedisString?]?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertNotNil(memberPopped)
+                            
+                            redis.scard(self.redisKey2) {
+                                (retrievedTotalMembers: Int?, error: NSError?) in
+                                XCTAssertNil(error)
+                                XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                            }
+                        }
+                    }
                 }
             }
             
@@ -1098,6 +1127,22 @@ public class TestSetCommandsPart2: XCTestCase {
             
             expectation1.fulfill()
         }
+        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
+    }
+    
+    func test_info() {
+        let expectation1 = expectation(description: "Shows all information on the redis server")
+        
+        redis.info() {
+            (info: [String: String]?, error: NSError?) in
+            
+            XCTAssertNil(error)
+            XCTAssertNotNil(info)
+            if let info = info {
+                print(info["redis_version"]!)
+            }
+        }
+        expectation1.fulfill()
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
 
