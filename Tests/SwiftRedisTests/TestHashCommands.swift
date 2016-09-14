@@ -110,23 +110,27 @@ public class TestHashCommands: XCTestCase {
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(value, "Value of field shouldn't be nil")
                     XCTAssertEqual(value!.asDouble, Double(incFloat), "Value of field should be \(incFloat), was \(value!.asDouble)")
-                            
-                        /* ****************
-                         *   HSTRLEN is only on Redis 3.2 and above *
-                     
-                    let expVal1 = "testing, testing, 1 2 3"
-                     
-                    redis.hset(self.key1, field: self.field1, value: expVal1) {(newField: Bool, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssert(newField, "\(self.field1) wasn't a new field in \(self.key1)")
+                    
+                    redis.info() {
+                        (info: RedisInfo?, error: NSError?) in
+                        
+                        if let info = info {
+                            if info.server.checkVersionIsNewerOrSame("3.2") {
+                                let expVal1 = "testing, testing, 1 2 3"
                                 
-                        redis.hstrlen(self.key1, field: self.field1) {(length: Int?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNotNil(length, "Length of field shouldn't be nil")
-                            XCTAssertEqual(length!, expVal1.characters.count, "Length of field should be \(expVal1.characters.count), was \(length!)")
+                                redis.hset(self.key1, field: self.field1, value: expVal1) {(newField: Bool, error: NSError?) in
+                                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                    XCTAssert(newField, "\(self.field1) wasn't a new field in \(self.key1)")
+                                    
+                                    redis.hstrlen(self.key1, field: self.field1) {(length: Int?, error: NSError?) in
+                                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                        XCTAssertNotNil(length, "Length of field shouldn't be nil")
+                                        XCTAssertEqual(length!, expVal1.characters.count, "Length of field should be \(expVal1.characters.count), was \(length!)")
+                                    }
+                                }
+                            }
                         }
                     }
-                          **************** */
                 }
             }
         }

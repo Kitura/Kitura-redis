@@ -86,24 +86,32 @@ public class TestStringAndBitCommands: XCTestCase {
             redis.set(self.key1, value: RedisString(expVal1)) {(wasSet: Bool,  error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 
-                /* bitpos was added in redis 2.8.7 
  
-                redis.bitpos(self.key1, bit: true) {(position: Int?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(position, "Position result shouldn't be nil")
-                    XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(position)")
-                        
-                    redis.bitpos(self.key1, bit: true, start: 2){(position: Int?, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(position, "Position result shouldn't be nil")
-                        XCTAssertEqual(position!, 23, "Bit position should have been 23, was \(position)")
-                            
-                        redis.bitpos(self.key1, bit: true, start: 1, end: 2) {(position: Int?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNotNil(position, "Position result shouldn't be nil")
-                            XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(position)")
- 
-                    */
+                redis.info() {
+                    (info: RedisInfo?, error: NSError?) in
+                    
+                    if let info = info {
+                        if info.server.checkVersionIsNewerOrSame("2.8.7") {
+                            redis.bitpos(self.key1, bit: true) {(position: Int?, error: NSError?) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(position, "Position result shouldn't be nil")
+                                XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(position)")
+                                
+                                redis.bitpos(self.key1, bit: true, start: 2){(position: Int?, error: NSError?) in
+                                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                    XCTAssertNotNil(position, "Position result shouldn't be nil")
+                                    XCTAssertEqual(position!, 23, "Bit position should have been 23, was \(position)")
+                                    
+                                    redis.bitpos(self.key1, bit: true, start: 1, end: 2) {(position: Int?, error: NSError?) in
+                                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                        XCTAssertNotNil(position, "Position result shouldn't be nil")
+                                        XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(position)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
  
                             redis.bitcount(self.key1) {(count: Int?, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")

@@ -2584,6 +2584,20 @@ public struct RedisInfo {
             self.uptime_in_seconds  = Int(redisInfo["uptime_in_seconds"]!)!
             self.uptime_in_days  = Int(redisInfo["uptime_in_days"]!)!
         }
+        
+        public func checkVersionIsNewerOrSame(_ versionToCompare: String) -> Bool {
+
+            let v = self.redis_version.components(separatedBy: ".")
+            let vToCompare = versionToCompare.components(separatedBy: ".")
+        
+            if vToCompare.count == 3 {
+                return v[0] >= vToCompare[0] && v[1] >= vToCompare[1] && v[2] >= vToCompare[2]
+            } else if vToCompare.count == 2 {
+                return v[0] >= vToCompare[0] && v[1] >= vToCompare[1]
+            } else {
+                return v[0] >= vToCompare[0]
+            }
+        }
     }
     
 }

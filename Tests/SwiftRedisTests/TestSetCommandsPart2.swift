@@ -103,17 +103,17 @@ public class TestSetCommandsPart2: XCTestCase {
                 XCTAssertNil(error)
                 XCTAssertNotNil(retrievedTotalElementAdded)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.sadd(self.key1, members: self.member1, self.member4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded, 1)
-                
+                    redis.sadd(self.key1, members: self.member1, self.member4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedTotalElementAdded)
+                    XCTAssertEqual(retrievedTotalElementAdded, 1)
+                    
+                    expectation1.fulfill()
+                }
             }
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -127,17 +127,17 @@ public class TestSetCommandsPart2: XCTestCase {
                 XCTAssertNil(error)
                 XCTAssertNotNil(retrievedTotalElementAdded)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.sadd(self.redisKey1, members: self.redismember1, self.redismember4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded, 1)
-                
+                    redis.sadd(self.redisKey1, members: self.redismember1, self.redismember4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedTotalElementAdded)
+                    XCTAssertEqual(retrievedTotalElementAdded, 1)
+                    
+                    expectation1.fulfill()
+                }
             }
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -152,17 +152,17 @@ public class TestSetCommandsPart2: XCTestCase {
                 XCTAssertNil(error)
                 XCTAssertNotNil(retrievedTotalElementAdded)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.scard(self.key1) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded, 3)
-                
+                    redis.scard(self.key1) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedTotalElementAdded)
+                    XCTAssertEqual(retrievedTotalElementAdded, 3)
+                    
+                    expectation1.fulfill()
+                }
             }
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -177,17 +177,17 @@ public class TestSetCommandsPart2: XCTestCase {
                 XCTAssertNil(error)
                 XCTAssertNotNil(retrievedTotalElementAdded)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.scard(self.redisKey1) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded, 3)
-                
+                    redis.scard(self.redisKey1) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedTotalElementAdded)
+                    XCTAssertEqual(retrievedTotalElementAdded, 3)
+                    
+                    expectation1.fulfill()
+                }
             }
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -203,25 +203,24 @@ public class TestSetCommandsPart2: XCTestCase {
                 XCTAssertNotNil(retrievedTotalElementAdded)
                 XCTAssertEqual(retrievedTotalElementAdded, 4)
                 
+                    redis.sadd(self.key2, members: self.member1, self.member4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedTotalElementAdded)
+                    XCTAssertEqual(retrievedTotalElementAdded, 2)
+                    
+                        redis.sdiff(keys: self.key1, self.key2) {
+                        (retrievedArrayMembers: [RedisString?]?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(retrievedArrayMembers)
+                        XCTAssertEqual(retrievedArrayMembers!.count, 2)
+                        
+                        expectation1.fulfill()
+                    }
+                }
             }
-            redis.sadd(self.key2, members: self.member1, self.member4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded, 2)
-                
-            }
-            
-            redis.sdiff(keys: self.key1, self.key2) {
-                (retrievedArrayMembers: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedArrayMembers)
-                XCTAssertEqual(retrievedArrayMembers!.count, 2)
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -238,25 +237,24 @@ public class TestSetCommandsPart2: XCTestCase {
                 XCTAssertNotNil(retrievedTotalElementAdded)
                 XCTAssertEqual(retrievedTotalElementAdded, 4)
                 
+                    redis.sadd(self.redisKey2, members: self.redismember1, self.redismember4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedTotalElementAdded)
+                    XCTAssertEqual(retrievedTotalElementAdded, 2)
+                    
+                        redis.sdiff(keys: self.redisKey1, self.redisKey2) {
+                        (retrievedArrayMembers: [RedisString?]?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(retrievedArrayMembers)
+                        XCTAssertEqual(retrievedArrayMembers!.count, 2)
+                        
+                        expectation1.fulfill()
+                    }
+                }
             }
-            redis.sadd(self.redisKey2, members: self.redismember1, self.redismember4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded, 2)
-                
-            }
-            
-            redis.sdiff(keys: self.redisKey1, self.redisKey2) {
-                (retrievedArrayMembers: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedArrayMembers)
-                XCTAssertEqual(retrievedArrayMembers!.count, 2)
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -268,21 +266,22 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementsAdded: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
-            }
-            redis.smembers(self.key1) {
-                (retrievedMembers: [RedisString?]?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMembers)
-                
-                redis.scard(self.key1) {
-                    (retrievedTotalCount: Int?, error: NSError?) in
+                    redis.smembers(self.key1) {
+                    (retrievedMembers: [RedisString?]?, error: NSError?) in
                     
-                    XCTAssertEqual(retrievedTotalCount, 2)
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedMembers)
+                    
+                    redis.scard(self.key1) {
+                        (retrievedTotalCount: Int?, error: NSError?) in
+                        
+                        XCTAssertEqual(retrievedTotalCount, 2)
+                        
+                        expectation1.fulfill()
+                    }
                 }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -295,21 +294,22 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementsAdded: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
-            }
-            redis.smembers(self.redisKey1) {
-                (retrievedMembers: [RedisString?]?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMembers)
-                
-                redis.scard(self.redisKey1) {
-                    (retrievedTotalCount: Int?, error: NSError?) in
+                    redis.smembers(self.redisKey1) {
+                    (retrievedMembers: [RedisString?]?, error: NSError?) in
                     
-                    XCTAssertEqual(retrievedTotalCount, 2)
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedMembers)
+                    
+                    redis.scard(self.redisKey1) {
+                        (retrievedTotalCount: Int?, error: NSError?) in
+                        
+                        XCTAssertEqual(retrievedTotalCount, 2)
+                        
+                        expectation1.fulfill()
+                    }
                 }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -323,28 +323,27 @@ public class TestSetCommandsPart2: XCTestCase {
                 
                 XCTAssertNil(error)
                 
+                    redis.sadd(self.key2, members: self.member1, self.member4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    
+                        redis.smembers(self.key2) {
+                        (retrievedMembers: [RedisString?]?, error: NSError?) in
+                        XCTAssertNil(error)
+                        
+                            redis.sdiffstore(destination: self.key3, keys: self.key1, self.key2) {
+                            (retrievedTotalElementAdded: Int?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertNotNil(retrievedTotalElementAdded)
+                            XCTAssertEqual(retrievedTotalElementAdded!, 2)
+                            
+                            expectation1.fulfill()
+                        }
+                    }
+                }
             }
-            redis.sadd(self.key2, members: self.member1, self.member4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                
-            }
-            
-            redis.smembers(self.key2) {
-                (retrievedMembers: [RedisString?]?, error: NSError?) in
-                XCTAssertNil(error)
-            }
-            
-            redis.sdiffstore(destination: self.key3, keys: self.key1, self.key2) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded!, 2)
-            }
-
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -359,28 +358,27 @@ public class TestSetCommandsPart2: XCTestCase {
                 
                 XCTAssertNil(error)
                 
+                    redis.sadd(self.redisKey2, members: self.redismember1, self.redismember4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    
+                        redis.smembers(self.redisKey2) {
+                        (retrievedMembers: [RedisString?]?, error: NSError?) in
+                        XCTAssertNil(error)
+                        
+                            redis.sdiffstore(destination: self.redisKey3, keys: self.redisKey1, self.redisKey2) {
+                            (retrievedTotalElementAdded: Int?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertNotNil(retrievedTotalElementAdded)
+                            XCTAssertEqual(retrievedTotalElementAdded!, 2)
+                            
+                            expectation1.fulfill()
+                        }
+                    }
+                }
             }
-            redis.sadd(self.redisKey2, members: self.redismember1, self.redismember4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                
-            }
-            
-            redis.smembers(self.redisKey2) {
-                (retrievedMembers: [RedisString?]?, error: NSError?) in
-                XCTAssertNil(error)
-            }
-            
-            redis.sdiffstore(destination: self.redisKey3, keys: self.redisKey1, self.redisKey2) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalElementAdded)
-                XCTAssertEqual(retrievedTotalElementAdded!, 2)
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -393,25 +391,22 @@ public class TestSetCommandsPart2: XCTestCase {
                 
                 XCTAssertNil(error)
                 
+                    redis.sadd(self.key2, members: self.member3, self.member4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    
+                        redis.sinter(self.key1, self.key2) {
+                        (retrievedMembers: [RedisString?]?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(retrievedMembers)
+                        XCTAssertEqual(retrievedMembers!.count, 1)
+                        
+                        expectation1.fulfill()
+                    }
+                }
             }
-            
-            redis.sadd(self.key2, members: self.member3, self.member4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                
-            }
-            
-            redis.sinter(self.key1, self.key2) {
-                (retrievedMembers: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMembers)
-                XCTAssertEqual(retrievedMembers!.count, 1)
-                
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -425,25 +420,23 @@ public class TestSetCommandsPart2: XCTestCase {
                 
                 XCTAssertNil(error)
                 
+                    redis.sadd(self.redisKey2, members: self.redismember3, self.redismember4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    
+                        redis.sinter(self.redisKey1, self.redisKey2) {
+                        (retrievedMembers: [RedisString?]?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(retrievedMembers)
+                        XCTAssertEqual(retrievedMembers!.count, 1)
+                        
+                        
+                        expectation1.fulfill()
+                    }
+                }
             }
-            
-            redis.sadd(self.redisKey2, members: self.redismember3, self.redismember4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                
-            }
-            
-            redis.sinter(self.redisKey1, self.redisKey2) {
-                (retrievedMembers: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMembers)
-                XCTAssertEqual(retrievedMembers!.count, 1)
-                
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -455,32 +448,31 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.sadd(self.key2, members: self.member3, self.member4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 2)
-            }
-            
-            
-            redis.sinterstore(self.key3, keys: self.key1, self.key2) {
-                (retrievedTotalMembers: Int?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalMembers)
-                XCTAssertEqual(retrievedTotalMembers, 1)
-                
-                redis.scard(self.key3) {
-                    (retrievedTotalElements: Int?, error: NSError?) in
-                    
+                    redis.sadd(self.key2, members: self.member3, self.member4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
                     XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalElements, 1, "There should only be 1 member in the set \(self.key3), there are in fact \(retrievedTotalElements!)")
-                }
+                    XCTAssertEqual(retrievedTotalElementAdded, 2)
+                    
+                        redis.sinterstore(self.key3, keys: self.key1, self.key2) {
+                        (retrievedTotalMembers: Int?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(retrievedTotalMembers)
+                        XCTAssertEqual(retrievedTotalMembers, 1)
+                        
+                        redis.scard(self.key3) {
+                            (retrievedTotalElements: Int?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertEqual(retrievedTotalElements, 1, "There should only be 1 member in the set \(self.key3), there are in fact \(retrievedTotalElements!)")
+                            
+                            expectation1.fulfill()
+                        }
 
+                    }
+                }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -493,32 +485,31 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.sadd(self.redisKey2, members: self.redismember3, self.redismember4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 2)
-            }
-            
-            
-            redis.sinterstore(self.redisKey3, keys: self.redisKey1, self.redisKey2) {
-                (retrievedTotalMembers: Int?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedTotalMembers)
-                XCTAssertEqual(retrievedTotalMembers, 1)
-                
-                redis.scard(self.redisKey3) {
-                    (retrievedTotalElements: Int?, error: NSError?) in
-                    
+                    redis.sadd(self.redisKey2, members: self.redismember3, self.redismember4) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
                     XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalElements, 1, "There should only be 1 member in the set \(self.redisKey3), there are in fact \(retrievedTotalElements!)")
+                    XCTAssertEqual(retrievedTotalElementAdded, 2)
+                    
+                        redis.sinterstore(self.redisKey3, keys: self.redisKey1, self.redisKey2) {
+                        (retrievedTotalMembers: Int?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(retrievedTotalMembers)
+                        XCTAssertEqual(retrievedTotalMembers, 1)
+                        
+                        redis.scard(self.redisKey3) {
+                            (retrievedTotalElements: Int?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertEqual(retrievedTotalElements, 1, "There should only be 1 member in the set \(self.redisKey3), there are in fact \(retrievedTotalElements!)")
+                            
+                            expectation1.fulfill()
+                        }
+                        
+                    }
                 }
-                
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -530,29 +521,29 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementsAdded: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
-            }
-            
-            redis.sismember(self.key1, member: self.member1) {
-                (isMember: Bool?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(isMember)
-                if let isMember = isMember {
-                    XCTAssertTrue(isMember, "Member '\(self.member1)' should be a member of set '\(self.key1)'")
+                    redis.sismember(self.key1, member: self.member1) {
+                    (isMember: Bool?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(isMember)
+                    if let isMember = isMember {
+                        XCTAssertTrue(isMember, "Member '\(self.member1)' should be a member of set '\(self.key1)'")
+                    }
+                    
+                        redis.sismember(self.key1, member: self.member3) {
+                        (isMember: Bool?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(isMember)
+                        if let isMember = isMember {
+                            XCTAssertFalse(isMember, "Member '\(self.member3)' should not be a member of set '\(self.key1)'")
+                        }
+                        
+                        expectation1.fulfill()
+                    }
                 }
             }
-            
-            redis.sismember(self.key1, member: self.member3) {
-                (isMember: Bool?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(isMember)
-                if let isMember = isMember {
-                    XCTAssertFalse(isMember, "Member '\(self.member3)' should not be a member of set '\(self.key1)'")
-                }
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -564,29 +555,29 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementsAdded: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
-            }
-            
-            redis.sismember(self.redisKey1, member: self.redismember1) {
-                (isMember: Bool?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(isMember)
-                if let isMember = isMember {
-                    XCTAssertTrue(isMember, "Member '\(self.redismember1)' should be a member of set '\(self.redisKey1)'")
+                    redis.sismember(self.redisKey1, member: self.redismember1) {
+                    (isMember: Bool?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(isMember)
+                    if let isMember = isMember {
+                        XCTAssertTrue(isMember, "Member '\(self.redismember1)' should be a member of set '\(self.redisKey1)'")
+                    }
+                    
+                        redis.sismember(self.redisKey1, member: self.redismember3) {
+                        (isMember: Bool?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(isMember)
+                        if let isMember = isMember {
+                            XCTAssertFalse(isMember, "Member '\(self.redismember3)' should not be a member of set '\(self.redisKey1)'")
+                        }
+                        
+                        expectation1.fulfill()
+                    }
                 }
             }
-            
-            redis.sismember(self.redisKey1, member: self.redismember3) {
-                (isMember: Bool?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(isMember)
-                if let isMember = isMember {
-                    XCTAssertFalse(isMember, "Member '\(self.redismember3)' should not be a member of set '\(self.redisKey1)'")
-                }
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -598,36 +589,37 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 2)
-            }
-            
-            redis.sadd(self.key2, members: self.member3) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 1)
-            }
-            
-            redis.smove(source: self.key1, destination: self.key2, member: self.member1) {
-                (hasMoved: Bool?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(hasMoved)
-                if let hasMoved = hasMoved {
-                    XCTAssertTrue(hasMoved)
-                }
-                
-                redis.scard(self.key1) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
+                    redis.sadd(self.key2, members: self.member3) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
                     XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
-                }
-                redis.scard(self.key2) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
-                    XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
+                    XCTAssertEqual(retrievedTotalElementAdded, 1)
+                    
+                        redis.smove(source: self.key1, destination: self.key2, member: self.member1) {
+                        (hasMoved: Bool?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(hasMoved)
+                        if let hasMoved = hasMoved {
+                            XCTAssertTrue(hasMoved)
+                        }
+                        
+                        redis.scard(self.key1) {
+                            (retrievedTotalMembers: Int?, error: NSError?) in
+                            XCTAssertNil(error)
+                            XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                            
+                                redis.scard(self.key2) {
+                                (retrievedTotalMembers: Int?, error: NSError?) in
+                                XCTAssertNil(error)
+                                XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
+                                
+                                expectation1.fulfill()
+                            }
+                        }
+                    }
                 }
             }
-
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -640,36 +632,37 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 2)
-            }
-            
-            redis.sadd(self.redisKey2, members: self.redismember3) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 1)
-            }
-            
-            redis.smove(source: self.redisKey1, destination: self.redisKey2, member: self.redismember1) {
-                (hasMoved: Bool?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(hasMoved)
-                if let hasMoved = hasMoved {
-                    XCTAssertTrue(hasMoved)
-                }
-                
-                redis.scard(self.redisKey1) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
+                    redis.sadd(self.redisKey2, members: self.redismember3) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
                     XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
-                }
-                redis.scard(self.redisKey2) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
-                    XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
+                    XCTAssertEqual(retrievedTotalElementAdded, 1)
+                    
+                        redis.smove(source: self.redisKey1, destination: self.redisKey2, member: self.redismember1) {
+                        (hasMoved: Bool?, error: NSError?) in
+                        
+                        XCTAssertNil(error)
+                        XCTAssertNotNil(hasMoved)
+                        if let hasMoved = hasMoved {
+                            XCTAssertTrue(hasMoved)
+                        }
+                        
+                        redis.scard(self.redisKey1) {
+                            (retrievedTotalMembers: Int?, error: NSError?) in
+                            XCTAssertNil(error)
+                            XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                            
+                                redis.scard(self.redisKey2) {
+                                (retrievedTotalMembers: Int?, error: NSError?) in
+                                XCTAssertNil(error)
+                                XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
+                                
+                                expectation1.fulfill()
+                            }
+                        }
+                    }
                 }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -681,54 +674,50 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.spop(self.key1) {
-                (memberPopped: RedisString?, error: NSError?) in
                 
-                XCTAssertNil(error, "Error: \(error)")
-                XCTAssertNotNil(memberPopped)
-                
-                redis.scard(self.key1) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
-                    XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
-                }
-            }
-            
-            redis.info() {
-                (info: RedisInfo?, error: NSError?) in
-                
-                if let info = info {
-                    let version = info.server.redis_version
-                    //Get the major and minor from the version
-                    let minorMicro = version.substring(from: (version.range(of: ".")?.upperBound)!)
-                    let minor = minorMicro.substring(to: (minorMicro.range(of: ".")?.lowerBound)!)
-                    let majorMinor = version.substring(to: (version.range(of: ".")?.upperBound)!)+minor
-
-                    if !self.redisVersions.contains(majorMinor) {
-                        redis.sadd(self.key2, members: self.member1, self.member2, self.member3) {
-                            (retrievedTotalElementAdded: Int?, error: NSError?) in
-                            XCTAssertNil(error)
-                            XCTAssertEqual(retrievedTotalElementAdded, 3)
-                        }
+                    redis.spop(self.key1) {
+                    (memberPopped: RedisString?, error: NSError?) in
+                    
+                    XCTAssertNil(error, "Error: \(error)")
+                    XCTAssertNotNil(memberPopped)
+                    
+                    redis.scard(self.key1) {
+                        (retrievedTotalMembers: Int?, error: NSError?) in
+                        XCTAssertNil(error)
+                        XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
                         
-                        redis.spop(self.key2, count: 2) {
-                            (memberPopped: [RedisString?]?, error: NSError?) in
+                            redis.info() {
+                            (info: RedisInfo?, error: NSError?) in
                             
-                            XCTAssertNil(error, "Error: \(error)")
-                            XCTAssertNotNil(memberPopped)
-                            
-                            redis.scard(self.key2) {
-                                (retrievedTotalMembers: Int?, error: NSError?) in
-                                XCTAssertNil(error)
-                                XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                            if let info = info {
+
+                                if info.server.checkVersionIsNewerOrSame("3.2") {
+                                    redis.sadd(self.key2, members: self.member1, self.member2, self.member3) {
+                                        (retrievedTotalElementAdded: Int?, error: NSError?) in
+                                        XCTAssertNil(error)
+                                        XCTAssertEqual(retrievedTotalElementAdded, 3)
+                                        
+                                            redis.spop(self.key2, count: 2) {
+                                            (memberPopped: [RedisString?]?, error: NSError?) in
+                                            
+                                            XCTAssertNil(error, "Error: \(error)")
+                                            XCTAssertNotNil(memberPopped)
+                                            
+                                            redis.scard(self.key2) {
+                                                (retrievedTotalMembers: Int?, error: NSError?) in
+                                                XCTAssertNil(error)
+                                                XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                                                
+                                                expectation1.fulfill()
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -741,55 +730,51 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.spop(self.redisKey1) {
-                (memberPopped: RedisString?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(memberPopped)
-                
-                redis.scard(self.redisKey1) {
-                    (retrievedTotalMembers: Int?, error: NSError?) in
-                    XCTAssertNil(error)
-                    XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
-                }
-            }
-            
-            redis.info() {
-                (info: RedisInfo?, error: NSError?) in
-                
-                if let info = info {
-                    let version = info.server.redis_version
-                    //Get the major and minor from the version
-                    let minorMicro = version.substring(from: (version.range(of: ".")?.upperBound)!)
-                    let minor = minorMicro.substring(to: (minorMicro.range(of: ".")?.lowerBound)!)
-                    let majorMinor = version.substring(to: (version.range(of: ".")?.upperBound)!)+minor
+                    redis.spop(self.redisKey1) {
+                    (memberPopped: RedisString?, error: NSError?) in
                     
-                    if !self.redisVersions.contains(majorMinor) {
-                        redis.sadd(self.redisKey2, members: self.redismember1, self.redismember2, self.redismember3) {
-                            (retrievedTotalElementAdded: Int?, error: NSError?) in
-                            XCTAssertNil(error)
-                            XCTAssertEqual(retrievedTotalElementAdded, 3)
-                        }
-                        
-                        redis.spop(self.redisKey2, count: 2) {
-                            (memberPopped: [RedisString?]?, error: NSError?) in
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(memberPopped)
+                    
+                    redis.scard(self.redisKey1) {
+                        (retrievedTotalMembers: Int?, error: NSError?) in
+                        XCTAssertNil(error)
+                        XCTAssertEqual(retrievedTotalMembers, 2, "There should be 2 members but there are \(retrievedTotalMembers) member(s)")
                             
-                            XCTAssertNil(error)
-                            XCTAssertNotNil(memberPopped)
+                            redis.info() {
+                            (info: RedisInfo?, error: NSError?) in
                             
-                            redis.scard(self.redisKey2) {
-                                (retrievedTotalMembers: Int?, error: NSError?) in
-                                XCTAssertNil(error)
-                                XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                            if let info = info {
+                                
+                                if info.server.checkVersionIsNewerOrSame("3.2") {
+                                    
+                                    redis.sadd(self.redisKey2, members: self.redismember1, self.redismember2, self.redismember3) {
+                                        (retrievedTotalElementAdded: Int?, error: NSError?) in
+                                        XCTAssertNil(error)
+                                        XCTAssertEqual(retrievedTotalElementAdded, 3)
+                                        
+                                            redis.spop(self.redisKey2, count: 2) {
+                                            (memberPopped: [RedisString?]?, error: NSError?) in
+                                            
+                                            XCTAssertNil(error)
+                                            XCTAssertNotNil(memberPopped)
+                                            
+                                            redis.scard(self.redisKey2) {
+                                                (retrievedTotalMembers: Int?, error: NSError?) in
+                                                XCTAssertNil(error)
+                                                XCTAssertEqual(retrievedTotalMembers, 1, "There should be 1 member but there are \(retrievedTotalMembers) member(s)")
+                                                
+                                                expectation1.fulfill()
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -801,16 +786,16 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.srandmember(self.key1) {
-                (retrievedMember: RedisString?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMember)
+                    redis.srandmember(self.key1) {
+                    (retrievedMember: RedisString?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedMember)
+                    
+                    expectation1.fulfill()
+                }
             }
-
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -823,16 +808,16 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.srandmember(self.redisKey1) {
-                (retrievedMember: RedisString?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMember)
+                    redis.srandmember(self.redisKey1) {
+                    (retrievedMember: RedisString?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(retrievedMember)
+                    
+                    expectation1.fulfill()
+                }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -844,22 +829,22 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.srem(self.key1, members: self.member3, self.member2) {
+                
+                redis.srem(self.key1, members: self.member3, self.member2) {
                 (totalMembersRemoved: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
                 XCTAssertNotNil(totalMembersRemoved)
                 XCTAssertEqual(totalMembersRemoved, 2)
                 
-                redis.scard(self.key1) {
-                    (totalMembers: Int?, error: NSError?) in
-                    XCTAssertEqual(totalMembers, 1)
+                    redis.scard(self.key1) {
+                        (totalMembers: Int?, error: NSError?) in
+                        XCTAssertEqual(totalMembers, 1)
+                        
+                        expectation1.fulfill()
+                    }
                 }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -872,22 +857,22 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.srem(self.redisKey1, members: self.redismember3, self.redismember2) {
+                
+                redis.srem(self.redisKey1, members: self.redismember3, self.redismember2) {
                 (totalMembersRemoved: Int?, error: NSError?) in
                 
                 XCTAssertNil(error)
                 XCTAssertNotNil(totalMembersRemoved)
                 XCTAssertEqual(totalMembersRemoved, 2)
                 
-                redis.scard(self.redisKey1) {
-                    (totalMembers: Int?, error: NSError?) in
-                    XCTAssertEqual(totalMembers, 1)
+                    redis.scard(self.redisKey1) {
+                        (totalMembers: Int?, error: NSError?) in
+                        XCTAssertEqual(totalMembers, 1)
+                        
+                        expectation1.fulfill()
+                    }
                 }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -900,29 +885,29 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 2)
-            }
-            
-            redis.sadd(self.key2, members: self.member3) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 1)
-            }
-            
-            redis.sadd(self.key3, members: self.member1, self.member3, self.member4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.sunion(self.key1, self.key2, self.key3) {
-                (retrievedMemberList: [RedisString?]?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMemberList)
-                XCTAssertEqual(retrievedMemberList!.count, 4)
+                    redis.sadd(self.key2, members: self.member3) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    XCTAssertNil(error)
+                    XCTAssertEqual(retrievedTotalElementAdded, 1)
+                    
+                        redis.sadd(self.key3, members: self.member1, self.member3, self.member4) {
+                        (retrievedTotalElementAdded: Int?, error: NSError?) in
+                        XCTAssertNil(error)
+                        XCTAssertEqual(retrievedTotalElementAdded, 3)
+                        
+                            redis.sunion(self.key1, self.key2, self.key3) {
+                            (retrievedMemberList: [RedisString?]?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertNotNil(retrievedMemberList)
+                            XCTAssertEqual(retrievedMemberList!.count, 4)
+                            
+                            expectation1.fulfill()
+                        }
+                    }
+                }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -936,29 +921,29 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 2)
-            }
-            
-            redis.sadd(self.redisKey2, members: self.redismember3) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 1)
-            }
-            
-            redis.sadd(self.redisKey3, members: self.redismember1, self.redismember3, self.redismember4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.sunion(self.redisKey1, self.redisKey2, self.redisKey3) {
-                (retrievedMemberList: [RedisString?]?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMemberList)
-                XCTAssertEqual(retrievedMemberList!.count, 4)
+                redis.sadd(self.redisKey2, members: self.redismember3) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    XCTAssertNil(error)
+                    XCTAssertEqual(retrievedTotalElementAdded, 1)
+                    
+                        redis.sadd(self.redisKey3, members: self.redismember1, self.redismember3, self.redismember4) {
+                        (retrievedTotalElementAdded: Int?, error: NSError?) in
+                        XCTAssertNil(error)
+                        XCTAssertEqual(retrievedTotalElementAdded, 3)
+                        
+                            redis.sunion(self.redisKey1, self.redisKey2, self.redisKey3) {
+                            (retrievedMemberList: [RedisString?]?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertNotNil(retrievedMemberList)
+                            XCTAssertEqual(retrievedMemberList!.count, 4)
+                            
+                            expectation1.fulfill()
+                        }
+                    }
+                }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -1009,33 +994,33 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 2)
-            }
-            
-            redis.sadd(self.redisKey2, members: self.redismember3) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 1)
-            }
-            
-            redis.sadd(self.redisKey3, members: self.redismember1, self.redismember3, self.redismember4) {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 3)
-            }
-            
-            redis.sunionstore(self.redisKey4, keys: self.redisKey1, self.redisKey2, self.redisKey3) {
-                (retrievedMemberList: Int?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertNotNil(retrievedMemberList)
-                
-                redis.scard(self.redisKey4) {
-                    (totalMembers: Int?, error: NSError?) in
-                    XCTAssertEqual(totalMembers, 4)
+                    redis.sadd(self.redisKey2, members: self.redismember3) {
+                    (retrievedTotalElementAdded: Int?, error: NSError?) in
+                    XCTAssertNil(error)
+                    XCTAssertEqual(retrievedTotalElementAdded, 1)
+                    
+                        redis.sadd(self.redisKey3, members: self.redismember1, self.redismember3, self.redismember4) {
+                        (retrievedTotalElementAdded: Int?, error: NSError?) in
+                        XCTAssertNil(error)
+                        XCTAssertEqual(retrievedTotalElementAdded, 3)
+                        
+                            redis.sunionstore(self.redisKey4, keys: self.redisKey1, self.redisKey2, self.redisKey3) {
+                            (retrievedMemberList: Int?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertNotNil(retrievedMemberList)
+                            
+                            redis.scard(self.redisKey4) {
+                                (totalMembers: Int?, error: NSError?) in
+                                XCTAssertEqual(totalMembers, 4)
+                            }
+                            
+                            expectation1.fulfill()
+                        }
+                    }
                 }
             }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -1047,45 +1032,46 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 4)
-            }
-            redis.sscan(self.key1, cursor: 0) {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
                 
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedResults!.count, 4)
+                    redis.sscan(self.key1, cursor: 0) {
+                    (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertEqual(retrievedResults!.count, 4)
+                    
+                        redis.sadd(self.key2, members: "1", "2", "3", "foo", "foobar", "feelsgoodman") {
+                        (retrievedTotalElementAdded: Int?, error: NSError?) in
+                        XCTAssertNil(error)
+                        XCTAssertEqual(retrievedTotalElementAdded, 6)
+                        
+                            redis.sscan(self.key2, cursor: 0, match: "f*") {
+                            (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                            
+                            XCTAssertNil(error)
+                            XCTAssertNotNil(cursor)
+                            XCTAssertNotNil(retrievedResults)
+                            
+                                redis.sscan(self.key2, cursor: 0, count: 3) {
+                                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                                
+                                XCTAssertNil(error)
+                                XCTAssertNotNil(cursor)
+                                XCTAssertNotNil(retrievedResults)
+                                
+                                    redis.sscan(self.key2, cursor: 0, match: "f*", count: 3) {
+                                    (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                                    
+                                    XCTAssertNil(error)
+                                    XCTAssertNotNil(cursor)
+                                    XCTAssertNotNil(retrievedResults)
+                                    
+                                    expectation1.fulfill()
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            
-            redis.sadd(self.key2, members: "1", "2", "3", "foo", "foobar", "feelsgoodman") {
-                (retrievedTotalElementAdded: Int?, error: NSError?) in
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedTotalElementAdded, 6)
-            }
-            
-            redis.sscan(self.key2, cursor: 0, match: "f*") {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(cursor)
-                XCTAssertNotNil(retrievedResults)
-            }
-            
-            redis.sscan(self.key2, cursor: 0, count: 3) {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(cursor)
-                XCTAssertNotNil(retrievedResults)
-            }
-            
-            redis.sscan(self.key2, cursor: 0, match: "f*", count: 3) {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(cursor)
-                XCTAssertNotNil(retrievedResults)
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -1098,46 +1084,50 @@ public class TestSetCommandsPart2: XCTestCase {
                 (retrievedTotalElementAdded: Int?, error: NSError?) in
                 XCTAssertNil(error)
                 XCTAssertEqual(retrievedTotalElementAdded, 4)
-            }
-            redis.sscan(self.redisKey1, cursor: 0) {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertEqual(retrievedResults!.count, 4)
+            
+                redis.sscan(self.redisKey1, cursor: 0) {
+                    (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertEqual(retrievedResults!.count, 4)
+                    
+                        redis.sadd(self.redisKey2, members: RedisString("1"), RedisString("2"),
+                               RedisString("3"), RedisString("foo"), RedisString("foobar"), RedisString("feelsgoodman")) {
+                                (retrievedTotalElementAdded: Int?, error: NSError?) in
+                                XCTAssertNil(error)
+                                XCTAssertEqual(retrievedTotalElementAdded, 6)
+                                
+                                redis.sscan(self.redisKey2, cursor: 0, match: RedisString("f*")) {
+                                    (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                                    
+                                    XCTAssertNil(error)
+                                    XCTAssertNotNil(cursor)
+                                    XCTAssertNotNil(retrievedResults)
+                                    
+                                    redis.sscan(self.redisKey2, cursor: 0, count: 3) {
+                                        (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                                        
+                                        XCTAssertNil(error)
+                                        XCTAssertNotNil(cursor)
+                                        XCTAssertNotNil(retrievedResults)
+                                        
+                                        redis.sscan(self.redisKey2, cursor: 0, match: RedisString("f*"), count: 3) {
+                                            (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
+                                            
+                                            XCTAssertNil(error)
+                                            XCTAssertNotNil(cursor)
+                                            XCTAssertNotNil(retrievedResults)
+                                            
+                                            expectation1.fulfill()
+                                        }
+                                    }
+                                }
+                    }
+                }
             }
             
-            redis.sadd(self.redisKey2, members: RedisString("1"), RedisString("2"),
-                       RedisString("3"), RedisString("foo"), RedisString("foobar"), RedisString("feelsgoodman")) {
-                        (retrievedTotalElementAdded: Int?, error: NSError?) in
-                        XCTAssertNil(error)
-                        XCTAssertEqual(retrievedTotalElementAdded, 6)
-            }
             
-            redis.sscan(self.redisKey2, cursor: 0, match: RedisString("f*")) {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(cursor)
-                XCTAssertNotNil(retrievedResults)
-            }
             
-            redis.sscan(self.redisKey2, cursor: 0, count: 3) {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(cursor)
-                XCTAssertNotNil(retrievedResults)
-            }
-            
-            redis.sscan(self.redisKey2, cursor: 0, match: RedisString("f*"), count: 3) {
-                (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-                
-                XCTAssertNil(error)
-                XCTAssertNotNil(cursor)
-                XCTAssertNotNil(retrievedResults)
-            }
-            
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
@@ -1150,8 +1140,8 @@ public class TestSetCommandsPart2: XCTestCase {
             
             XCTAssertNil(error)
             XCTAssertNotNil(info)
+            expectation1.fulfill()
         }
-        expectation1.fulfill()
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
 
