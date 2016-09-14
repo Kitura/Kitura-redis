@@ -21,7 +21,7 @@ import Foundation
 public class Redis {
     
     ///
-    /// REdis Serialization Protocol handle
+    /// Redis Serialization Protocol handle
     ///
     private var respHandle: RedisResp?
     
@@ -146,9 +146,9 @@ public class Redis {
     ///
     /// Returns information and statistics about the server
     ///
-    /// Returns: Dictionary reply: Dictionary of field and result
+    /// Returns: RedisInfo reply: Struct containing some client and server information
     ///
-    public func info(callback: @escaping ([String: String]?, NSError?) -> Void) {
+    public func info(callback: (RedisInfo?, NSError?) -> Void) {
         issueCommand("INFO") {(response: RedisResponse) in
             self.redisDictionaryResponseHandler(response, callback: callback)
         }
@@ -1903,12 +1903,12 @@ public class Redis {
     /// - Parameter key: the String paramter for the key
     /// - Parameter member: the String paramter for the member
     ///
-    /// Returns: Integer reply: 1 if element is a member of the set,
-    ///                         0 if the element isn't a member of the set, or if key doesn't exist.
+    /// Returns: Bool reply: True if element is a member of the set,
+    ///                      False if the element isn't a member of the set, or if key doesn't exist.
     ///
-    public func sismember(_ key: String, member: String, callback: (Int?, NSError?) -> Void) {
+    public func sismember(_ key: String, member: String, callback: (Bool?, NSError?) -> Void) {
         issueCommand("SISMEMBER", key, member) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
+            self.redisBoolResponseHandler(response, callback: callback)
         }
     }
     
@@ -1918,12 +1918,12 @@ public class Redis {
     /// - Parameter key: the RedisString paramter for the key
     /// - Parameter member: the RedisString paramter for the member
     ///
-    /// Returns: Integer reply: 1 if element is a member of the set,
-    ///                         0 if the element isn't a member of the set, or if key doesn't exist.
+    /// Returns: Bool reply: True if element is a member of the set,
+    ///                      False if the element isn't a member of the set, or if key doesn't exist.
     ///
-    public func sismember(_ key: RedisString, member: RedisString, callback: (Int?, NSError?) -> Void) {
+    public func sismember(_ key: RedisString, member: RedisString, callback: (Bool?, NSError?) -> Void) {
         issueCommand(RedisString("SISMEMBER"), key, member) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
+            self.redisBoolResponseHandler(response, callback: callback)
         }
     }
     
@@ -1934,14 +1934,14 @@ public class Redis {
     /// - Parameter destination: the Destination set from where to move the member to
     /// - Parameter member: the String parameter for the member to be moved
     ///
-    /// Returns: Integer reply: 1 if element is moved,
-    ///                         0 if the element isn't a member of source and
+    /// Returns: Bool reply: True if element is moved,
+    ///                      False if the element isn't a member of source and
     ///                             no operation was performed.
     ///
-    public func smove(source: String, destination: String, member: String, callback: (Int?, NSError?) -> Void) {
+    public func smove(source: String, destination: String, member: String, callback: (Bool?, NSError?) -> Void) {
         issueCommand("SMOVE", source, destination, member) {
             (response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
+            self.redisBoolResponseHandler(response, callback: callback)
         }
     }
     
@@ -1952,14 +1952,14 @@ public class Redis {
     /// - Parameter destination: the Destination set from where to move the member to
     /// - Parameter member: the RedisString parameter for the member to be moved
     ///
-    /// Returns: Integer reply: 1 if element is moved,
-    ///                         0 if the element isn't a member of source and
+    /// Returns: Bool reply: True if element is moved,
+    ///                      False if the element isn't a member of source and
     ///                             no operation was performed.
     ///
-    public func smove(source: RedisString, destination: RedisString, member: RedisString, callback: (Int?, NSError?) -> Void) {
+    public func smove(source: RedisString, destination: RedisString, member: RedisString, callback: (Bool?, NSError?) -> Void) {
         issueCommand(RedisString("SMOVE"), source, destination, member) {
             (response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
+            self.redisBoolResponseHandler(response, callback: callback)
         }
     }
     
@@ -2498,10 +2498,10 @@ public class Redis {
         }
     }
     
-    private func redisDictionaryResponseHandler(_ response: RedisResponse, callback: ([String: String]?, NSError?) -> Void) {
+    private func redisDictionaryResponseHandler(_ response: RedisResponse, callback: (RedisInfo?, NSError?) -> Void) {
         switch(response){
         case .StringValue(let str):
-            callback(parseString(str), nil)
+            callback(RedisInfo(str), nil)
         case .Nil:
             callback(nil, nil)
         case .Error(let error):
@@ -2509,20 +2509,6 @@ public class Redis {
         default:
             callback(nil, _: createUnexpectedResponseError(response))
         }
-    }
-    
-    private func parseString(_ str: RedisString) -> [String: String]? {
-        let convertedStr = str.asString
-        let newline = "\r\n"
-        let strArray = convertedStr.components(separatedBy: newline)
-        var infoDict: [String: String] = [:]
-        for val in strArray {
-            let pos = val.range(of: ":")
-            if let pos = pos {
-                infoDict[val.substring(to: pos.lowerBound)] = val.substring(from: pos.upperBound)
-            }
-        }
-        return infoDict
     }
     
     private func createUnexpectedResponseError(_ response: RedisResponse) -> NSError {
@@ -2541,6 +2527,63 @@ public class Redis {
     
     private func createRedisError(_ redisError: String) -> NSError {
         return createError(redisError, code: 1)
+    }
+}
+
+public struct RedisInfo {
+    
+    public let server: RedisInfoServer
+    public let client: RedisInfoClient
+
+    public init(_ redisReply: RedisString) {
+        
+        let convertedStr = redisReply.asString
+        let newline = "\r\n"
+        let strArray = convertedStr.components(separatedBy: newline)
+        var parsedInfo: [String: String] = [:]
+        
+        for val in strArray {
+            let pos = val.range(of: ":")
+            if let pos = pos {
+                parsedInfo[val.substring(to: pos.lowerBound)] = val.substring(from: pos.upperBound)
+            }
+        }
+        
+        server = RedisInfoServer(parsedInfo)
+        client = RedisInfoClient(parsedInfo)
+    }
+    
+    public struct RedisInfoClient {
+        public let connected_clients: Int
+        public let blocked_clients: Int
+
+        fileprivate init(_ redisInfo: [String: String]) {
+            self.connected_clients = Int(redisInfo["connected_clients"]!)!
+            self.blocked_clients = Int(redisInfo["blocked_clients"]!)!
+        }
+    }
+    
+    public struct RedisInfoServer {
+        
+        public let redis_version: String
+        public let redis_mode: String
+        public let os: String
+        public let arch_bits: Int
+        public let process_id: Int
+        public let tcp_port: Int
+        public let uptime_in_seconds: Int
+        public let uptime_in_days: Int
+        
+        fileprivate init(_ redisInfo: [String: String]) {
+            self.redis_version = redisInfo["redis_version"]!
+            self.redis_mode = redisInfo["redis_mode"]!
+            self.os = redisInfo["os"]!
+            self.arch_bits = Int(redisInfo["arch_bits"]!)!
+            self.process_id = Int(redisInfo["process_id"]!)!
+            self.tcp_port = Int(redisInfo["tcp_port"]!)!
+            self.uptime_in_seconds  = Int(redisInfo["uptime_in_seconds"]!)!
+            self.uptime_in_days  = Int(redisInfo["uptime_in_days"]!)!
+        }
     }
     
 }

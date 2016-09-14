@@ -533,19 +533,23 @@ public class TestSetCommandsPart2: XCTestCase {
             }
             
             redis.sismember(self.key1, member: self.member1) {
-                (retrievedIntegerReply: Int?, error: NSError?) in
+                (isMember: Bool?, error: NSError?) in
                 
                 XCTAssertNil(error)
-                XCTAssertNotNil(retrievedIntegerReply)
-                XCTAssertEqual(retrievedIntegerReply, 1, "Member '\(self.member1)' should be a member of set '\(self.key1)'")
+                XCTAssertNotNil(isMember)
+                if let isMember = isMember {
+                    XCTAssertTrue(isMember, "Member '\(self.member1)' should be a member of set '\(self.key1)'")
+                }
             }
             
             redis.sismember(self.key1, member: self.member3) {
-                (retrievedIntegerReply: Int?, error: NSError?) in
+                (isMember: Bool?, error: NSError?) in
                 
                 XCTAssertNil(error)
-                XCTAssertNotNil(retrievedIntegerReply)
-                XCTAssertEqual(retrievedIntegerReply, 0, "Member '\(self.member3)' should not be a member of set '\(self.key1)'")
+                XCTAssertNotNil(isMember)
+                if let isMember = isMember {
+                    XCTAssertFalse(isMember, "Member '\(self.member3)' should not be a member of set '\(self.key1)'")
+                }
             }
             
             expectation1.fulfill()
@@ -563,19 +567,23 @@ public class TestSetCommandsPart2: XCTestCase {
             }
             
             redis.sismember(self.redisKey1, member: self.redismember1) {
-                (retrievedIntegerReply: Int?, error: NSError?) in
+                (isMember: Bool?, error: NSError?) in
                 
                 XCTAssertNil(error)
-                XCTAssertNotNil(retrievedIntegerReply)
-                XCTAssertEqual(retrievedIntegerReply, 1, "Member '\(self.redismember1)' should be a member of set '\(self.redisKey1)'")
+                XCTAssertNotNil(isMember)
+                if let isMember = isMember {
+                    XCTAssertTrue(isMember, "Member '\(self.redismember1)' should be a member of set '\(self.redisKey1)'")
+                }
             }
             
             redis.sismember(self.redisKey1, member: self.redismember3) {
-                (retrievedIntegerReply: Int?, error: NSError?) in
+                (isMember: Bool?, error: NSError?) in
                 
                 XCTAssertNil(error)
-                XCTAssertNotNil(retrievedIntegerReply)
-                XCTAssertEqual(retrievedIntegerReply, 0, "Member '\(self.redismember3)' should not be a member of set '\(self.redisKey1)'")
+                XCTAssertNotNil(isMember)
+                if let isMember = isMember {
+                    XCTAssertFalse(isMember, "Member '\(self.redismember3)' should not be a member of set '\(self.redisKey1)'")
+                }
             }
             
             expectation1.fulfill()
@@ -599,11 +607,13 @@ public class TestSetCommandsPart2: XCTestCase {
             }
             
             redis.smove(source: self.key1, destination: self.key2, member: self.member1) {
-                (retrievedIntegerReply: Int?, error: NSError?) in
+                (hasMoved: Bool?, error: NSError?) in
                 
                 XCTAssertNil(error)
-                XCTAssertNotNil(retrievedIntegerReply)
-                XCTAssertEqual(retrievedIntegerReply, 1)
+                XCTAssertNotNil(hasMoved)
+                if let hasMoved = hasMoved {
+                    XCTAssertTrue(hasMoved)
+                }
                 
                 redis.scard(self.key1) {
                     (retrievedTotalMembers: Int?, error: NSError?) in
@@ -639,11 +649,13 @@ public class TestSetCommandsPart2: XCTestCase {
             }
             
             redis.smove(source: self.redisKey1, destination: self.redisKey2, member: self.redismember1) {
-                (retrievedIntegerReply: Int?, error: NSError?) in
+                (hasMoved: Bool?, error: NSError?) in
                 
                 XCTAssertNil(error)
-                XCTAssertNotNil(retrievedIntegerReply)
-                XCTAssertEqual(retrievedIntegerReply, 1)
+                XCTAssertNotNil(hasMoved)
+                if let hasMoved = hasMoved {
+                    XCTAssertTrue(hasMoved)
+                }
                 
                 redis.scard(self.redisKey1) {
                     (retrievedTotalMembers: Int?, error: NSError?) in
@@ -685,10 +697,10 @@ public class TestSetCommandsPart2: XCTestCase {
             }
             
             redis.info() {
-                (info: [String: String]?, error: NSError?) in
+                (info: RedisInfo?, error: NSError?) in
                 
-                if let info = info, let version = info["redis_version"] {
-                    
+                if let info = info {
+                    let version = info.server.redis_version
                     //Get the major and minor from the version
                     let minorMicro = version.substring(from: (version.range(of: ".")?.upperBound)!)
                     let minor = minorMicro.substring(to: (minorMicro.range(of: ".")?.lowerBound)!)
@@ -745,10 +757,10 @@ public class TestSetCommandsPart2: XCTestCase {
             }
             
             redis.info() {
-                (info: [String: String]?, error: NSError?) in
+                (info: RedisInfo?, error: NSError?) in
                 
-                if let info = info, let version = info["redis_version"] {
-                    
+                if let info = info {
+                    let version = info.server.redis_version
                     //Get the major and minor from the version
                     let minorMicro = version.substring(from: (version.range(of: ".")?.upperBound)!)
                     let minor = minorMicro.substring(to: (minorMicro.range(of: ".")?.lowerBound)!)
@@ -1131,16 +1143,13 @@ public class TestSetCommandsPart2: XCTestCase {
     }
     
     func test_info() {
-        let expectation1 = expectation(description: "Shows all information on the redis server")
+        let expectation1 = expectation(description: "Shows some information about the redis server")
         
         redis.info() {
-            (info: [String: String]?, error: NSError?) in
+            (info: RedisInfo?, error: NSError?) in
             
             XCTAssertNil(error)
             XCTAssertNotNil(info)
-            if let info = info {
-                print(info["redis_version"]!)
-            }
         }
         expectation1.fulfill()
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
