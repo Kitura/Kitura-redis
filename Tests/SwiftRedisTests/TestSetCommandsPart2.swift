@@ -712,16 +712,16 @@ public class TestSetCommandsPart2: XCTestCase {
                                             }
                                         }
                                     }
+                                } else {
+                                    expectation1.fulfill()
                                 }
-                            } else {
-                                expectation1.fulfill()
                             }
                         }
                     }
                 }
             }
         }
-        waitForExpectations(timeout: 10, handler: {error in XCTAssertNil(error, "Timeout") })
+        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
     
     func test_spop_redis() {
