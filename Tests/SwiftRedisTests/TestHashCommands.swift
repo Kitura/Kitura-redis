@@ -115,7 +115,7 @@ public class TestHashCommands: XCTestCase {
                         (info: RedisInfo?, error: NSError?) in
                         
                         if let info = info {
-                            if info.server.checkVersionIsNewerOrSame("3.2") {
+                            if info.server.checkVersionCompatible(major: 3, minor: 2) {
                                 let expVal1 = "testing, testing, 1 2 3"
                                 
                                 redis.hset(self.key1, field: self.field1, value: expVal1) {(newField: Bool, error: NSError?) in

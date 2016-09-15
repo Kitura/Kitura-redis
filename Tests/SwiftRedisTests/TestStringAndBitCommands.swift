@@ -91,7 +91,7 @@ public class TestStringAndBitCommands: XCTestCase {
                     (info: RedisInfo?, error: NSError?) in
                     
                     if let info = info {
-                        if info.server.checkVersionIsNewerOrSame("2.8.7") {
+                        if info.server.checkVersionCompatible(major: 2, minor: 8, micro: 7) {
                             redis.bitpos(self.key1, bit: true) {(position: Int?, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(position, "Position result shouldn't be nil")
