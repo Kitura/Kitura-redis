@@ -47,7 +47,10 @@ public class TestListsPart3: XCTestCase {
     
     func localSetup(block: () -> Void) {
         connectRedis() {(error: NSError?) in
-            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
         
             redis.del(self.key1, self.key2, self.key3) {(deleted: Int?, error: NSError?) in
                 block()

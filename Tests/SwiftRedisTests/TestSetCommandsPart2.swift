@@ -75,7 +75,10 @@ public class TestSetCommandsPart2: XCTestCase {
     
     func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
-            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
             
             redis.del(self.key1, self.key2, self.key3, self.key4) {(deleted: Int?, error: NSError?) in
                 callback()
@@ -85,7 +88,10 @@ public class TestSetCommandsPart2: XCTestCase {
     
     func setupRedisTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
-            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
             
             redis.del(self.redisKey1, self.redisKey2, self.redisKey3, self.redisKey4) {(deleted: Int?, error: NSError?) in
                 callback()

@@ -28,7 +28,10 @@ class TestIssueCommand: XCTestCase {
     
     func test_SetAndGet() {
         connectRedis() {(error: NSError?) in
-            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
 
             let key = "plover"
             let value = "613"

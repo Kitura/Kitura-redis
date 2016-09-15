@@ -29,7 +29,10 @@ public class TestConnectCommands: XCTestCase {
     
     func test_pingAndEcho() {
         connectRedis() {(error: NSError?) in
-            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
             
             redis.ping() {(error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -52,7 +55,10 @@ public class TestConnectCommands: XCTestCase {
     
     func selectTestSetup(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
-            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
             
             redis.select(1) {(error: NSError?) in
                 redis.del(self.key) {(count: Int?, error: NSError?) in
