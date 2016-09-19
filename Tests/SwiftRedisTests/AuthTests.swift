@@ -42,22 +42,20 @@ public class AuthTests: XCTestCase {
         redis = Redis()
         connectRedis(authenticate: false) {(error: NSError?) in
             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-
             let expectedValue = "Hi ho, hi ho, we are so secured"
             redis.set(self.key, value: expectedValue) {(wasSet: Bool, error: NSError?) in
                 XCTAssertNotNil(error, "Error was nil")
                 XCTAssertFalse(wasSet, "Set \(self.key) without authenticating")
-
                 redis.auth(self.password) {(error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-
                     redis.set(self.key, value: expectedValue) {(wasSet: Bool, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssert(wasSet, "Failed to set \(self.key)")
-
                         redis.get(self.key) {(returnedValue: RedisString?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertEqual(returnedValue!.asString, expectedValue, "Returned value was not '\(expectedValue)'")
+                            if let returnedValue = returnedValue {
+                                XCTAssertEqual(returnedValue.asString, expectedValue, "Returned value was not '\(expectedValue)'")
+                            }
                         }
                     }
                 }

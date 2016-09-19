@@ -38,7 +38,7 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
                 redis.auth(password, callback: callback)
             }
             else {
-                callback(nil)
+                callback(error)
             }
         }
     }

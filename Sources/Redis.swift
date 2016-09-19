@@ -21,7 +21,7 @@ import Foundation
 public class Redis {
     
     ///
-    /// REdis Serialization Protocol handle
+    /// Redis Serialization Protocol handle
     ///
     private var respHandle: RedisResp?
     
@@ -133,6 +133,28 @@ public class Redis {
     }
     
     ///
+    /// Returns information and statistics about the server
+    ///
+    /// Returns: Bulk string reply: as a collection of text lines.
+    ///
+    public func info(callback: (RedisString?, NSError?) -> Void) {
+        issueCommand("INFO") {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Returns information and statistics about the server
+    ///
+    /// Returns: RedisInfo reply: Struct containing some client and server information
+    ///
+    public func info(callback: (RedisInfo?, NSError?) -> Void) {
+        issueCommand("INFO") {(response: RedisResponse) in
+            self.redisDictionaryResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
     /// Get the value of key.
     ///
     /// - Parameter key: String for the key name
@@ -231,6 +253,23 @@ public class Redis {
     public func del(_ keys: String..., callback: (Int?, NSError?) -> Void) {
         
         var command = ["DEL"]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Removes the specified keys. A key is ignored if it does not exist
+    ///
+    /// - Parameter keys: Variadic parameter as a list of Strings
+    /// - Parameter callback: callback function after deleting item
+    ///
+    public func del(_ keys: RedisString..., callback: (Int?, NSError?) -> Void) {
+        
+        var command = [RedisString("DEL")]
         for key in keys {
             command.append(key)
         }
@@ -1482,6 +1521,8 @@ public class Redis {
         }
     }
     
+    
+    
     ///
     /// Append a value to a list, only if the list exists
     ///
@@ -1503,6 +1544,775 @@ public class Redis {
     public func rpushx(_ key: String, value: RedisString, callback: (Int?, NSError?) -> Void) {
         issueCommand(RedisString("RPUSHX"), RedisString(key), value) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
+
+    ///
+    /// Add one or more members to a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter memebers: an variadic parameter of the values to be added to the set
+    ///
+    /// Returns: Integer reply: the number of elements that were added to the set, not including all the elements already present into the set.
+    ///
+    public func sadd(_ key: String, members: String..., callback: (Int?, NSError?) -> Void) {
+        saddArrayOfMembers(key, members: members, callback: callback)
+    }
+
+    ///
+    /// Add one or more members to a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter memebers: an array parameter of the values to be added to the set
+    ///
+    /// Returns: Integer reply: the number of elements that were added to the set, not including all the elements already present into the set.
+    ///
+    public func saddArrayOfMembers(_ key: String, members: [String], callback: (Int?, NSError?) -> Void) {
+        var command = ["SADD", key]
+        for member in members {
+            command.append(member)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
+    ///
+    /// Add one or more members to a set
+    ///
+    /// - Parameter key: the RedisString parameter for the key
+    /// - Parameter memebers: an variadic parameter of the values to be added to the set
+    ///
+    /// Returns: Integer reply: the number of elements that were added to the set, not including all the elements already present into the set.
+    ///
+    public func sadd(_ key: RedisString, members: RedisString..., callback: (Int?, NSError?) -> Void) {
+        saddArrayOfMembers(key, members: members, callback: callback)
+    }
+    
+    ///
+    /// Add one or more members to a set
+    ///
+    /// - Parameter key: the RedisString parameter for the key
+    /// - Parameter memebers: an array parameter of the values to be added to the set
+    ///
+    /// Returns: Integer reply: the number of elements that were added to the set, not including all the elements already present into the set.
+    ///
+    public func saddArrayOfMembers(_ key: RedisString, members: [RedisString], callback: (Int?, NSError?) -> Void) {
+        var command = [RedisString("SADD"), key]
+        for member in members {
+            command.append(member)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get the number of members in a set
+    /// - Parameter key: the String paramter for the key
+    ///
+    /// Returns: Integer reply: the cardinality (number of elements) of the set, or 0 if key does not exist.
+    ///
+    public func scard(_ key: String, callback: (Int?, NSError?) -> Void) {
+        issueCommand("SCARD", key) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
+    ///
+    /// Get the number of members in a set
+    /// - Parameter key: the RedisString paramter for the key
+    ///
+    /// Returns: Integer reply: the cardinality (number of elements) of the set, or 0 if key does not exist.
+    ///
+    public func scard(_ key: RedisString, callback: (Int?, NSError?) -> Void) {
+        issueCommand(RedisString("SCARD"), key) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
+    ///
+    /// Subtract multiple sets
+    ///
+    /// - Parameter keys: an variadic parameter of the keys to get the difference from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sdiff(keys: String..., callback: ([RedisString?]?, NSError?) -> Void) {
+        sdiffArrayOfKeys(keys: keys, callback: callback)
+    }
+
+    ///
+    /// Subtract multiple sets
+    ///
+    /// - Parameter keys: an array parameter of the keys to get the difference from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sdiffArrayOfKeys(keys: [String], callback: ([RedisString?]?, NSError?) -> Void) {
+        var command = ["SDIFF"]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Subtract multiple sets
+    ///
+    /// - Parameter keys: an variadic parameter of the keys to get the difference from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    public func sdiff(keys: RedisString..., callback: ([RedisString?]?, NSError?) -> Void) {
+        sdiffArrayOfKeys(keys: keys, callback: callback)
+    }
+    
+    ///
+    /// Subtract multiple sets
+    ///
+    /// - Parameter keys: an array parameter of the keys to get the difference from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sdiffArrayOfKeys(keys: [RedisString], callback: ([RedisString?]?, NSError?) -> Void) {
+        var command = [RedisString("SDIFF")]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Subtract multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result,
+    ///                             if destination already exists, it is overwritten
+    /// - Paramter keys: a variadic parameter of the keys to get the difference from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sdiffstore(destination: String, keys: String...,
+        callback: (Int?, NSError?) -> Void) {
+        self.sdiffstoreArrayOfKeys(destination: destination, keys: keys, callback: callback)
+    }
+    
+    ///
+    /// Subtract multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result
+    /// - Paramter keys: a array parameter of the keys to get the difference from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sdiffstoreArrayOfKeys(destination: String, keys: [String],
+                                      callback: (Int?, NSError?) -> Void) {
+        
+        var command = ["sdiffstore"]
+        for key in keys {
+            command.append(key)
+        }
+        self.issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Subtract multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result,
+    ///                             if destination already exists, it is overwritten
+    /// - Paramter keys: a variadic parameter of the keys to get the difference from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sdiffstore(destination: RedisString, keys: RedisString...,
+                           callback: (Int?, NSError?) -> Void) {
+        self.sdiffstoreArrayOfKeys(destination: destination, keys: keys, callback: callback)
+    }
+    
+    ///
+    /// Subtract multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result
+    /// - Paramter keys: a array parameter of the keys to get the difference from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sdiffstoreArrayOfKeys(destination: RedisString, keys: [RedisString],
+        callback: (Int?, NSError?) -> Void) {
+        
+        var command = [RedisString("sdiffstore")]
+        for key in keys {
+            command.append(key)
+        }
+        self.issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get all the members in a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    ///
+    /// Returns: Array reply: all elements of the set.
+    ///
+    public func smembers(_ key: String, callback: ([RedisString?]?, NSError?) -> Void) {
+        issueCommand(RedisString("SMEMBERS"), RedisString(key)) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get all the members in a set
+    ///
+    /// - Parameter key: the RedisString parameter for the key
+    ///
+    /// Returns: Array reply: all elements of the set.
+    ///
+    public func smembers(_ key: RedisString, callback: ([RedisString?]?, NSError?) -> Void) {
+        issueCommand(RedisString("SMEMBERS"), key) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Intersect multiple sets
+    ///
+    /// - Parameter keys: a variadic parameter of the keys to intersect from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sinter(_ keys: String..., callback: ([RedisString?]?, NSError?) -> Void) {
+        self.sinterArrayOfKeys(keys, callback: callback)
+    }
+    
+    ///
+    /// Intersect multiple sets
+    ///
+    /// - Parameter keys: an array parameter of the keys to intersect from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sinterArrayOfKeys(_ keys: [String], callback: ([RedisString?]?, NSError?) -> Void) {
+        var command = ["SINTER"]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Intersect multiple sets
+    ///
+    /// - Parameter keys: a variadic parameter of the keys to intersect from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sinter(_ keys: RedisString..., callback: ([RedisString?]?, NSError?) -> Void) {
+        self.sinterArrayOfKeys(keys, callback: callback)
+    }
+    
+    ///
+    /// Intersect multiple sets
+    ///
+    /// - Parameter keys: an array parameter of the keys to intersect from
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sinterArrayOfKeys(_ keys: [RedisString], callback: ([RedisString?]?, NSError?) -> Void) {
+        var command = [RedisString("SINTER")]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Intersect multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result
+    /// - Parameter keys: a variadic parameter of the keys to intersect from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sinterstore(_ destination: String, keys: String..., callback: (Int?, NSError?) -> Void) {
+        self.sinterstoreArrayOfKeys(destination, keys: keys, callback: callback)
+    }
+    
+    ///
+    /// Intersect multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result
+    /// - Parameter keys: an array parameter of the keys to intersect from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sinterstoreArrayOfKeys(_ destination: String, keys: [String], callback: (Int?, NSError?) -> Void) {
+        var command = ["SINTERSTORE", destination]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Intersect multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result
+    /// - Parameter keys: a variadic parameter of the keys to intersect from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sinterstore(_ destination: RedisString, keys: RedisString..., callback: (Int?, NSError?) -> Void) {
+        self.sinterstoreArrayOfKeys(destination, keys: keys, callback: callback)
+    }
+    
+    ///
+    /// Intersect multiple sets and store the resulting set in a key
+    ///
+    /// - Parameter destination: the destination of the result
+    /// - Parameter keys: an array parameter of the keys to intersect from
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sinterstoreArrayOfKeys(_ destination: RedisString, keys: [RedisString], callback: (Int?, NSError?) -> Void) {
+        var command = [RedisString("SINTERSTORE"), destination]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Determine if a given value is a member of a set
+    ///
+    /// - Parameter key: the String paramter for the key
+    /// - Parameter member: the String paramter for the member
+    ///
+    /// Returns: Bool reply: True if element is a member of the set,
+    ///                      False if the element isn't a member of the set, or if key doesn't exist.
+    ///
+    public func sismember(_ key: String, member: String, callback: (Bool?, NSError?) -> Void) {
+        issueCommand("SISMEMBER", key, member) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Determine if a given value is a member of a set
+    ///
+    /// - Parameter key: the RedisString paramter for the key
+    /// - Parameter member: the RedisString paramter for the member
+    ///
+    /// Returns: Bool reply: True if element is a member of the set,
+    ///                      False if the element isn't a member of the set, or if key doesn't exist.
+    ///
+    public func sismember(_ key: RedisString, member: RedisString, callback: (Bool?, NSError?) -> Void) {
+        issueCommand(RedisString("SISMEMBER"), key, member) {(response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Move a member from one set to another
+    ///
+    /// - Parameter source: the Source set from where to move the member from
+    /// - Parameter destination: the Destination set from where to move the member to
+    /// - Parameter member: the String parameter for the member to be moved
+    ///
+    /// Returns: Bool reply: True if element is moved,
+    ///                      False if the element isn't a member of source and
+    ///                             no operation was performed.
+    ///
+    public func smove(source: String, destination: String, member: String, callback: (Bool?, NSError?) -> Void) {
+        issueCommand("SMOVE", source, destination, member) {
+            (response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Move a member from one set to another
+    ///
+    /// - Parameter source: the Source set from where to move the member from
+    /// - Parameter destination: the Destination set from where to move the member to
+    /// - Parameter member: the RedisString parameter for the member to be moved
+    ///
+    /// Returns: Bool reply: True if element is moved,
+    ///                      False if the element isn't a member of source and
+    ///                             no operation was performed.
+    ///
+    public func smove(source: RedisString, destination: RedisString, member: RedisString, callback: (Bool?, NSError?) -> Void) {
+        issueCommand(RedisString("SMOVE"), source, destination, member) {
+            (response: RedisResponse) in
+            self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Remove and return one or multiple random members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    ///
+    /// Returns: Bulk string reply: the removed element, or nil when key does not exist.
+    ///
+    public func spop(_ key: String, callback: (RedisString?, NSError?) -> Void) {
+        issueCommand("SPOP", key) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Remove and return one or multiple random members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter count: the number of members to pop
+    ///
+    /// Returns: Bulk string reply: the removed element, or nil when key does not exist.
+    ///
+    public func spop(_ key: String, count: Int, callback: ([RedisString?]?, NSError?) -> Void) {
+        issueCommand("SPOP", key, String(count)) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Remove and return one or multiple random members from a set
+    ///
+    /// - Parameter key: the RedisString parameter for the key
+    ///
+    /// Returns: Bulk string reply: the removed element, or nil when key does not exist.
+    ///
+    public func spop(_ key: RedisString, callback: (RedisString?, NSError?) -> Void) {
+        issueCommand(RedisString("SPOP"), key) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Remove and return one or multiple random members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter count: the number of members to pop
+    ///
+    /// Returns: Bulk string reply: the removed element, or nil when key does not exist.
+    ///
+    public func spop(_ key: RedisString, count: Int, callback: ([RedisString?]?, NSError?) -> Void) {
+        issueCommand(RedisString("SPOP"), key, RedisString(count)) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get one or multiple random members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    ///
+    /// Returns: Bulk string reply: the randomly selected element, or nil when key does not exist.
+    ///
+    public func srandmember(_ key: String, callback: (RedisString?, NSError?) -> Void) {
+        issueCommand("SRANDMEMBER", key) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get one or multiple random members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter count: the number of members to return
+    ///
+    /// Returns: Array reply: an array of elements, or an empty array when key does not exist.
+    ///
+    public func srandmember(_ key: String, count: Int, callback: ([RedisString?]?, NSError?) -> Void) {
+        issueCommand("SRANDMEMBER", key, String(count)) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get one or multiple random members from a set
+    ///
+    /// - Parameter key: the RedisString parameter for the key
+    ///
+    /// Returns: Bulk string reply: the randomly selected element, or nil when key does not exist.
+    ///
+    public func srandmember(_ key: RedisString, callback: (RedisString?, NSError?) -> Void) {
+        issueCommand(RedisString("SRANDMEMBER"), key) {(response: RedisResponse) in
+            self.redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Get one or multiple random members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter count: the number of members to return
+    ///
+    /// Returns: Array reply: an array of elements, or an empty array when key does not exist.
+    ///
+    public func srandmember(_ key: RedisString, count: Int, callback: ([RedisString?]?, NSError?) -> Void) {
+        issueCommand(RedisString("SRANDMEMBER"), key, RedisString(count)) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Remove one or more members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter members: the variadic parameter for the members to be removed
+    ///
+    /// Returns: Integer reply: the number of members that were removed from the set,
+    ///                         not including non existing members.
+    ///
+    public func srem(_ key: String, members: String..., callback: (Int?, NSError?) -> Void) {
+        self.sremArrayOfMembers(key, members: members, callback: callback)
+    }
+    
+    ///
+    /// Remove one or more members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter members: the Array parameter for the members to be removed
+    ///
+    /// Returns: Integer reply: the number of members that were removed from the set,
+    ///                         not including non existing members.
+    ///
+    public func sremArrayOfMembers(_ key: String, members: [String], callback: (Int?, NSError?) -> Void) {
+        var command = ["SREM", key]
+        for member in members {
+            command.append(member)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
+    ///
+    /// Remove one or more members from a set
+    ///
+    /// - Parameter key: the String parameter for the key
+    /// - Parameter members: the variadic parameter for the members to be removed
+    ///
+    /// Returns: Integer reply: the number of members that were removed from the set,
+    ///                         not including non existing members.
+    ///
+    public func srem(_ key: RedisString, members: RedisString..., callback: (Int?, NSError?) -> Void) {
+        self.sremArrayOfMembers(key, members: members, callback: callback)
+    }
+    
+    ///
+    /// Remove one or more members from a set
+    ///
+    /// - Parameter key: the RedisString parameter for the key
+    /// - Parameter members: the array parameter for the members to be removed
+    ///
+    /// Returns: Integer reply: the number of members that were removed from the set,
+    ///                         not including non existing members.
+    ///
+    public func sremArrayOfMembers(_ key: RedisString, members: [RedisString], callback: (Int?, NSError?) -> Void) {
+        var command = [RedisString("SREM"), key]
+        for member in members {
+            command.append(member)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sunion(_ keys: String..., callback: ([RedisString?]?, NSError?) -> Void) {
+        self.sunionArrofOfKeys(keys, callback: callback)
+    }
+    
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sunionArrofOfKeys(_ keys: [String], callback: ([RedisString?]?, NSError?) -> Void) {
+        var command = ["SUNION"]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sunion(_ keys: RedisString..., callback: ([RedisString?]?, NSError?) -> Void) {
+        self.sunionArrofOfKeys(keys, callback: callback)
+    }
+    
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Array reply: list with members of the resulting set.
+    ///
+    public func sunionArrofOfKeys(_ keys: [RedisString], callback: ([RedisString?]?, NSError?) -> Void) {
+        var command = [RedisString("SUNION")]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisStringArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sunionstore(_ destination: String, keys: String..., callback: (Int?, NSError?) -> Void) {
+        self.sunionstoreArrofOfKeys(destination, keys: keys, callback: callback)
+    }
+    
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sunionstoreArrofOfKeys(_ destination: String, keys: [String], callback: (Int?, NSError?) -> Void) {
+        var command = ["SUNIONSTORE", destination]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sunionstore(_ destination: RedisString, keys: RedisString..., callback: (Int?, NSError?) -> Void) {
+        self.sunionstoreArrofOfKeys(destination, keys: keys, callback: callback)
+    }
+    
+    ///
+    /// Add multiple sets
+    ///
+    /// - Parameter keys: a variadic parater for the keys to union
+    ///
+    /// Returns: Integer reply: the number of elements in the resulting set.
+    ///
+    public func sunionstoreArrofOfKeys(_ destination: RedisString, keys: [RedisString], callback: (Int?, NSError?) -> Void) {
+        var command = [RedisString("SUNIONSTORE"), destination]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    ///
+    /// Iterates elements of Sets types.
+    ///
+    /// - Paramter key: the String parameter for the key
+    /// - Paramter cursor: iterator
+    /// - Parameter match: glob-style pattern
+    /// - parameter count: amount of work that should be done at every call in order to retrieve elements from the collection
+    ///
+    /// Returns: Array reply: a two elements multi-bulk reply:
+    ///                         first element is a string representing an unsigned 64 bit number (the cursor),
+    ///                         the second element is a multi-bulk with an array of elements.
+    ///
+    public func sscan(_ key: String, cursor: Int, match: String? = nil, count: Int? = nil,
+                      callback: (RedisString?, [RedisString?]?, NSError?) -> Void) {
+        if let match = match, let count = count {
+            issueCommand("SSCAN", key, String(cursor), "MATCH", match, "COUNT", String(count)) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
+        } else if let match = match {
+            issueCommand("SSCAN", key, String(cursor), "MATCH", match) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
+        } else if let count = count {
+            issueCommand("SSCAN", key, String(cursor), "COUNT", String(count)) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
+        } else {
+            issueCommand("SSCAN", key, String(cursor)) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
+        }
+    }
+    
+    ///
+    /// Iterates elements of Sets types.
+    ///
+    /// - Paramter key: the String parameter for the key
+    /// - Paramter cursor: iterator
+    /// - Parameter match: glob-style pattern
+    /// - parameter count: amount of work that should be done at every call in order to retrieve elements from the collection
+    ///
+    /// Returns: Array reply: a two elements multi-bulk reply:
+    ///                         first element is a string representing an unsigned 64 bit number (the cursor),
+    ///                         the second element is a multi-bulk with an array of elements.
+    ///
+    public func sscan(_ key: RedisString, cursor: Int, match: RedisString? = nil, count: Int? = nil,
+                      callback: (RedisString?, [RedisString?]?, NSError?) -> Void) {
+        let SSCAN = RedisString("SSCAN")
+        let MATCH = RedisString("MATCH")
+        let COUNT = RedisString("COUNT")
+        if let match = match, let count = count {
+            issueCommand(SSCAN, key, RedisString(cursor), MATCH, match, COUNT, RedisString(count)) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
+        } else if let match = match {
+            issueCommand(SSCAN, key, RedisString(cursor), MATCH, match) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
+        } else if let count = count {
+            issueCommand(SSCAN, key, RedisString(cursor), COUNT, RedisString(count)) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
+        } else {
+            issueCommand(SSCAN, key, RedisString(cursor)) {(response: RedisResponse) in
+                self.redisScanResponseHandler(response, callback: callback)
+            }
         }
     }
     
@@ -1645,6 +2455,62 @@ public class Redis {
         callback(error == nil ? result : nil, _: error)
     }
     
+    private func redisScanResponseHandler(_ response: RedisResponse, callback: (RedisString?, [RedisString?]?, NSError?) -> Void) {
+        var error: NSError? = nil
+        var cursor: RedisString?
+        var result: [RedisString?]?
+        
+        switch(response) {
+        case .Array(let responses):
+            var strings = [RedisString?]()
+            for innerResponse in responses {
+                switch(innerResponse) {
+                case .StringValue(let str):
+                    cursor = str
+                case.Array(let innerArray):
+                    for val in innerArray {
+                        switch(val) {
+                        case .StringValue(let str):
+                            strings.append(str)
+                        case .Nil:
+                            strings.append(nil)
+                        default:
+                            error = self.createUnexpectedResponseError(response)
+                        }
+                    }
+                default:
+                    error = self.createUnexpectedResponseError(response)
+                }
+            }
+            result = strings
+        case .Nil:
+            result = nil
+        case .Error(let err):
+            error = self.createError("Error: \(err)", code: 1)
+        default:
+            error = self.createUnexpectedResponseError(response)
+        }
+        
+        if(error == nil) {
+            callback(cursor, result, nil)
+        } else {
+            callback(nil, nil, error)
+        }
+    }
+    
+    private func redisDictionaryResponseHandler(_ response: RedisResponse, callback: (RedisInfo?, NSError?) -> Void) {
+        switch(response){
+        case .StringValue(let str):
+            callback(RedisInfo(str), nil)
+        case .Nil:
+            callback(nil, nil)
+        case .Error(let error):
+            callback(nil, _: createError("Error: \(error)", code: 1))
+        default:
+            callback(nil, _: createUnexpectedResponseError(response))
+        }
+    }
+    
     private func createUnexpectedResponseError(_ response: RedisResponse) -> NSError {
         return createError("Unexpected result received from Redis \(response)", code: 2)
     }
@@ -1661,6 +2527,73 @@ public class Redis {
     
     private func createRedisError(_ redisError: String) -> NSError {
         return createError(redisError, code: 1)
+    }
+}
+
+public struct RedisInfo {
+    
+    public let server: RedisInfoServer
+    public let client: RedisInfoClient
+
+    public init(_ redisReply: RedisString) {
+        
+        let convertedStr = redisReply.asString
+        let newline = "\r\n"
+        let strArray = convertedStr.components(separatedBy: newline)
+        var parsedInfo: [String: String] = [:]
+        
+        for val in strArray {
+            let pos = val.range(of: ":")
+            if let pos = pos {
+                parsedInfo[val.substring(to: pos.lowerBound)] = val.substring(from: pos.upperBound)
+            }
+        }
+        
+        server = RedisInfoServer(parsedInfo)
+        client = RedisInfoClient(parsedInfo)
+    }
+    
+    public struct RedisInfoClient {
+        public let connected_clients: Int
+        public let blocked_clients: Int
+
+        fileprivate init(_ redisInfo: [String: String]) {
+            self.connected_clients = Int(redisInfo["connected_clients"]!)!
+            self.blocked_clients = Int(redisInfo["blocked_clients"]!)!
+        }
+    }
+    
+    public struct RedisInfoServer {
+        
+        public let redis_version: String
+        public let redis_mode: String
+        public let os: String
+        public let arch_bits: Int
+        public let process_id: Int
+        public let tcp_port: Int
+        public let uptime_in_seconds: Int
+        public let uptime_in_days: Int
+        
+        fileprivate init(_ redisInfo: [String: String]) {
+            self.redis_version = redisInfo["redis_version"]!
+            self.redis_mode = redisInfo["redis_mode"]!
+            self.os = redisInfo["os"]!
+            self.arch_bits = Int(redisInfo["arch_bits"]!)!
+            self.process_id = Int(redisInfo["process_id"]!)!
+            self.tcp_port = Int(redisInfo["tcp_port"]!)!
+            self.uptime_in_seconds  = Int(redisInfo["uptime_in_seconds"]!)!
+            self.uptime_in_days  = Int(redisInfo["uptime_in_days"]!)!
+        }
+        
+        public func checkVersionCompatible(major: Int, minor: Int=0) -> Bool{
+            let v = self.redis_version.components(separatedBy: ".")
+            return Int(v[0])! >= major && Int(v[1])! >= minor
+        }
+
+        public func checkVersionCompatible(major: Int, minor: Int=0, micro: Int) -> Bool{
+            let v = self.redis_version.components(separatedBy: ".")
+            return Int(v[0])! >= major && Int(v[1])! >= minor && Int(v[2])! >= micro
+        }
     }
     
 }

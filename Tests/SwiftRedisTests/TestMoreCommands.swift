@@ -202,7 +202,10 @@ public class TestMoreCommands: XCTestCase {
     
     private func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
-            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
             
             redis.del(self.key1, self.key2, self.key3, self.key4, self.key5) {(deleted: Int?, error: NSError?) in
                 callback()
