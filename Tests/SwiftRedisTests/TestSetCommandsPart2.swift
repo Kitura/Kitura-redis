@@ -28,8 +28,6 @@ public class TestSetCommandsPart2: XCTestCase {
             ("test_scard_redis", test_scard_redis),
             ("test_sdiff", test_sdiff),
             ("test_sdiff_redis", test_sdiff_redis),
-            ("test_smebers", test_smembers),
-            ("test_smebers_redis", test_smembers_redis),
             ("test_sdiffstore", test_sdiffstore),
             ("test_sdiffstore_redis", test_sdiffstore_redis),
             ("test_sinter", test_sinter),
@@ -38,6 +36,8 @@ public class TestSetCommandsPart2: XCTestCase {
             ("test_sinterstore_redis", test_sinterstore_redis),
             ("test_sismember", test_sismember),
             ("test_sismember_redis", test_sismember_redis),
+            ("test_smebers", test_smembers),
+            ("test_smebers_redis", test_smembers_redis),
             ("test_smove", test_smove),
             ("test_smove_redis", test_smove_redis),
             ("test_spop", test_spop),
@@ -46,10 +46,10 @@ public class TestSetCommandsPart2: XCTestCase {
             ("test_srandmember_redis", test_srandmember_redis),
             ("test_srem", test_srem),
             ("test_srem_redis", test_srem_redis),
-            ("test_sunion", test_sunion),
-            ("test_sunion_redis", test_sunion_redis),
             ("test_sscan", test_sscan),
             ("test_sscan_redis", test_sscan_redis),
+            ("test_sunion", test_sunion),
+            ("test_sunion_redis", test_sunion_redis)
         ]
     }
     
@@ -1138,19 +1138,6 @@ public class TestSetCommandsPart2: XCTestCase {
             
             
             
-        }
-        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
-    }
-    
-    func test_info() {
-        let expectation1 = expectation(description: "Shows some information about the redis server")
-        
-        redis.info() {
-            (info: RedisInfo?, error: NSError?) in
-            
-            XCTAssertNil(error)
-            XCTAssertNotNil(info)
-            expectation1.fulfill()
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }

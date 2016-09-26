@@ -22,6 +22,7 @@ import XCTest
 public class TestConnectCommands: XCTestCase {
     static var allTests : [(String, (TestConnectCommands) -> () throws -> Void)] {
         return [
+            ("test_info", test_info),
             ("test_pingAndEcho", test_pingAndEcho),
             ("test_select", test_select)
         ]
@@ -109,5 +110,25 @@ public class TestConnectCommands: XCTestCase {
                 }
             }
         }
+    }
+    
+    func test_info() {
+        let expectation1 = expectation(description: "Shows some information about the redis server")
+        
+        connectRedis() {(error: NSError?) in
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
+        
+            redis.info() {
+                (info: RedisInfo?, error: NSError?) in
+            
+                XCTAssertNil(error)
+                XCTAssertNotNil(info)
+                expectation1.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
 }
