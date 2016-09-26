@@ -49,7 +49,9 @@ public class TestSetCommandsPart2: XCTestCase {
             ("test_sscan", test_sscan),
             ("test_sscan_redis", test_sscan_redis),
             ("test_sunion", test_sunion),
-            ("test_sunion_redis", test_sunion_redis)
+            ("test_sunion_redis", test_sunion_redis),
+            ("test_sunionstore", test_sunionstore),
+            ("test_sunionstore_redis", test_sunionstore_redis)
         ]
     }
     
