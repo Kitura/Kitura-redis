@@ -2071,7 +2071,7 @@ public class Redis {
     //  MARK: Helper functions
     //
     
-    private func redisBoolResponseHandler(_ response: RedisResponse, callback: (Bool, NSError?) -> Void) {
+    func redisBoolResponseHandler(_ response: RedisResponse, callback: (Bool, NSError?) -> Void) {
         switch(response) {
         case .IntegerValue(let num):
             if  num == 0  || num == 1 {
@@ -2087,7 +2087,7 @@ public class Redis {
         }
     }
     
-    private func redisIntegerResponseHandler(_ response: RedisResponse, callback: (Int?, NSError?) -> Void) {
+    func redisIntegerResponseHandler(_ response: RedisResponse, callback: (Int?, NSError?) -> Void) {
         switch(response) {
         case .IntegerValue(let num):
             callback(Int(num), nil)
@@ -2098,7 +2098,7 @@ public class Redis {
         }
     }
     
-    private func redisOkResponseHandler(_ response: RedisResponse, nilOk: Bool=true) -> (Bool, NSError?) {
+    func redisOkResponseHandler(_ response: RedisResponse, nilOk: Bool=true) -> (Bool, NSError?) {
         switch(response) {
         case .Status(let str):
             if  str == "OK"  {
@@ -2116,7 +2116,7 @@ public class Redis {
         }
     }
     
-    private func redisStringResponseHandler(_ response: RedisResponse, callback: (RedisString?, NSError?) -> Void) {
+    func redisStringResponseHandler(_ response: RedisResponse, callback: (RedisString?, NSError?) -> Void) {
         switch(response) {
         case .StringValue(let str):
             callback(str, nil)
@@ -2129,7 +2129,7 @@ public class Redis {
         }
     }
     
-    private func redisStringArrayResponseHandler(_ response: RedisResponse, callback: ([RedisString?]?, NSError?) -> Void) {
+    func redisStringArrayResponseHandler(_ response: RedisResponse, callback: ([RedisString?]?, NSError?) -> Void) {
         var error: NSError? = nil
         var result: [RedisString?]?
         
@@ -2157,7 +2157,7 @@ public class Redis {
         callback(error == nil ? result : nil, _: error)
     }
     
-    private func redisScanResponseHandler(_ response: RedisResponse, callback: (RedisString?, [RedisString?]?, NSError?) -> Void) {
+    func redisScanResponseHandler(_ response: RedisResponse, callback: (RedisString?, [RedisString?]?, NSError?) -> Void) {
         var error: NSError? = nil
         var cursor: RedisString?
         var result: [RedisString?]?
@@ -2200,7 +2200,7 @@ public class Redis {
         }
     }
     
-    private func redisDictionaryResponseHandler(_ response: RedisResponse, callback: (RedisInfo?, NSError?) -> Void) {
+    func redisDictionaryResponseHandler(_ response: RedisResponse, callback: (RedisInfo?, NSError?) -> Void) {
         switch(response){
         case .StringValue(let str):
             callback(RedisInfo(str), nil)
@@ -2213,11 +2213,11 @@ public class Redis {
         }
     }
     
-    private func createUnexpectedResponseError(_ response: RedisResponse) -> NSError {
+    func createUnexpectedResponseError(_ response: RedisResponse) -> NSError {
         return createError("Unexpected result received from Redis \(response)", code: 2)
     }
     
-    private func createError(_ errorMessage: String, code: Int) -> NSError {
+    func createError(_ errorMessage: String, code: Int) -> NSError {
         #if os(Linux)
             let userInfo: [String: Any]
         #else
@@ -2227,7 +2227,7 @@ public class Redis {
         return NSError(domain: "RedisDomain", code: code, userInfo: userInfo)
     }
     
-    private func createRedisError(_ redisError: String) -> NSError {
+    func createRedisError(_ redisError: String) -> NSError {
         return createError(redisError, code: 1)
     }
 }
