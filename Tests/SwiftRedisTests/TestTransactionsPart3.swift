@@ -100,13 +100,13 @@ public class TestTransactionsPart3: XCTestCase {
                     var intResponse = nestedResponses[3].asInteger
                     XCTAssertNotNil(intResponse, "ttl for \(self.key1) was nil")
                     var expectedAsInt = Int64(expiration*1000.0)
-                    XCTAssert(expectedAsInt-100 <= intResponse!  &&  intResponse! <= expectedAsInt+100, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
+                    XCTAssert(expectedAsInt-1000 <= intResponse!  &&  intResponse! <= expectedAsInt+1000, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't reset")
                     XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
                     intResponse = nestedResponses[6].asInteger
                     XCTAssertNotNil(intResponse, "ttl for \(self.key1) was nil")
                     expectedAsInt = Int64(timeFromNow*1000.0)
-                    XCTAssert(expectedAsInt-100 <= intResponse!  &&  intResponse! <= expectedAsInt+100, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
+                    XCTAssert(expectedAsInt-1000 <= intResponse!  &&  intResponse! <= expectedAsInt+1000, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
                 }
             }
         }

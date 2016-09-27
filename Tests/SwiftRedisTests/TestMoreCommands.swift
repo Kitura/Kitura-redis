@@ -188,7 +188,7 @@ public class TestMoreCommands: XCTestCase {
                                     redis.ttl(self.key1) {(ttl: TimeInterval?, error: NSError?) in
                                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                         XCTAssertNotNil(ttl, "ttl result shouldn't be nil")
-                                        XCTAssert(timeFromNow-0.1 <= ttl! && ttl! <= timeFromNow+0.1, "ttl for \(self.key1) should be approximately \(timeFromNow). It was \(ttl!)")
+                                        XCTAssert(timeFromNow-1.0 <= ttl! && ttl! <= timeFromNow+1.0, "ttl for \(self.key1) should be approximately \(timeFromNow). It was \(ttl!)")
                                     }
                                 }
                             }
