@@ -18,6 +18,8 @@ import Foundation
 
 // MARK: Redis
 
+/// The `Redis` class represents a handle for issueing commands to a Redis server.
+/// It provides a set of type safe functions for issueing those commands.
 public class Redis {
     
     /// Redis Serialization Protocol handle
@@ -170,7 +172,7 @@ public class Redis {
     /// Issue a Redis command
     ///
     /// - Parameter stringArgs: A list of Strings making up the Redis command to issue
-    /// - Parameter callback: a function returning response in the form of a `RedisResponse`
+    /// - Parameter callback: a function returning the response in the form of a `RedisResponse`
     public func issueCommand(_ stringArgs: String..., callback: (RedisResponse) -> Void) {
         issueCommandInArray(stringArgs, callback: callback)
     }
@@ -178,7 +180,7 @@ public class Redis {
     /// Issue a Redis command
     ///
     /// - Parameter stringArgs: An array of Strings making up the Redis command to issue
-    /// - Parameter callback: a function returning response in the form of a `RedisResponse`
+    /// - Parameter callback: a function returning the response in the form of a `RedisResponse`
     public func issueCommandInArray(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
         guard  let respHandle = respHandle, respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
@@ -196,7 +198,7 @@ public class Redis {
     /// Issue a Redis command
     ///
     /// - Parameter stringArgs: A list of `RedisString` objects making up the Redis command to issue
-    /// - Parameter callback: a function returning response in the form of a `RedisResponse`
+    /// - Parameter callback: a function returning the response in the form of a `RedisResponse`
     public func issueCommand(_ stringArgs: RedisString..., callback: (RedisResponse) -> Void) {
         issueCommandInArray(stringArgs, callback: callback)
     }
@@ -204,7 +206,7 @@ public class Redis {
     /// Issue a Redis command
     ///
     /// - Parameter stringArgs: An array of `RedisString` objects making up the Redis command to issue
-    /// - Parameter callback: a function returning response in the form of a `RedisResponse`
+    /// - Parameter callback: a function returning the response in the form of a `RedisResponse`
     public func issueCommandInArray(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
         guard  let respHandle = respHandle, respHandle.status == .connected else {
             callback(RedisResponse.Error("Not connected to Redis server"))
