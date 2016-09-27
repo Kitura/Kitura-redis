@@ -1,9 +1,291 @@
-//
-//  RedisMulti+Basic.swift
-//  SwiftRedis
-//
-//  Created by Samuel Kallner on 27/09/2016.
-//
-//
+/**
+ * Copyright IBM Corporation 2016
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 import Foundation
+
+/// Extend RedisMulti by adding the Basic operations
+extension RedisMulti {
+
+    @discardableResult
+    public func append(_ key: String, value: String) -> RedisMulti {
+        queuedCommands.append([RedisString("APPEND"), RedisString(key), RedisString(value)])
+        return self
+    }
+    
+    @discardableResult
+    public func bitcount(_ key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("BITCOUNT"), RedisString(key)])
+        return self
+    }
+    
+    @discardableResult
+    public func bitcount(_ key: String, start: Int, end: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("BITCOUNT"), RedisString(key), RedisString(start), RedisString(end)])
+        return self
+    }
+    
+    @discardableResult
+    public func bitop(_ destKey: String, and: String...) -> RedisMulti {
+        var command = [RedisString("BITOP"), RedisString("AND"), RedisString(destKey)]
+        for key in and {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func bitop(_ destKey: String, not: String) -> RedisMulti {
+        queuedCommands.append([RedisString("BITOP"), RedisString("NOT"), RedisString(destKey), RedisString(not)])
+        return self
+    }
+    
+    @discardableResult
+    public func bitop(_ destKey: String, or: String...) -> RedisMulti {
+        var command = [RedisString("BITOP"), RedisString("OR"), RedisString(destKey)]
+        for key in or {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func bitop(_ destKey: String, xor: String...) -> RedisMulti {
+        var command = [RedisString("BITOP"), RedisString("XOR"), RedisString(destKey)]
+        for key in xor {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func bitpos(_ key: String, bit:Bool) -> RedisMulti {
+        queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0")])
+        return self
+    }
+    
+    @discardableResult
+    public func bitpos(_ key: String, bit:Bool, start: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0"), RedisString(start)])
+        return self
+    }
+    
+    @discardableResult
+    public func bitpos(_ key: String, bit:Bool, start: Int, end: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0"), RedisString(start), RedisString(end)])
+        return self
+    }
+    
+    @discardableResult
+    public func decr(_ key: String, by: Int=1) -> RedisMulti {
+        queuedCommands.append([RedisString("DECRBY"), RedisString(key), RedisString(by)])
+        return self
+    }
+    
+    @discardableResult
+    public func del(_ keys: String...) -> RedisMulti {
+        var command = [RedisString("DEL")]
+        for key in keys {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func exists(_ keys: String...) -> RedisMulti {
+        var command = [RedisString("EXISTS")]
+        for key in keys {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func expire(_ key: String, inTime: TimeInterval) -> RedisMulti {
+        queuedCommands.append([RedisString("PEXPIRE"), RedisString(key), RedisString(Int(inTime * 1000.0))])
+        return self
+    }
+    
+    @discardableResult
+    public func expire(_ key: String, atDate: NSDate) -> RedisMulti {
+        queuedCommands.append([RedisString("PEXPIREAT"), RedisString(key), RedisString(Int(atDate.timeIntervalSince1970 * 1000.0))])
+        return self
+    }
+    
+    @discardableResult
+    public func get(_ key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("GET"), RedisString(key)])
+        return self
+    }
+    
+    @discardableResult
+    public func getbit(_ key: String, offset: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("GETBIT"), RedisString(key), RedisString(offset)])
+        return self
+    }
+    
+    @discardableResult
+    public func getrange(_ key: String, start: Int, end: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("GETRANGE"), RedisString(key), RedisString(start), RedisString(end)])
+        return self
+    }
+    
+    @discardableResult
+    public func getSet(_ key: String, value: String) -> RedisMulti {
+        queuedCommands.append([RedisString("GETSET"), RedisString(key), RedisString(value)])
+        return self
+    }
+    
+    @discardableResult
+    public func getSet(_ key: String, value: RedisString) -> RedisMulti {
+        queuedCommands.append([RedisString("GETSET"), RedisString(key), value])
+        return self
+    }
+    
+    @discardableResult
+    public func incr(_ key: String, by: Int=1) -> RedisMulti {
+        queuedCommands.append([RedisString("INCRBY"), RedisString(key), RedisString(by)])
+        return self
+    }
+    
+    @discardableResult
+    public func incr(_ key: String, byFloat: Float) -> RedisMulti {
+        queuedCommands.append([RedisString("INCRBYFLOAT"), RedisString(key), RedisString(Double(byFloat))])
+        return self
+    }
+    
+    @discardableResult
+    public func mget(_ keys: String...) -> RedisMulti {
+        var command = [RedisString("MGET")]
+        for key in keys {
+            command.append(RedisString(key))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func move(_ key: String, toDB: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("MOVE"), RedisString(key), RedisString(toDB)])
+        return self
+    }
+    
+    @discardableResult
+    public func mset(_ keyValuePairs: (String, String)..., exists: Bool=true) -> RedisMulti {
+        return msetArrayOfKeyValues(keyValuePairs, exists: exists)
+    }
+    
+    @discardableResult
+    public func msetArrayOfKeyValues(_ keyValuePairs: [(String, String)], exists: Bool=true) -> RedisMulti {
+        var command = [RedisString(exists ? "MSET" : "MSETNX")]
+        for (key, value) in keyValuePairs {
+            command.append(RedisString(key))
+            command.append(RedisString(value))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func mset(_ keyValuePairs: (String, RedisString)..., exists: Bool=true) -> RedisMulti {
+        return msetArrayOfKeyValues(keyValuePairs, exists: exists)
+    }
+    
+    @discardableResult
+    public func msetArrayOfKeyValues(_ keyValuePairs: [(String, RedisString)], exists: Bool=true) -> RedisMulti {
+        var command = [RedisString(exists ? "MSET" : "MSETNX")]
+        for (key, value) in keyValuePairs {
+            command.append(RedisString(key))
+            command.append(value)
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func persist(_ key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("PERSIST"), RedisString(key)])
+        return self
+    }
+    
+    @discardableResult
+    public func rename(_ key: String, newKey: String, exists: Bool=true) -> RedisMulti {
+        queuedCommands.append([RedisString(exists ? "RENAME" : "RENAMENX"), RedisString(key), RedisString(newKey)])
+        return self
+    }
+    
+    @discardableResult
+    public func select(_ db: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("SELECT"), RedisString(db)])
+        return self
+    }
+    
+    @discardableResult
+    public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: TimeInterval?=nil) -> RedisMulti {
+        var command = [RedisString("SET"), RedisString(key), RedisString(value)]
+        if  let exists = exists  {
+            command.append(RedisString(exists ? "XX" : "NX"))
+        }
+        if  let expiresIn = expiresIn  {
+            command.append(RedisString("PX"))
+            command.append(RedisString(Int(expiresIn * 1000.0)))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: TimeInterval?=nil) -> RedisMulti {
+        var command = [RedisString("SET"), RedisString(key), value]
+        if  let exists = exists  {
+            command.append(RedisString(exists ? "XX" : "NX"))
+        }
+        if  let expiresIn = expiresIn  {
+            command.append(RedisString("PX"))
+            command.append(RedisString(Int(expiresIn * 1000.0)))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    @discardableResult
+    public func setbit(_ key: String, offset: Int, value: Bool) -> RedisMulti {
+        queuedCommands.append([RedisString("SETBIT"), RedisString(key), RedisString(offset), RedisString(value ? "1" : "0")])
+        return self
+    }
+    
+    @discardableResult
+    public func setrange(_ key: String, offset: Int, value: String) -> RedisMulti {
+        queuedCommands.append([RedisString("SETRANGE"), RedisString(key), RedisString(offset), RedisString(value)])
+        return self
+    }
+    
+    @discardableResult
+    public func strlen(_ key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("STRLEN"), RedisString(key)])
+        return self
+    }
+    
+    @discardableResult
+    public func ttl(_ key: String) -> RedisMulti {
+        queuedCommands.append([RedisString("PTTL"), RedisString(key)])
+        return self
+    }
+}
