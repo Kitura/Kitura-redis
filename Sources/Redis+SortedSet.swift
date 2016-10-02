@@ -19,23 +19,25 @@ import Foundation
 /// Extend Redis by adding the Sorted Set operations
 extension Redis {
     
-    /// Return the number of elements added to the sorted sets, not including elements already existing for which the score was
-    /// updated.
+    /// Add elements to a sorted set.
     ///
-    /// - Parameter key: the String parameter for the key
-    /// - Parameter tuples: a tuple variadic parameter containing a score(s) and member(s)
-    /// - Parameter callback: a function returning the number of elements added to the sorted sets
-    public func zadd(_ key: String, tuples: (Int,String)..., callback: (Int?, NSError?) -> Void) {
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements added to the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
+    public func zadd(_ key: String, tuples: (Int, String)..., callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
     
-    /// Return the number of elements added to the sorted sets, not including elements already existing for which the score was
-    /// updated.
+    /// Add elements to a sorted set.
     ///
-    /// - Parameter key: the String parameter for the key
-    /// - Parameter tuples: a tuple variadic parameter containing a score(s) and member(s)
-    /// - Parameter callback: a function returning the number of elements added to the sorted sets
-    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int,String)], callback: (Int?, NSError?) -> Void) {
+    /// - Parameter key: The key.
+    /// - Parameter tuples: An array of tuples containing a score and value to be added to the sorted set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements added to the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, String)], callback: (Int?, NSError?) -> Void) {
         var command = ["ZADD"]
         command.append(key)
         for tuple in tuples {
@@ -47,23 +49,27 @@ extension Redis {
         }
     }
     
-    /// Returns the sorted set cardinality (number of elements) of the sorted set stored at key.
+    /// Get the sorted set's cardinality (number of elements).
     ///
-    /// - Parameter key: the String parameter for the key
-    /// - Parameter callback: a function returning the sorted set cardinality of the sorted set
+    /// - Parameter key: The key.
+    /// - Parameter callback: a function returning the sorted set cardinality of the sorted set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements in the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zcard(_ key: String, callback: (Int?, NSError?) -> Void) {
         issueCommand("ZCARD", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
     
-    /// Returns the specified range of elements in the sorted set stored at key
+    /// Get the specified range of elements in a sorted set
     ///
-    ///
-    /// - Parameter key: the String parameter for the key
-    /// - Parameter start: the start of index of the set
-    /// - Parameter stop:  the end of the index of the set
-    /// - Parameter callback: a function returning the array of specified range of elements in the sorted set
+    /// - Parameter key: The key.
+    /// - Parameter start: The starting index of the elements of the sorted set to fetch.
+    /// - Parameter stop:  The ending index of the elements of the sorted set to fetch.
+    /// - Parameter callback: The callback function, the Array<RedisString> will contain the
+    ///                      elements fetched from the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zrange(_ key: String, start: Int, stop: Int, callback: ([RedisString?]?, NSError?) -> Void) {
         issueCommand("ZRANGE", key, String(start), String(stop)) { (response: RedisResponse) in
             self.redisStringArrayResponseHandler(response, callback: callback)
@@ -73,9 +79,11 @@ extension Redis {
     /// Removes the specified members from the sorted set stored at key. Non existing members are ignored.
     /// An error is returned when key exists and does not hold a sorted set.
     ///
-    /// - Parameter key: the String parameter for the key
-    /// - Parameter members: a  variadic parameter containing the member(s)
-    /// - Parameter callback: a function returning the number of members removed from the sorted set
+    /// - Parameter key: The key.
+    /// - Parameter members: The list of the member(s) to remove.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements removed from the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zrem(_ key: String, members: String..., callback: (Int?, NSError?) -> Void) {
         zremArrayOfMembers(key, members: members, callback: callback)
     }
@@ -83,9 +91,11 @@ extension Redis {
     /// Removes the specified members from the sorted set stored at key. Non existing members are ignored.
     /// An error is returned when key exists and does not hold a sorted set.
     ///
-    /// - Parameter key: the String parameter for the key
-    /// - Parameter members: a  variadic parameter containing the member(s)
-    /// - Parameter callback: a function returning the number of members removed from the sorted set
+    /// - Parameter key: The key.
+    /// - Parameter members: An array of the member(s) to remove.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements removed from the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zremArrayOfMembers(_ key: String, members: [String], callback: (Int?, NSError?) -> Void) {
         var command = ["ZREM"]
         command.append(key)
@@ -97,12 +107,14 @@ extension Redis {
         }
     }
     
-    /// Removes all elements in the sorted set stored at key with a score between min and max (inclusive).
+    /// Removes all elements in the sorted set stored at key with a score between a minimum and a maximum (inclusive).
     ///
-    /// - Parameter key: the String parameter for the key
-    /// - Parameter min: the String parameter for the min
-    /// - Parameter max: the String parameter for the max
-    /// - Parameter callback: a function returning removes all elements in the sorted set
+    /// - Parameter key: The key.
+    /// - Parameter min: The minimum score to remove from the set.
+    /// - Parameter max: The maximum score to remove from the set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements removed from the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zremrangebyscore(_ key: String, min: String, max: String, callback: (Int?, NSError?) -> Void) {
         issueCommand("ZREMRANGEBYSCORE",key, min, max) { (response) in
             self.redisIntegerResponseHandler(response, callback: callback)
