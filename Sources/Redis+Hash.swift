@@ -103,6 +103,7 @@ extension Redis {
     /// Increments the number stored in a field in the hash stored at a key by a value
     ///
     /// - Parameter key: The key.
+    /// - Parameter field: The field.
     /// - Parameter by: The value to increment by.
     /// - Parameter callback: The callback function, the Int will contain the value of
     ///                      the field after it was incremented.
@@ -116,7 +117,8 @@ extension Redis {
     /// Increments the number stored in a field in the hash stored at a key by floating point value
     ///
     /// - Parameter key: The key.
-    /// - Parameter by: The floating point value to increment by.
+    /// - Parameter field: The field.
+    /// - Parameter byFloat: The floating point value to increment by.
     /// - Parameter callback: The callback function, the `RedisString` will contain the value of
     ///                      the field after it was incremented.
     ///                      NSError will be non-nil if an error occurred.
@@ -171,7 +173,7 @@ extension Redis {
     /// Returns the values associated with the specified fields in the hash stored at a key.
     ///
     /// - Parameter key: The key.
-    /// - Parameter fields: The list of field names
+    /// - Parameter fields: The list of field names.
     /// - Parameter callback: The callback function, the Array<RedisString> will contain the list
     ///                      of values associated with the given fields, in the order the field
     ///                      names were specified. NSError will be non-nil if an error occurred.
@@ -255,7 +257,7 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Parameter field: The name of the field name to set.
     /// - Parameter value: The value to set the field to.
-    /// - Parameter exists: If true, will set the value only if the field exists
+    /// - Parameter exists: If true, will set the value only if the field exists.
     /// - Parameter callback: The callback function, the Bool will contain true if the
     ///                      field was set. NSError will be non-nil if an error occurred.
     public func hset(_ key: String, field: String, value: String, exists: Bool=true, callback: (Bool, NSError?) -> Void) {

@@ -34,9 +34,9 @@ extension Redis {
     /// Atomically sets a key to a value and returns the old value stored at the key.
     ///                      NSError will be non-nil if an error occurred.
     ///
-    /// - Parameter key: The key
-    /// - Parameter value: The String value to set
-    /// - Parameter callback: The callback function with the old value
+    /// - Parameter key: The key.
+    /// - Parameter value: The String value to set.
+    /// - Parameter callback: The callback function with the old value.
     public func getSet(_ key: String, value: String, callback: (RedisString?, NSError?) -> Void) {
         issueCommand("GETSET", key, value) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
@@ -155,7 +155,7 @@ extension Redis {
     /// If the key does not exist, it is set to 0 before performing the operation.
     ///
     /// - Parameter key: The key.
-    /// - Parameter by: A floating point number that will be added to the value at the key.
+    /// - Parameter byFloat: A floating point number that will be added to the value at the key.
     /// - Parameter callback: The callback function, the `RedisString` will be the value of the key
     ///                      after the increment. NSError will be non-nil if an error occurred.
     ///
@@ -295,6 +295,7 @@ extension Redis {
     ///
     /// - Parameter key: The key.
     /// - Parameter offset: Integer index for the starting position within the key's value to overwrite.
+    /// - Parameter value: The String value to overwrite the value of the key with.
     /// - Parameter callback: The callback function, the Int will contain the length of the key's value
     ///                      after it was modified by the command. NSError will be non-nil if an error occurred.
     public func setrange(_ key: String, offset: Int, value: String, callback: (Int?, NSError?) -> Void) {
@@ -485,6 +486,7 @@ extension Redis {
     /// source database, nothing is done.
     ///
     /// - Parameter key: The key.
+    /// - Parameter toDB: The number of the database to move the key to.
     /// - Parameter callback: The callback function, the Bool will be true if the key was moved.
     ///                      NSError will be non-nil if an error occurred.
     public func move(_ key: String, toDB: Int, callback: (Bool, NSError?) -> Void) {

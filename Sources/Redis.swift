@@ -35,8 +35,8 @@ public class Redis {
     
     /// Connects to a redis server
     ///
-    /// - Parameter ipAddress: the server IP address
-    /// - Parameter port: port number
+    /// - Parameter ipAddress: the server IP address.
+    /// - Parameter port: port number.
     /// - Parameter callback: callback function for on completion, NSError will be nil if successful.
     public func connect (host: String, port: Int32, callback: (NSError?) -> Void) {
         
@@ -51,7 +51,7 @@ public class Redis {
     
     /// Authenticate against the server
     ///
-    /// - Parameter pswd: String for the password
+    /// - Parameter pswd: String for the password.
     /// - Parameter callback: callback function that is called after authenticating,
     ///                      NSError will be nil if successful.
     public func auth(_ pswd: String, callback: (NSError?) -> Void) {
@@ -64,7 +64,7 @@ public class Redis {
     
     /// Select the database to use
     ///
-    /// - Parameter db: numeric index for the database
+    /// - Parameter db: numeric index for the database.
     /// - Parameter callback: callback function for after the database is selected,
     ///                      NSError will be nil if successful.
     public func select(_ db: Int, callback: (NSError?) -> Void) {
@@ -77,7 +77,7 @@ public class Redis {
     
     /// Ping the server to test if a connection is still alive
     ///
-    /// - Parameter pingStr: String for the ping message
+    /// - Parameter pingStr: String for the ping message.
     /// - Parameter callback: callback function for after the pong is received,
     ///                      NSError will be nil if successful.
     public func ping(_ pingStr: String?=nil, callback: (NSError?) -> Void) {
@@ -112,7 +112,7 @@ public class Redis {
     
     /// Echos a message
     ///
-    /// - Parameter str: String for the message
+    /// - Parameter str: String for the message.
     /// - Parameter callback: callback function with the String echoed back,
     ///                      NSError will be nil if successful.
     public func echo(_ str: String, callback: (RedisString?, NSError?) -> Void) {
