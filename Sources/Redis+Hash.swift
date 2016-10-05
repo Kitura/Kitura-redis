@@ -37,7 +37,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns if the specified field exists in the hash stored at a key
     ///
     /// - Parameter key: The key.
@@ -50,7 +50,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns the value associated with field in the hash stored at a key.
     ///
     /// - Parameter key: The key.
@@ -63,7 +63,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns all fields and values of the hash stored at a key.
     ///
     /// - Parameter key: The key.
@@ -75,7 +75,7 @@ extension Redis {
         issueCommand("HGETALL", key) {(response: RedisResponse) in
             var values = [String: RedisString]()
             var error: NSError? = nil
-            
+
             switch(response) {
             case .Array(let responses):
                 for idx in stride(from: 0, to: responses.count-1, by: 2) {
@@ -99,7 +99,7 @@ extension Redis {
             callback(values, _: error)
         }
     }
-    
+
     /// Increments the number stored in a field in the hash stored at a key by a value
     ///
     /// - Parameter key: The key.
@@ -127,7 +127,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns all field names in the hash stored at a key
     ///
     /// - Parameter key: The key.
@@ -138,7 +138,7 @@ extension Redis {
         issueCommand("HKEYS", key) {(response: RedisResponse) in
             var error: NSError? = nil
             var strings = [String]()
-            
+
             switch(response) {
             case .Array(let responses):
                 for innerResponse in responses {
@@ -157,7 +157,7 @@ extension Redis {
             callback(error == nil ? strings : nil, _: error)
         }
     }
-    
+
     /// Returns the number of fields contained in the hash stored at a key
     ///
     /// - Parameter key: The key.
@@ -169,7 +169,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns the values associated with the specified fields in the hash stored at a key.
     ///
     /// - Parameter key: The key.
@@ -186,7 +186,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If the key does not exist,
     /// a new key holding a hash is created.
@@ -198,7 +198,7 @@ extension Redis {
     public func hmset(_ key: String, fieldValuePairs: (String, String)..., callback: (Bool, NSError?) -> Void) {
         hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
     }
-    
+
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
     /// a new key holding a hash is created.
@@ -218,7 +218,7 @@ extension Redis {
             callback(ok, _: error)
         }
     }
-    
+
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
     /// a new key holding a hash is created.
@@ -230,7 +230,7 @@ extension Redis {
     public func hmset(_ key: String, fieldValuePairs: (String, RedisString)..., callback: (Bool, NSError?) -> Void) {
         hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
     }
-    
+
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
     /// a new key holding a hash is created.
@@ -250,7 +250,7 @@ extension Redis {
             callback(ok, _: error)
         }
     }
-    
+
     /// Sets the specified field in a hash stored at a key to a value. This command overwrites
     /// an existing field in the hash. If key does not exist, a new key holding a hash is created.
     ///
@@ -265,7 +265,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Sets the specified field in a hash stored at a key to a value. This command overwrites
     /// an existing field in the hash. If key does not exist, a new key holding a hash is created.
     ///
@@ -280,7 +280,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns the string length of the value in a field in a hash stored at a key.
     /// If the key or the field do not exist, 0 is returned.
     ///
@@ -294,7 +294,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns all values in the hash stored at a key.
     ///
     /// - Parameter key: The key.

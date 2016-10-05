@@ -30,7 +30,7 @@ extension Redis {
     ///                      entry is the value of that element.
     ///                      NSError will be non-nil if an error occurred.
     public func blpop(_ keys: String..., timeout: TimeInterval, callback: ([RedisString?]?, NSError?) -> Void) {
-        
+
         var command = ["BLPOP"]
         for key in keys {
             command.append(key)
@@ -40,7 +40,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Retrieve an element from the end of one of many lists, potentially blocking until
     /// one of the lists has an element
     ///
@@ -52,7 +52,7 @@ extension Redis {
     ///                      entry is the value of that element.
     ///                      NSError will be non-nil if an error occurred.
     public func brpop(_ keys: String..., timeout: TimeInterval, callback: ([RedisString?]?, NSError?) -> Void) {
-        
+
         var command = ["BRPOP"]
         for key in keys {
             command.append(key)
@@ -62,7 +62,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove and return the last value of a list and push it onto another list,
     /// blocking until there is an element to pop
     ///
@@ -76,7 +76,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Retrieve an element from a list by index
     ///
     /// - Parameter key: The key.
@@ -89,7 +89,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Insert a value into a list before or after a pivot
     ///
     /// - Parameter key: The key.
@@ -104,7 +104,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Insert a value into a list before or after a pivot
     ///
     /// - Parameter key: The key.
@@ -120,7 +120,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get the length of a list
     ///
     /// - Parameter key: The key.
@@ -131,7 +131,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Pop a value from a list
     ///
     /// - Parameter key: The key.
@@ -142,7 +142,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Push a set of values on to a list
     ///
     /// - Parameter key: The key.
@@ -153,7 +153,7 @@ extension Redis {
     public func lpush(_ key: String, values: String..., callback: (Int?, NSError?) -> Void) {
         lpushArrayOfValues(key, values: values, callback: callback)
     }
-    
+
     /// Push a set of values on to a list
     ///
     /// - Parameter key: The key.
@@ -170,7 +170,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Push a set of values on to a list
     ///
     /// - Parameter key: The key.
@@ -182,7 +182,7 @@ extension Redis {
     public func lpush(_ key: String, values: RedisString..., callback: (Int?, NSError?) -> Void) {
         lpushArrayOfValues(key, values: values, callback: callback)
     }
-    
+
     /// Push a set of values on to a list
     ///
     /// - Parameter key: The key.
@@ -200,7 +200,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Push a value on to a list, only if the list exists
     ///
     /// - Parameter key: The key.
@@ -213,7 +213,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Push a value on to a list, only if the list exists
     ///
     /// - Parameter key: The key.
@@ -226,7 +226,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Retrieve a group of elements from a list as specified by a range
     ///
     /// - Parameter key: The key.
@@ -240,7 +240,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove a number of elements that match the supplied value from the list
     ///
     /// - Parameter key: The key.
@@ -254,7 +254,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove a number of elements that match the supplied value from the list
     ///
     /// - Parameter key: The key.
@@ -268,7 +268,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Set a value in a list to a new value
     ///
     /// - Parameter key: The key.
@@ -283,7 +283,7 @@ extension Redis {
             callback(ok, _: error)
         }
     }
-    
+
     /// Set a value in a list to a new value
     ///
     /// - Parameter key: The key.
@@ -298,7 +298,7 @@ extension Redis {
             callback(ok, _: error)
         }
     }
-    
+
     /// Trim a list to a new size
     ///
     /// - Parameter key: The key.
@@ -313,7 +313,7 @@ extension Redis {
             callback(ok, _: error)
         }
     }
-    
+
     /// Remove and return the last value of a list
     ///
     /// - Parameter key: The key.
@@ -325,7 +325,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove and return the last value of a list and push it onto the front of another list
     ///
     /// - Parameter source: The list to pop an item from.
@@ -338,7 +338,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Append a set of values to end of a list
     ///
     /// - Parameter key: The key.
@@ -349,7 +349,7 @@ extension Redis {
     public func rpush(_ key: String, values: String..., callback: (Int?, NSError?) -> Void) {
         rpushArrayOfValues(key, values: values, callback: callback)
     }
-    
+
     /// Append a set of values to a list
     ///
     /// - Parameter key: The key.
@@ -366,7 +366,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Append a set of values to a list
     ///
     /// - Parameter key: The key.
@@ -377,7 +377,7 @@ extension Redis {
     public func rpush(_ key: String, values: RedisString..., callback: (Int?, NSError?) -> Void) {
         rpushArrayOfValues(key, values: values, callback: callback)
     }
-    
+
     /// Append a set of values to a list
     ///
     /// - Parameter key: The key.
@@ -391,7 +391,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Append a value to a list, only if the list exists
     ///
     /// - Parameter key: The key.
@@ -404,7 +404,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Append a value to a list, only if the list exists
     ///
     /// - Parameter key: The key.

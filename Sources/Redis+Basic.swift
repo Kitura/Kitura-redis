@@ -25,12 +25,12 @@ extension Redis {
     /// - Parameter callback: The callback function with the value of the key.
     ///                      NSError will be non-nil if an error occurred.
     public func get(_ key: String, callback: (RedisString?, NSError?) -> Void) {
-        
+
         issueCommand("GET", key) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Atomically sets a key to a value and returns the old value stored at the key.
     ///                      NSError will be non-nil if an error occurred.
     ///
@@ -42,7 +42,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Atomically sets a key to a value and returns the old value stored at the key.
     ///
     /// - Parameter key: The key.
@@ -54,7 +54,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Set a key to hold a value. If key already holds a value, it is overwritten.
     ///
     /// - Parameter key: The key.
@@ -64,12 +64,12 @@ extension Redis {
     /// - Parameter callback: The callback function after setting the value. Bool will be
     ///                      true if the key was set. NSError will be non-nil if an error occurred.
     public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: TimeInterval?=nil, callback: (Bool, NSError?) -> Void) {
-        
+
         var command = ["SET", key, value]
-        if  let exists = exists  {
+        if  let exists = exists {
             command.append(exists ? "XX" : "NX")
         }
-        if  let expiresIn = expiresIn  {
+        if  let expiresIn = expiresIn {
             command.append("PX")
             command.append(String(Int(expiresIn * 1000.0)))
         }
@@ -78,7 +78,7 @@ extension Redis {
             callback(ok, _: error)
         }
     }
-    
+
     /// Set a key to hold a value. If key already holds a value, it is overwritten.
     ///
     /// - Parameter key: The key.
@@ -88,12 +88,12 @@ extension Redis {
     /// - Parameter callback: The callback function after setting the value. Bool will be
     ///                      true if the key was set. NSError will be non-nil if an error occurred.
     public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: TimeInterval?=nil, callback: (Bool, NSError?) -> Void) {
-        
+
         var command = [RedisString("SET"), RedisString(key), value]
-        if  let exists = exists  {
+        if  let exists = exists {
             command.append(RedisString(exists ? "XX" : "NX"))
         }
-        if  let expiresIn = expiresIn  {
+        if  let expiresIn = expiresIn {
             command.append(RedisString("PX"))
             command.append(RedisString(Int(expiresIn * 1000.0)))
         }
@@ -102,14 +102,14 @@ extension Redis {
             callback(ok, _: error)
         }
     }
-    
+
     /// Removes the specified keys. A key is ignored if it does not exist
     ///
     /// - Parameter keys: A list of keys.
     /// - Parameter callback: callback function, the Int is the number of keys deleted.
     ///                      NSError will be non-nil if an error occurred.
     public func del(_ keys: String..., callback: (Int?, NSError?) -> Void) {
-        
+
         var command = ["DEL"]
         for key in keys {
             command.append(key)
@@ -118,14 +118,14 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Removes the specified keys. A key is ignored if it does not exist
     ///
     /// - Parameter keys: A list of keys in the form of `RedisString`s.
     /// - Parameter callback: The callback function, the Int is the number of keys deleted.
     ///                      NSError will be non-nil if an error occurred.
     public func del(_ keys: RedisString..., callback: (Int?, NSError?) -> Void) {
-        
+
         var command = [RedisString("DEL")]
         for key in keys {
             command.append(key)
@@ -134,7 +134,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Increments the number stored at the key by a value. If the key does not exist,
     /// it is set to 0 before performing the operation.
     ///
@@ -145,12 +145,12 @@ extension Redis {
     ///
     /// - Note: This is a string operation since Redis does not have a dedicated integer type
     public func incr(_ key: String, by: Int=1, callback: (Int?, NSError?) -> Void) {
-        
+
         issueCommand("INCRBY", key, String(by)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Increments the floating point number stored at the key by a value.
     /// If the key does not exist, it is set to 0 before performing the operation.
     ///
@@ -161,12 +161,12 @@ extension Redis {
     ///
     /// - Note: This is a string operation since Redis does not have a dedicated float type
     public func incr(_ key: String, byFloat: Float, callback: (RedisString?, NSError?) -> Void) {
-        
+
         issueCommand("INCRBYFLOAT", key, String(byFloat)) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Decrements the integer number stored at the key by a value.
     /// If the key does not exist, it is set to 0 before performing the operation.
     ///
@@ -181,7 +181,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns the value of all the specified keys.
     ///
     /// - Parameter keys: The list of keys.
@@ -189,7 +189,7 @@ extension Redis {
     ///                      values returned for the keys, in the order of the keys.
     ///                      NSError will be non-nil if an error occurred.
     public func mget(_ keys: String..., callback: ([RedisString?]?, NSError?) -> Void) {
-        
+
         var command = ["MGET"]
         for key in keys {
             command.append(key)
@@ -198,7 +198,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Sets a set key value pairs in the database
     ///
     /// - Parameter keyValuePairs: A list of tuples containing a key and a value.
@@ -208,7 +208,7 @@ extension Redis {
     public func mset(_ keyValuePairs: (String, String)..., exists: Bool=true, callback: (Bool, NSError?) -> Void) {
         msetArrayOfKeyValues(keyValuePairs, exists: exists, callback: callback)
     }
-    
+
     /// Sets a set key value pairs in the database
     ///
     /// - Parameter keyValuePairs: An array of tuples containing a key and a value.
@@ -225,13 +225,12 @@ extension Redis {
             if  exists {
                 let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
                 callback(ok, _: error)
-            }
-            else {
+            } else {
                 self.redisBoolResponseHandler(response, callback: callback)
             }
         }
     }
-    
+
     /// Sets the given keys to their respective values.
     ///
     /// - Parameter keyValuePairs: A list of tuples containing a key and value in the form of a `RedisString`.
@@ -241,7 +240,7 @@ extension Redis {
     public func mset(_ keyValuePairs: (String, RedisString)..., exists: Bool=true, callback: (Bool, NSError?) -> Void) {
         msetArrayOfKeyValues(keyValuePairs, exists: exists, callback: callback)
     }
-    
+
     /// Sets the given keys to their respective values.
     ///
     /// - Parameter keyValuePairs: An array of tuples containing a key and a value in the form of a `RedisString`.
@@ -258,13 +257,12 @@ extension Redis {
             if  exists {
                 let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
                 callback(ok, _: error)
-            }
-            else {
+            } else {
                 self.redisBoolResponseHandler(response, callback: callback)
             }
         }
     }
-    
+
     /// If the key already exists and is a string, this command appends the value at the end of the string
     ///
     /// - Parameter key: The key.
@@ -276,7 +274,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns a substring of the string value stored at the key, determined by the offsets start and end.
     /// Negative offsets can be used in order to provide an offset starting from the end of the string.
     ///
@@ -290,7 +288,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Overwrites part of the string stored at key, starting at the specified offset, for the entire length of value
     ///
     /// - Parameter key: The key.
@@ -303,7 +301,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns the length of the string value stored at the key
     ///
     /// - Parameter key: The key.
@@ -314,7 +312,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Returns the bit at an offset in the string value stored at the key.
     ///
     /// - Parameter key: The key.
@@ -326,7 +324,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Sets the bit value at an offset in the string value stored at the key.
     ///
     /// - Parameter key: The key.
@@ -339,7 +337,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Count the number of set bits (population counting) in a string.
     ///
     /// - Parameter key: The key.
@@ -350,7 +348,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Count the number of set bits (population counting) in a string.
     ///
     /// - Parameter key: The key.
@@ -363,7 +361,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Return the position of the first bit set to 1 or 0 in a string
     ///
     /// - Parameter key: The key.
@@ -371,12 +369,12 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the index in the
     ///                      string where the bit value matches the compaison value.
     ///                      NSError will be non-nil if an error occurred.
-    public func bitpos(_ key: String, bit:Bool, callback: (Int?, NSError?) -> Void) {
+    public func bitpos(_ key: String, bit: Bool, callback: (Int?, NSError?) -> Void) {
         issueCommand("BITPOS", key, bit ? "1" : "0") {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Return the position of the first bit set to 1 or 0 in a string
     ///
     /// - Parameter key: The key.
@@ -385,12 +383,12 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the index in the
     ///                      string where the bit value matches the compaison value.
     ///                      NSError will be non-nil if an error occurred.
-    public func bitpos(_ key: String, bit:Bool, start: Int, callback: (Int?, NSError?) -> Void) {
+    public func bitpos(_ key: String, bit: Bool, start: Int, callback: (Int?, NSError?) -> Void) {
         issueCommand("BITPOS", key, bit ? "1" : "0", String(start)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Return the position of the first bit set to 1 or 0 in a string
     ///
     /// - Parameter key: The key.
@@ -400,12 +398,12 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the index in the
     ///                      string where the bit value matches the compaison value.
     ///                      NSError will be non-nil if an error occurred.
-    public func bitpos(_ key: String, bit:Bool, start: Int, end: Int, callback: (Int?, NSError?) -> Void) {
+    public func bitpos(_ key: String, bit: Bool, start: Int, end: Int, callback: (Int?, NSError?) -> Void) {
         issueCommand("BITPOS", key, bit ? "1" : "0", String(start), String(end)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Perform a bitwise AND operation between multiple keys and store the result at the destination key.
     ///
     /// - Parameter destKey: The destination key.
@@ -421,7 +419,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Perform a bitwise OR operation between multiple keys and store the result at the destination key.
     ///
     /// - Parameter destKey: The destination key.
@@ -437,7 +435,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Perform a bitwise XOR operation between multiple keys and store the result at the destination key.
     ///
     /// - Parameter destKey: The destination key.
@@ -453,7 +451,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Perform a bitwise NOT operation on the value at a key and store the result at the destination key.
     ///
     /// - Parameter destKey: The destination key.
@@ -465,7 +463,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Check if one or more keys exist
     ///
     /// - Parameter keys: A list of keys.
@@ -480,7 +478,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Move a key from the currently selected database to the specified destination database.
     /// When the key already exists in the destination database, or it does not exist in the
     /// source database, nothing is done.
@@ -494,7 +492,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Renames a key. It returns an error if the original and new names are the same,
     /// or when the original key does not exist.
     ///
@@ -503,19 +501,18 @@ extension Redis {
     /// - Parameter callback: The callback function, the Bool will be true if the key was renamed.
     ///                      NSError will be non-nil if an error occurred.
     public func rename(_ key: String, newKey: String, exists: Bool=true, callback: (Bool, NSError?) -> Void) {
-        if  exists  {
+        if  exists {
             issueCommand("RENAME", key, newKey) {(response: RedisResponse) in
                 let (renamed, error) = self.redisOkResponseHandler(response, nilOk: false)
                 callback(renamed, _: error)
             }
-        }
-        else {
+        } else {
             issueCommand("RENAMENX", key, newKey) {(response: RedisResponse) in
                 self.redisBoolResponseHandler(response, callback: callback)
             }
         }
     }
-    
+
     /// Set a timeout on a key. After the timeout has expired, the key will automatically be deleted.
     /// A key with an associated timeout is often said to be volatile in Redis terminology.
     ///
@@ -528,7 +525,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Set a timeout on a key. After the timeout has expired, the key will automatically be deleted.
     /// A key with an associated timeout is often said to be volatile in Redis terminology.
     ///
@@ -541,7 +538,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove the existing timeout on a key, turning the key from volatile (a key with an expiration)
     /// to persistent (a key that will never expire as no timeout is associated)
     ///
@@ -553,7 +550,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get the remaining time to live of a key that has an expiration period set.
     ///
     /// - Parameter key: The key.
@@ -566,10 +563,9 @@ extension Redis {
         issueCommand("PTTL", key) {(response: RedisResponse) in
             switch(response) {
             case .IntegerValue(let num):
-                if  num >= 0  {
+                if  num >= 0 {
                     callback(TimeInterval(Double(num)/1000.0), nil)
-                }
-                else {
+                } else {
                     callback(TimeInterval(num), nil)
                 }
             case .Error(let error):

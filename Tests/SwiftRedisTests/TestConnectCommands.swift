@@ -20,24 +20,24 @@ import Foundation
 import XCTest
 
 public class TestConnectCommands: XCTestCase {
-    static var allTests : [(String, (TestConnectCommands) -> () throws -> Void)] {
+    static var allTests: [(String, (TestConnectCommands) -> () throws -> Void)] {
         return [
             ("test_info", test_info),
             ("test_pingAndEcho", test_pingAndEcho),
             ("test_select", test_select)
         ]
     }
-    
+
     func test_pingAndEcho() {
         connectRedis() {(error: NSError?) in
             if error != nil {
                 XCTFail("Could not connect to Redis")
                 return
             }
-            
+
             redis.ping() {(error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                
+
                 /* Changed for Redis 2.8.0
                 let pingText = "Hello, hello, hello, hi there"
                 redis.ping(pingText) {(error: NSError?) in
@@ -53,14 +53,14 @@ public class TestConnectCommands: XCTestCase {
             }
         }
     }
-    
+
     func selectTestSetup(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
             if error != nil {
                 XCTFail("Could not connect to Redis")
                 return
             }
-            
+
             redis.select(1) {(error: NSError?) in
                 redis.del(self.key) {(count: Int?, error: NSError?) in
                     redis.select(0) {(error: NSError?) in
@@ -70,35 +70,35 @@ public class TestConnectCommands: XCTestCase {
             }
         }
     }
-    
+
     let key = "selectKey"
-    
+
     func test_select() {
         selectTestSetup() {
             let expectedValue = "testing 1 2 3"
             let newValue = "xyzzy-plover"
-            
+
             redis.set(self.key, value: expectedValue) {(wasSet: Bool, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssert(wasSet, "Failed to set \(self.key)")
-                    
+
                 redis.select(99) {(error: NSError?) in
                     XCTAssertNotNil(error, "Database 99 shouldn't have been selected")
-                        
+
                     redis.select(1) {(error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        
+
                         redis.get(self.key) {(returnedValue: RedisString?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                             XCTAssertNil(returnedValue, "Returned value was not nil. Was '\(returnedValue)'")
-                                
+
                             redis.set(self.key, value: newValue) {(wasSet: Bool, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssert(wasSet, "Failed to set \(self.key)")
-                                
+
                                 redis.select(0) {(error: NSError?) in
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                    
+
                                     redis.get(self.key) {(returnedValue: RedisString?, error: NSError?) in
                                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                         XCTAssertEqual(returnedValue!.asString, expectedValue, "Returned value was not '\(expectedValue)'")
@@ -111,19 +111,19 @@ public class TestConnectCommands: XCTestCase {
             }
         }
     }
-    
+
     func test_info() {
         let expectation1 = expectation(description: "Shows some information about the redis server")
-        
+
         connectRedis() {(error: NSError?) in
             if error != nil {
                 XCTFail("Could not connect to Redis")
                 return
             }
-        
+
             redis.info() {
                 (info: RedisInfo?, error: NSError?) in
-            
+
                 XCTAssertNil(error)
                 XCTAssertNotNil(info)
                 expectation1.fulfill()

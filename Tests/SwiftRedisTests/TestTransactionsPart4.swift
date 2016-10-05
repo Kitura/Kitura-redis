@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestTransactionsPart4: XCTestCase {
-    static var allTests : [(String, (TestTransactionsPart4) -> () throws -> Void)] {
+    static var allTests: [(String, (TestTransactionsPart4) -> () throws -> Void)] {
         return [
             ("test_hashSetAndGet", test_hashSetAndGet),
             ("test_Incr", test_Incr),
@@ -50,7 +50,7 @@ public class TestTransactionsPart4: XCTestCase {
             multi.hset(self.key1, field: self.field1, value: expVal1, exists: false)
 
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 10)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 10) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(1), "\(self.field1) wasn't a new field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(0), "\(self.field1) wasn't an existing field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(expVal2)), "\(self.key1) should have been equal to \(expVal2). Was \(nestedResponses[2].asString?.asString)")
@@ -81,7 +81,7 @@ public class TestTransactionsPart4: XCTestCase {
             //multi.hset(self.key1, field: self.field1, value: expVal1).hstrlen(self.key1, field: self.field1)
 
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 2  /* Should be 4 if testing hstrlen */ )  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 2  /* Should be 4 if testing hstrlen */ ) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(Int64(incInt)), "Value of the field should be \(incInt), was \(nestedResponses[0].asInteger)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(String(incFloat))), "Value of the field should be \(incFloat). Was \(nestedResponses[1].asString?.asString)")
 
@@ -107,7 +107,7 @@ public class TestTransactionsPart4: XCTestCase {
             multi.hkeys(self.key1).hvals(self.key1).hgetall(self.key1)
 
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Fields 1,2,3 should have been set")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(expVal1)), "\(self.key1).\(self.field1) wasn't set to \(expVal1). Was \(nestedResponses[1].asString?.asString)")
                     let innerResponses = nestedResponses[2].asArray!
@@ -139,7 +139,7 @@ public class TestTransactionsPart4: XCTestCase {
             multi.hgetall(self.key1)
 
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 3)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 3) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(1), "\(self.field1) wasn't a new field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Status("OK"), "Fields 1,2,3 should have been set")
                     let innerResponses = nestedResponses[2].asArray!

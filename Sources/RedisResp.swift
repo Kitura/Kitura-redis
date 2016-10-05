@@ -44,8 +44,7 @@ internal class RedisResp {
             socket = try Socket.create()
             try socket!.connect(to: host, port: port)
             status = .connected
-        }
-        catch {
+        } catch {
             status = .notConnected
         }
     }
@@ -66,11 +65,9 @@ internal class RedisResp {
             try socket.write(from: buffer)
 
             readAndParseResponse(callback: callback)
-        }
-        catch let error as Socket.Error {
+        } catch let error as Socket.Error {
             callback(RedisResponse.Error("Error sending command to Redis server. Error=\(error.description)"))
-        }
-        catch {
+        } catch {
             callback(RedisResponse.Error("Error sending command to Redis server. Unknown error"))
         }
     }
@@ -86,16 +83,14 @@ internal class RedisResp {
         for arg in stringArgs {
             addAsBulkString(arg.asData, to: &buffer)
         }
-        
+
         do {
             try socket.write(from: buffer)
 
             readAndParseResponse(callback: callback)
-        }
-        catch let error as Socket.Error {
+        } catch let error as Socket.Error {
             callback(RedisResponse.Error("Error sending command to Redis server. Error=\(error.description)"))
-        }
-        catch {
+        } catch {
             callback(RedisResponse.Error("Error sending command to Redis server. Unknown error."))
         }
     }
@@ -110,14 +105,11 @@ internal class RedisResp {
         do {
             (response, offset) = try parseByPrefix(&buffer, from: offset)
             callback(response)
-        }
-        catch let error as Socket.Error {
+        } catch let error as Socket.Error {
             callback(RedisResponse.Error("Error reading from the Redis server. Error=\(error.description)"))
-        }
-        catch let error as RedisRespError {
+        } catch let error as RedisRespError {
             callback(RedisResponse.Error("Error reading from the Redis server. Error=\(error.description)"))
-        }
-        catch {
+        } catch {
             callback(RedisResponse.Error("Error reading from the Redis server. Unknown error"))
         }
     }
@@ -128,28 +120,23 @@ internal class RedisResp {
         var (matched, offset) = try compare(&buffer, at: from, with: RedisResp.plus)
         if  matched {
             (response, offset) = try parseSimpleString(&buffer, offset: offset)
-        }
-        else {
+        } else {
             (matched, offset) = try compare(&buffer, at: from, with: RedisResp.colon)
             if  matched {
                 (response, offset) = try parseInteger(&buffer, offset: offset)
-            }
-            else {
+            } else {
                 (matched, offset) = try compare(&buffer, at: from, with: RedisResp.dollar)
                 if  matched {
                     (response, offset) = try parseBulkString(&buffer, offset: offset)
-                }
-                else {
+                } else {
                     (matched, offset) = try compare(&buffer, at: from, with: RedisResp.asterisk)
                     if  matched {
                         (response, offset) = try parseArray(&buffer, offset: offset)
-                    }
-                    else {
+                    } else {
                         (matched, offset) = try compare(&buffer, at: from, with: RedisResp.minus)
                         if  matched {
                             (response, offset) = try parseError(&buffer, offset: offset)
-                        }
-                        else {
+                        } else {
                             response = RedisResponse.Error("Unknown response type")
                         }
                     }
@@ -163,34 +150,32 @@ internal class RedisResp {
         var (arrayLength, newOffset) = try parseIntegerValue(&buffer, offset: offset)
         var responses = [RedisResponse]()
         var response: RedisResponse
-        if  arrayLength >= 0  {
-            for _ in 0 ..< Int(arrayLength)  {
+        if  arrayLength >= 0 {
+            for _ in 0 ..< Int(arrayLength) {
                 (response, newOffset) = try parseByPrefix(&buffer, from: newOffset)
                 responses.append(response)
             }
             return (RedisResponse.Array(responses), newOffset)
-        }
-        else {
+        } else {
             return (RedisResponse.Nil, newOffset)
         }
     }
 
     private func parseBulkString(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
         let (strLen64, newOffset) = try parseIntegerValue(&buffer, offset: offset)
-        if  strLen64 >= 0  {
+        if  strLen64 >= 0 {
             let strLen = Int(strLen64)
             let totalLength = newOffset+strLen+RedisResp.crLf.count
-            while  totalLength > buffer.count  {
+            while  totalLength > buffer.count {
                 let length = try socket?.read(into: &buffer)
-                if  length == 0  {
+                if  length == 0 {
                     throw RedisRespError(code: .EOF)
                 }
             }
             let data = buffer.subdata(in: newOffset..<newOffset+strLen)
             let redisString = RedisString(data)
             return (RedisResponse.StringValue(redisString), totalLength)
-        }
-        else {
+        } else {
             return (RedisResponse.Nil, newOffset)
         }
     }
@@ -225,18 +210,17 @@ internal class RedisResp {
     // Mark: Parser helper functions
 
     private func compare(_ buffer: inout Data, at offset: Int, with: Data) throws -> (Bool, Int) {
-        while  offset+with.count >= buffer.count  {
+        while  offset+with.count >= buffer.count {
             let length = try socket?.read(into: &buffer)
-            if  length == 0  {
+            if  length == 0 {
                 throw RedisRespError(code: .EOF)
             }
         }
-        
+
         let range = buffer.range(of: with, options: [], in: offset..<offset+with.count)
         if range != nil {
             return (true, offset+with.count)
-        }
-        else {
+        } else {
             return (false, offset)
         }
     }
@@ -250,10 +234,9 @@ internal class RedisResp {
             if range != nil {
                 offset = (range?.lowerBound)!
                 notFound = false
-            }
-            else  {
+            } else {
                 let length = try socket?.read(into: &buffer)
-                if  length == 0  {
+                if  length == 0 {
                     throw RedisRespError(code: .EOF)
                 }
             }
@@ -282,15 +265,15 @@ internal class RedisResp {
         buffer.append(RedisResp.dollar)
         add(cString.count, to: &buffer)
         buffer.append(RedisResp.crLf)
-        
+
         buffer.append(cString)
         buffer.append(RedisResp.crLf)
     }
-    
+
     private func add(_ number: Int, to buffer: inout Data) {
         add(String(number), to: &buffer)
     }
-    
+
     private func add(_ text: String, to buffer: inout Data) {
         buffer.append(RedisString(text).asData)
     }

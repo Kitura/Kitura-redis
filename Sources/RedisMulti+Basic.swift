@@ -30,7 +30,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("APPEND"), RedisString(key), RedisString(value)])
         return self
     }
-    
+
     /// Add a BITCOUNT command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -41,7 +41,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("BITCOUNT"), RedisString(key)])
         return self
     }
-    
+
     /// Add a BITCOUNT command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -54,7 +54,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("BITCOUNT"), RedisString(key), RedisString(start), RedisString(end)])
         return self
     }
-    
+
     /// Add a BITOP AND command to the "transaction"
     ///
     /// - Parameter destKey: The destination key.
@@ -70,7 +70,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a BITOP NOT command to the "transaction"
     ///
     /// - Parameter destKey: The destination key.
@@ -82,7 +82,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("BITOP"), RedisString("NOT"), RedisString(destKey), RedisString(not)])
         return self
     }
-    
+
     /// Add a BITOP OR command to the "transaction"
     ///
     /// - Parameter destKey: The destination key.
@@ -98,7 +98,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a BITOP XOR command to the "transaction"
     ///
     /// - Parameter destKey: The destination key.
@@ -114,7 +114,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a BITPOS command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -122,11 +122,11 @@ extension RedisMulti {
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
-    public func bitpos(_ key: String, bit:Bool) -> RedisMulti {
+    public func bitpos(_ key: String, bit: Bool) -> RedisMulti {
         queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0")])
         return self
     }
-    
+
     /// Add a BITPOS command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -135,11 +135,11 @@ extension RedisMulti {
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
-    public func bitpos(_ key: String, bit:Bool, start: Int) -> RedisMulti {
+    public func bitpos(_ key: String, bit: Bool, start: Int) -> RedisMulti {
         queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0"), RedisString(start)])
         return self
     }
-    
+
     /// Add a BITPOS command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -149,11 +149,11 @@ extension RedisMulti {
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
-    public func bitpos(_ key: String, bit:Bool, start: Int, end: Int) -> RedisMulti {
+    public func bitpos(_ key: String, bit: Bool, start: Int, end: Int) -> RedisMulti {
         queuedCommands.append([RedisString("BITPOS"), RedisString(key), RedisString(bit ? "1" : "0"), RedisString(start), RedisString(end)])
         return self
     }
-    
+
     /// Add a DECRBY command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -165,7 +165,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("DECRBY"), RedisString(key), RedisString(by)])
         return self
     }
-    
+
     /// Add a DEL command to the "transaction"
     ///
     /// - Parameter keys: A list of keys.
@@ -180,7 +180,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add an EXISTS command to the "transaction"
     ///
     /// - Parameter keys: A list of keys.
@@ -195,7 +195,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a PEXPIRE command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -207,7 +207,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("PEXPIRE"), RedisString(key), RedisString(Int(inTime * 1000.0))])
         return self
     }
-    
+
     /// Add a PEXPIREAT command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -219,7 +219,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("PEXPIREAT"), RedisString(key), RedisString(Int(atDate.timeIntervalSince1970 * 1000.0))])
         return self
     }
-    
+
     /// Add a GET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -230,7 +230,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("GET"), RedisString(key)])
         return self
     }
-    
+
     /// Add a GETBIT command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -242,7 +242,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("GETBIT"), RedisString(key), RedisString(offset)])
         return self
     }
-    
+
     /// Add a GETRANGE command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -255,7 +255,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("GETRANGE"), RedisString(key), RedisString(start), RedisString(end)])
         return self
     }
-    
+
     /// Add a GETSET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -267,7 +267,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("GETSET"), RedisString(key), RedisString(value)])
         return self
     }
-    
+
     /// Add a GETSET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -279,7 +279,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("GETSET"), RedisString(key), value])
         return self
     }
-    
+
     /// Add an INCRBY command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -291,7 +291,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("INCRBY"), RedisString(key), RedisString(by)])
         return self
     }
-    
+
     /// Add an INCRBYFLOAT command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -303,7 +303,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("INCRBYFLOAT"), RedisString(key), RedisString(Double(byFloat))])
         return self
     }
-    
+
     /// Add a MGET command to the "transaction"
     ///
     /// - Parameter keys: The list of keys.
@@ -318,7 +318,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a MOVE command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -330,7 +330,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("MOVE"), RedisString(key), RedisString(toDB)])
         return self
     }
-    
+
     /// Add a MSET or a MSETNX command to the "transaction"
     ///
     /// - Parameter keyValuePairs: A list of tuples containing a key and a value.
@@ -341,7 +341,7 @@ extension RedisMulti {
     public func mset(_ keyValuePairs: (String, String)..., exists: Bool=true) -> RedisMulti {
         return msetArrayOfKeyValues(keyValuePairs, exists: exists)
     }
-    
+
     /// Add a MSET or a MSETNX command to the "transaction"
     ///
     /// - Parameter keyValuePairs: An array of tuples containing a key and a value.
@@ -358,7 +358,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a MSET or a MSETNX command to the "transaction"
     ///
     /// - Parameter keyValuePairs: A list of tuples containing a key and a value in the form of a `RedisString`.
@@ -369,7 +369,7 @@ extension RedisMulti {
     public func mset(_ keyValuePairs: (String, RedisString)..., exists: Bool=true) -> RedisMulti {
         return msetArrayOfKeyValues(keyValuePairs, exists: exists)
     }
-    
+
     /// Add a MSET or a MSETNX command to the "transaction"
     ///
     /// - Parameter keyValuePairs: An array of tuples containing a key and a value in the form of a `RedisString`.
@@ -386,7 +386,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a PERSIST command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -397,7 +397,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("PERSIST"), RedisString(key)])
         return self
     }
-    
+
     /// Add a RENAME or a RENAMENX command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -409,7 +409,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString(exists ? "RENAME" : "RENAMENX"), RedisString(key), RedisString(newKey)])
         return self
     }
-    
+
     /// Add a SELECT command to the "transaction"
     ///
     /// - Parameter db: numeric index for the database.
@@ -420,7 +420,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("SELECT"), RedisString(db)])
         return self
     }
-    
+
     /// Add a SET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -432,17 +432,17 @@ extension RedisMulti {
     @discardableResult
     public func set(_ key: String, value: String, exists: Bool?=nil, expiresIn: TimeInterval?=nil) -> RedisMulti {
         var command = [RedisString("SET"), RedisString(key), RedisString(value)]
-        if  let exists = exists  {
+        if  let exists = exists {
             command.append(RedisString(exists ? "XX" : "NX"))
         }
-        if  let expiresIn = expiresIn  {
+        if  let expiresIn = expiresIn {
             command.append(RedisString("PX"))
             command.append(RedisString(Int(expiresIn * 1000.0)))
         }
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a SET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -454,17 +454,17 @@ extension RedisMulti {
     @discardableResult
     public func set(_ key: String, value: RedisString, exists: Bool?=nil, expiresIn: TimeInterval?=nil) -> RedisMulti {
         var command = [RedisString("SET"), RedisString(key), value]
-        if  let exists = exists  {
+        if  let exists = exists {
             command.append(RedisString(exists ? "XX" : "NX"))
         }
-        if  let expiresIn = expiresIn  {
+        if  let expiresIn = expiresIn {
             command.append(RedisString("PX"))
             command.append(RedisString(Int(expiresIn * 1000.0)))
         }
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a SETBIT command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -477,7 +477,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("SETBIT"), RedisString(key), RedisString(offset), RedisString(value ? "1" : "0")])
         return self
     }
-    
+
     /// Add a SETRANGE command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -490,7 +490,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("SETRANGE"), RedisString(key), RedisString(offset), RedisString(value)])
         return self
     }
-    
+
     /// Add a STRLEN command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -501,7 +501,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("STRLEN"), RedisString(key)])
         return self
     }
-    
+
     /// Add a PTTL command to the "transaction"
     ///
     /// - Parameter key: The key.

@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestTransactionsPart1: XCTestCase {
-    static var allTests : [(String, (TestTransactionsPart1) -> () throws -> Void)] {
+    static var allTests: [(String, (TestTransactionsPart1) -> () throws -> Void)] {
         return [
             ("testSetPlusGetAndDel", testSetPlusGetAndDel),
             ("testBinarySafeSetAndGet", testBinarySafeSetAndGet),
@@ -42,7 +42,7 @@ public class TestTransactionsPart1: XCTestCase {
             multi.set(self.key1, value: self.expVal1).getSet(self.key1, value: self.expVal2)
             multi.get(self.key1).del(self.key1).get(self.key1)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 5)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(self.expVal1)), "getSet didn't return '\(self.expVal1), returned \(nestedResponses[1])")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(self.expVal2)), "get didn't return '\(self.expVal2), returned \(nestedResponses[2])")
@@ -63,7 +63,7 @@ public class TestTransactionsPart1: XCTestCase {
             let multi = redis.multi()
             multi.set(self.key1, value: expData1).getSet(self.key1, value: expData2).get(self.key1)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 3)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 3) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(expData1), "getSet didn't return '\(expData1), returned \(nestedResponses[1])")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(expData2), "get didn't return '\(expData2), returned \(nestedResponses[2])")
@@ -81,7 +81,7 @@ public class TestTransactionsPart1: XCTestCase {
             multi.del(self.key2)
             multi.set(self.key2, value: self.expVal2, exists: false).get(self.key2)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 8)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 8) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Nil, "Shouldn't have set \(self.key2)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Nil, "\(self.key2) shouldn't exist")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.Status("OK"), "Set didn't return an 'OK'")
@@ -100,7 +100,7 @@ public class TestTransactionsPart1: XCTestCase {
             let multi = redis.multi()
             multi.set(self.key1, value: self.expVal1, expiresIn: 2.750).get(self.key1)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 2)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 2) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Failed to set \(self.key1)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(self.expVal1)), "get didn't return '\(self.expVal1), returned \(nestedResponses[1])")
 
@@ -127,7 +127,7 @@ public class TestTransactionsPart1: XCTestCase {
             multi.set(self.key2, value: String(dblValue)).incr(self.key2, byFloat: fltInc)
             multi.get(self.key1).get(self.key2)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 7)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 7) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set of \(self.key1) didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(Int64(intValue+intInc)), "After incr \(self.key1) wasn't equal to \(intValue+intInc), was \(nestedResponses[1])")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(Int64(intValue+intInc-1)), "After decr \(self.key1) wasn't equal to \(intValue+intInc-1), was \(nestedResponses[2])")
@@ -144,7 +144,7 @@ public class TestTransactionsPart1: XCTestCase {
             multi.set(self.key1, value: self.expVal1).select(1).get(self.key1)
             multi.set(self.key1, value: self.expVal2).select(0).get(self.key1)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Status("OK"), "Select(1) didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.Nil, "\(self.key1) in DB 1 shouldn't have a value")

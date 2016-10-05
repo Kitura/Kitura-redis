@@ -37,4 +37,3 @@ XCTMain([
 	testCase(TestSetCommands.allTests),
 	testCase(TestSetCommandsPart2.allTests)
 ])
-

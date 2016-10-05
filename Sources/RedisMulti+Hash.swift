@@ -34,7 +34,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a HEXISTS command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -46,7 +46,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HEXISTS"), RedisString(key), RedisString(field)])
         return self
     }
-    
+
     /// Add a HGET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -58,7 +58,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HGET"), RedisString(key), RedisString(field)])
         return self
     }
-    
+
     /// Add a HGETALL command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -69,7 +69,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HGETALL"), RedisString(key)])
         return self
     }
-    
+
     /// Add a HINCRBY command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -82,7 +82,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HINCRBY"), RedisString(key), RedisString(field), RedisString(by)])
         return self
     }
-    
+
     /// Add a HINCRBYFLOAT command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -95,7 +95,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HINCRBYFLOAT"), RedisString(key), RedisString(field), RedisString(Double(byFloat))])
         return self
     }
-    
+
     /// Add a HKEYS command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -106,7 +106,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HKEYS"), RedisString(key)])
         return self
     }
-    
+
     /// Add a HLEN command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -117,7 +117,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HLEN"), RedisString(key)])
         return self
     }
-    
+
     /// Add a HMGET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -133,7 +133,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a HMSET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -144,7 +144,7 @@ extension RedisMulti {
     public func hmset(_ key: String, fieldValuePairs: (String, String)...) -> RedisMulti {
         return hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs)
     }
-    
+
     /// Add a HMSET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -161,7 +161,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a HMSET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -172,7 +172,7 @@ extension RedisMulti {
     public func hmset(_ key: String, fieldValuePairs: (String, RedisString)...) -> RedisMulti {
         return hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs)
     }
-    
+
     /// Add a HMSET command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -189,7 +189,7 @@ extension RedisMulti {
         queuedCommands.append(command)
         return self
     }
-    
+
     /// Add a HSET or a HSETNX command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -203,7 +203,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), RedisString(value)])
         return self
     }
-    
+
     /// Add a HSET or a HSETNX command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -217,7 +217,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), value])
         return self
     }
-    
+
     /// Add a HSTRLEN command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -229,7 +229,7 @@ extension RedisMulti {
         queuedCommands.append([RedisString("HSTRLEN"), RedisString(key), RedisString(field)])
         return self
     }
-    
+
     /// Add a HVALS command to the "transaction"
     ///
     /// - Parameter key: The key.

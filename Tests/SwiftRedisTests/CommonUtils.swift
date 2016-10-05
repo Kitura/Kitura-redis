@@ -29,20 +29,18 @@ import SwiftRedis
 var redis = Redis()
 
 func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
-    if !redis.connected  {
+    if !redis.connected {
         let password = read(fileName: "password.txt")
         let host = read(fileName: "host.txt")
 
         redis.connect(host: host, port: 6379) {(error: NSError?) in
             if authenticate {
                 redis.auth(password, callback: callback)
-            }
-            else {
+            } else {
                 callback(error)
             }
         }
-    }
-    else {
+    } else {
         callback(nil)
     }
 }
@@ -50,7 +48,11 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
 func read(fileName: String) -> String {
         // Read in a configuration file into an NSData
     do {
-        let fileData = try Data(contentsOf: URL(fileURLWithPath: "Tests/SwiftRedisTests/\(fileName)"))
+        var pathToTests = #file
+        if pathToTests.hasSuffix("CommonUtils.swift") {
+            pathToTests = pathToTests.replacingOccurrences(of: "CommonUtils.swift", with: "")
+        }
+        let fileData = try Data(contentsOf: URL(fileURLWithPath: "\(pathToTests)\(fileName)"))
         XCTAssertNotNil(fileData, "Failed to read in the \(fileName) file")
 
         let resultString = String(data: fileData, encoding: String.Encoding.utf8)
@@ -62,8 +64,7 @@ func read(fileName: String) -> String {
             exit(1)
         }
         return resultLiteral.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-    }
-    catch {
+    } catch {
         XCTFail("Error in \(fileName).")
         exit(1)
     }

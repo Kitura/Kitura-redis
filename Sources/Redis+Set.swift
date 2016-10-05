@@ -18,7 +18,7 @@ import Foundation
 
 /// Extend Redis by adding the Set operations
 extension Redis {
-    
+
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
@@ -29,7 +29,7 @@ extension Redis {
     public func sadd(_ key: String, members: String..., callback: (Int?, NSError?) -> Void) {
         saddArrayOfMembers(key, members: members, callback: callback)
     }
-    
+
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
@@ -46,7 +46,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
@@ -57,7 +57,7 @@ extension Redis {
     public func sadd(_ key: RedisString, members: RedisString..., callback: (Int?, NSError?) -> Void) {
         saddArrayOfMembers(key, members: members, callback: callback)
     }
-    
+
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
@@ -74,7 +74,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get the number of members in a set
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Int will contain the cardinality
@@ -85,7 +85,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get the number of members in a set
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Int will contain the cardinality
@@ -96,7 +96,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Subtract multiple sets
     ///
     /// - Parameter keys: The list of keys to get the difference from.
@@ -106,7 +106,7 @@ extension Redis {
     public func sdiff(keys: String..., callback: ([RedisString?]?, NSError?) -> Void) {
         sdiffArrayOfKeys(keys: keys, callback: callback)
     }
-    
+
     /// Subtract multiple sets
     ///
     /// - Parameter keys: An array of the keys to get the difference from.
@@ -122,7 +122,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Subtract multiple sets
     ///
     /// - Parameter keys: The list of the keys to get the difference from.
@@ -132,7 +132,7 @@ extension Redis {
     public func sdiff(keys: RedisString..., callback: ([RedisString?]?, NSError?) -> Void) {
         sdiffArrayOfKeys(keys: keys, callback: callback)
     }
-    
+
     /// Subtract multiple sets
     ///
     /// - Parameter keys: An array of the keys to get the difference from.
@@ -148,7 +148,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Subtract multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result, if the
@@ -161,7 +161,7 @@ extension Redis {
         callback: (Int?, NSError?) -> Void) {
         self.sdiffstoreArrayOfKeys(destination: destination, keys: keys, callback: callback)
     }
-    
+
     /// Subtract multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
@@ -171,7 +171,7 @@ extension Redis {
     ///                      NSError will be non-nil if an error occurred.
     public func sdiffstoreArrayOfKeys(destination: String, keys: [String],
                                       callback: (Int?, NSError?) -> Void) {
-        
+
         var command = ["sdiffstore"]
         for key in keys {
             command.append(key)
@@ -180,7 +180,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Subtract multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result, if the
@@ -193,7 +193,7 @@ extension Redis {
         callback: (Int?, NSError?) -> Void) {
         self.sdiffstoreArrayOfKeys(destination: destination, keys: keys, callback: callback)
     }
-    
+
     /// Subtract multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: Tthe destination of the result.
@@ -203,7 +203,7 @@ extension Redis {
     ///                      NSError will be non-nil if an error occurred.
     public func sdiffstoreArrayOfKeys(destination: RedisString, keys: [RedisString],
                                       callback: (Int?, NSError?) -> Void) {
-        
+
         var command = [RedisString("sdiffstore")]
         for key in keys {
             command.append(key)
@@ -212,7 +212,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get all the members in a set
     ///
     /// - Parameter key: The key.
@@ -224,7 +224,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get all the members in a set
     ///
     /// - Parameter key: The key.
@@ -245,7 +245,7 @@ extension Redis {
     public func sinter(_ keys: String..., callback: ([RedisString?]?, NSError?) -> Void) {
         self.sinterArrayOfKeys(keys, callback: callback)
     }
-    
+
     /// Intersect multiple sets
     ///
     /// - Parameter keys: An array of the keys to intersect from.
@@ -261,7 +261,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Intersect multiple sets
     ///
     /// - Parameter keys: The list of the keys to intersect from.
@@ -271,7 +271,7 @@ extension Redis {
     public func sinter(_ keys: RedisString..., callback: ([RedisString?]?, NSError?) -> Void) {
         self.sinterArrayOfKeys(keys, callback: callback)
     }
-    
+
     /// Intersect multiple sets
     ///
     /// - Parameter keys: An array of the keys to intersect from.
@@ -287,7 +287,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Intersect multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
@@ -298,7 +298,7 @@ extension Redis {
     public func sinterstore(_ destination: String, keys: String..., callback: (Int?, NSError?) -> Void) {
         self.sinterstoreArrayOfKeys(destination, keys: keys, callback: callback)
     }
-    
+
     /// Intersect multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
@@ -315,7 +315,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Intersect multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
@@ -326,7 +326,7 @@ extension Redis {
     public func sinterstore(_ destination: RedisString, keys: RedisString..., callback: (Int?, NSError?) -> Void) {
         self.sinterstoreArrayOfKeys(destination, keys: keys, callback: callback)
     }
-    
+
     /// Intersect multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
@@ -343,7 +343,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Determine if a given value is a member of a set
     ///
     /// - Parameter key: The key.
@@ -356,7 +356,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Determine if a given value is a member of a set
     ///
     /// - Parameter key: The key.
@@ -369,7 +369,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Move a member from one set to another
     ///
     /// - Parameter source: The Source set from where to move the member from.
@@ -384,7 +384,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Move a member from one set to another
     ///
     /// - Parameter source: The Source set from where to move the member from.
@@ -399,7 +399,7 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove and return a random member from a set
     ///
     /// - Parameter key: The key.
@@ -411,7 +411,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove and return one or multiple random members from a set
     ///
     /// - Parameter key: The key.
@@ -424,7 +424,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove and return a random member from a set
     ///
     /// - Parameter key: The key.
@@ -436,7 +436,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove and return one or multiple random members from a set
     ///
     /// - Parameter key: The key.
@@ -449,7 +449,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get a random member from a set
     ///
     /// - Parameter key: The key.
@@ -461,7 +461,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get one or multiple random members from a set
     ///
     /// - Parameter key: The key.
@@ -474,7 +474,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get a random member from a set
     ///
     /// - Parameter key: The key.
@@ -486,7 +486,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Get one or multiple random members from a set
     ///
     /// - Parameter key: The key.
@@ -509,7 +509,7 @@ extension Redis {
     public func srem(_ key: String, members: String..., callback: (Int?, NSError?) -> Void) {
         self.sremArrayOfMembers(key, members: members, callback: callback)
     }
-    
+
     /// Remove one or more members from a set
     ///
     /// - Parameter key: The key.
@@ -526,7 +526,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Remove one or more members from a set
     ///
     /// - Parameter key: The key.
@@ -537,7 +537,7 @@ extension Redis {
     public func srem(_ key: RedisString, members: RedisString..., callback: (Int?, NSError?) -> Void) {
         self.sremArrayOfMembers(key, members: members, callback: callback)
     }
-    
+
     /// Remove one or more members from a set
     ///
     /// - Parameter key: The key.
@@ -554,7 +554,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
@@ -564,7 +564,7 @@ extension Redis {
     public func sunion(_ keys: String..., callback: ([RedisString?]?, NSError?) -> Void) {
         self.sunionArrayOfKeys(keys, callback: callback)
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: An array of the keys to union.
@@ -580,7 +580,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
@@ -590,7 +590,7 @@ extension Redis {
     public func sunion(_ keys: RedisString..., callback: ([RedisString?]?, NSError?) -> Void) {
         self.sunionArrayOfKeys(keys, callback: callback)
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
@@ -606,7 +606,7 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
@@ -616,7 +616,7 @@ extension Redis {
     public func sunionstore(_ destination: String, keys: String..., callback: (Int?, NSError?) -> Void) {
         self.sunionstoreArrayOfKeys(destination, keys: keys, callback: callback)
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
@@ -632,7 +632,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
@@ -642,7 +642,7 @@ extension Redis {
     public func sunionstore(_ destination: RedisString, keys: RedisString..., callback: (Int?, NSError?) -> Void) {
         self.sunionstoreArrayOfKeys(destination, keys: keys, callback: callback)
     }
-    
+
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
@@ -658,7 +658,7 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
-    
+
     /// Iterates elements of Sets types.
     ///
     /// - Parameter key: The key.
@@ -690,7 +690,7 @@ extension Redis {
             }
         }
     }
-    
+
     /// Iterates elements of Sets types.
     ///
     /// - Parameter key: The key.

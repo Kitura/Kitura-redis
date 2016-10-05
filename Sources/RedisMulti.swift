@@ -41,24 +41,22 @@ public class RedisMulti {
         redis.issueCommand("MULTI") {(multiResponse: RedisResponse) in
             switch(multiResponse) {
                 case .Status(let status):
-                    if  status == "OK"  {
+                    if  status == "OK" {
                         var idx = -1
                         var handler: ((RedisResponse) -> Void)? = nil
 
                         let actualHandler = {(response: RedisResponse) in
                             switch(response) {
                                 case .Status(let status):
-                                    if  status == "QUEUED"  {
+                                    if  status == "QUEUED" {
                                         idx += 1
-                                        if  idx < self.queuedCommands.count  {
+                                        if  idx < self.queuedCommands.count {
                                             // Queue another command to Redis
                                             self.redis.issueCommandInArray(self.queuedCommands[idx], callback: handler!)
-                                        }
-                                        else {
+                                        } else {
                                             self.redis.issueCommand("EXEC", callback: callback)
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         self.execQueueingFailed(response, callback: callback)
                                     }
                                 default:
@@ -68,8 +66,7 @@ public class RedisMulti {
                         handler = actualHandler
 
                         actualHandler(RedisResponse.Status("QUEUED"))
-                    }
-                    else {
+                    } else {
                         callback(multiResponse)
                     }
                 default:
