@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>RedisResponse Enum Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Enum/RedisResponse" class="dashAnchor"></a>
+
+    <a title="RedisResponse Enum Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          SwiftRedis Docs
+        </a>
+         (100% documented)
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/IBM-Swift/Kitura-redis/">
+            <img class="header-icon" src="../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">SwiftRedis Reference</a>
+      <img class="carat" src="../img/carat.png" />
+      RedisResponse Enum Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/Redis.html">Redis</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RedisMulti.html">RedisMulti</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RedisString.html">RedisString</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enums</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/RedisResponse.html">RedisResponse</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Functions.html#/s:F10SwiftRedisoi2eeFTCS_11RedisStringS0__Sb">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Functions.html#/s:F10SwiftRedisoi2eeFTOS_13RedisResponseS0__Sb">==(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Structs.html">Structs</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RedisInfo.html">RedisInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RedisInfo/RedisInfoClient.html">– RedisInfoClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RedisInfo/RedisInfoServer.html">– RedisInfoServer</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            <h1>RedisResponse</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">RedisResponse</span></code></pre>
+
+                </div>
+              </div>
+            <p>A <q>raw</q> response from a Redis server</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO10SwiftRedis13RedisResponse5ArrayFMS0_FGSaS0__S0_"></a>
+                    <a name="//apple_ref/swift/Element/Array" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO10SwiftRedis13RedisResponse5ArrayFMS0_FGSaS0__S0_">Array</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An array response from a Redis server. The value is an array of the individual
+responses that made up the array response.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">Array</span><span class="p">([</span><span class="kt">RedisResponse</span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO10SwiftRedis13RedisResponse5ErrorFMS0_FSSS0_"></a>
+                    <a name="//apple_ref/swift/Element/Error" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO10SwiftRedis13RedisResponse5ErrorFMS0_FSSS0_">Error</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An error from the Redis server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">Error</span><span class="p">(</span><span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO10SwiftRedis13RedisResponse12IntegerValueFMS0_FVs5Int64S0_"></a>
+                    <a name="//apple_ref/swift/Element/IntegerValue" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO10SwiftRedis13RedisResponse12IntegerValueFMS0_FVs5Int64S0_">IntegerValue</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An Integer value returned from the Redis server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">IntegerValue</span><span class="p">(</span><span class="kt">Int64</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO10SwiftRedis13RedisResponse3NilFMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/Nil" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO10SwiftRedis13RedisResponse3NilFMS0_S0_">Nil</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A Null response returned from the Redis server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">Nil</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO10SwiftRedis13RedisResponse6StatusFMS0_FSSS0_"></a>
+                    <a name="//apple_ref/swift/Element/Status" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO10SwiftRedis13RedisResponse6StatusFMS0_FSSS0_">Status</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A status response (Simple string, OK) returned from the Redis server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">Status</span><span class="p">(</span><span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO10SwiftRedis13RedisResponse11StringValueFMS0_FCS_11RedisStringS0_"></a>
+                    <a name="//apple_ref/swift/Element/StringValue" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO10SwiftRedis13RedisResponse11StringValueFMS0_FCS_11RedisStringS0_">StringValue</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A Bulk string response returned from the Redis server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">StringValue</span><span class="p">(</span><span class="kt"><a href="../Classes/RedisString.html">RedisString</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vO10SwiftRedis13RedisResponse7asArrayGSqGSaS0___"></a>
+                    <a name="//apple_ref/swift/Property/asArray" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vO10SwiftRedis13RedisResponse7asArrayGSqGSaS0___">asArray</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Extract an <q>array</q> response from the <code>RedisResponse</code> enum</p>
+
+<div class="aside aside-returns">
+    <p class="aside-title">Returns</p>
+    An array of <code>RedisResponse</code> enums or nil, if the Redis response
+      wasn&rsquo;t an array response.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">asArray</span><span class="p">:</span> <span class="p">[</span><span class="kt">RedisResponse</span><span class="p">]?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An array of <code>RedisResponse</code> enums or nil, if the Redis response wasn’t an array response.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vO10SwiftRedis13RedisResponse7asErrorGSqSS_"></a>
+                    <a name="//apple_ref/swift/Property/asError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vO10SwiftRedis13RedisResponse7asErrorGSqSS_">asError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Extract an error response from the <code>RedisResponse</code> enum</p>
+
+<div class="aside aside-returns">
+    <p class="aside-title">Returns</p>
+    The error message as a String or nil, if the Redis response
+      wasn&rsquo;t an error response.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">asError</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The error message as a String or nil, if the Redis response wasn’t an error response.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vO10SwiftRedis13RedisResponse9asIntegerGSqVs5Int64_"></a>
+                    <a name="//apple_ref/swift/Property/asInteger" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vO10SwiftRedis13RedisResponse9asIntegerGSqVs5Int64_">asInteger</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Extract an Integer response from the <code>RedisResponse</code> enum</p>
+
+<div class="aside aside-returns">
+    <p class="aside-title">Returns</p>
+    The response as a Int64 or nil, if the Redis response
+      wasn&rsquo;t an Integer response.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">asInteger</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The response as a Int64 or nil, if the Redis response wasn’t an Integer response.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vO10SwiftRedis13RedisResponse8asStatusGSqSS_"></a>
+                    <a name="//apple_ref/swift/Property/asStatus" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vO10SwiftRedis13RedisResponse8asStatusGSqSS_">asStatus</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Extract a Simple String response from the <code>RedisResponse</code> enum</p>
+
+<div class="aside aside-returns">
+    <p class="aside-title">Returns</p>
+    The response as a String or nil, if the Redis response
+      wasn&rsquo;t a Simple String response.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">asStatus</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The response as a String or nil, if the Redis response wasn’t a Simple String response.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vO10SwiftRedis13RedisResponse8asStringGSqCS_11RedisString_"></a>
+                    <a name="//apple_ref/swift/Property/asString" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vO10SwiftRedis13RedisResponse8asStringGSqCS_11RedisString_">asString</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Extract a Bulk String response from the <code>RedisResponse</code> enum</p>
+
+<div class="aside aside-returns">
+    <p class="aside-title">Returns</p>
+    The response as a String or nil, if the Redis response
+      wasn&rsquo;t a Bulk String response.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">asString</span><span class="p">:</span> <span class="kt"><a href="../Classes/RedisString.html">RedisString</a></span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The response as a String or nil, if the Redis response wasn’t a Bulk String response.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2016 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2016-10-06)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

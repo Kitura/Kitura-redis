@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SwiftRedis  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+
+
+    <a title="SwiftRedis  Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="index.html">
+          SwiftRedis Docs
+        </a>
+         (100% documented)
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/IBM-Swift/Kitura-redis/">
+            <img class="header-icon" src="img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="index.html">SwiftRedis Reference</a>
+      <img class="carat" src="img/carat.png" />
+      SwiftRedis  Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/Redis.html">Redis</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RedisMulti.html">RedisMulti</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RedisString.html">RedisString</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Enums.html">Enums</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/RedisResponse.html">RedisResponse</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Functions.html#/s:F10SwiftRedisoi2eeFTCS_11RedisStringS0__Sb">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Functions.html#/s:F10SwiftRedisoi2eeFTOS_13RedisResponseS0__Sb">==(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Structs.html">Structs</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/RedisInfo.html">RedisInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/RedisInfo/RedisInfoClient.html">– RedisInfoClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/RedisInfo/RedisInfoServer.html">– RedisInfoServer</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            
+            <a href='#kituraredis' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='kituraredis'>KituraRedis</h1>
+
+<p><a href="https://travis-ci.org/IBM-Swift/Kitura-redis"><img src="https://travis-ci.org/IBM-Swift/Kitura-redis.svg?branch=master" alt="Build Status"></a>
+<a href="https://travis-ci.org/IBM-Swift/Kitura-redis"><img src="https://travis-ci.org/IBM-Swift/Kitura-redis.svg?branch=develop" alt="Build Status"></a></p>
+
+<p><strong><em>Swift Redis library</em></strong></p>
+
+<p>KituraRedis is a Swift library for interacting with a Redis database using.</p>
+
+<p>It is dependent on the <a href="https://github.com/IBM-Swift/BlueSocket.git">BlueSocket</a> module.</p>
+<a href='#build' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='build'>Build:</h2>
+
+<ul>
+<li><code>swift build</code></li>
+</ul>
+<a href='#running-tests' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='running-tests'>Running Tests:</h2>
+
+<p>This example uses Docker to run Redis detached with the required password defined in Tests/SwiftRedis/password.txt.</p>
+
+<ul>
+<li><code>docker run -d -p 6379:6379 redis:alpine redis-server --requirepass password123</code></li>
+<li><code>swift test</code></li>
+</ul>
+<a href='#usage' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='usage'>Usage:</h2>
+<pre class="highlight plaintext"><code>import Foundation
+import SwiftRedis
+
+let redis = Redis()
+
+redis.connect(host: "localhost", port: 6379) { (redisError: NSError?) in
+    if let error = redisError {
+        print(error)
+    }
+    else {
+        print("Connected to Redis")
+        // set a key
+        redis.set("Redis", value: "on Swift") { (result: Bool, redisError: NSError?) in
+            if let error = redisError {
+                print(error)
+            }
+            // get the same key
+            redis.get("Redis") { (string: RedisString?, redisError: NSError?) in
+                if let error = redisError {
+                    print(error)
+                }
+                else if let string = string?.asString {
+                    print("Redis \(string)")
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+          </div>
+        </section>
+
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2016 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2016-10-06)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

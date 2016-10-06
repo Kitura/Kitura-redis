@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>RedisInfoServer Struct Reference</title>
+    <link rel="stylesheet" type="text/css" href="../../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../../js/jquery.min.js" defer></script>
+    <script src="../../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Struct/RedisInfoServer" class="dashAnchor"></a>
+
+    <a title="RedisInfoServer Struct Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../../index.html">
+          SwiftRedis Docs
+        </a>
+         (100% documented)
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/IBM-Swift/Kitura-redis/">
+            <img class="header-icon" src="../../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../../index.html">SwiftRedis Reference</a>
+      <img class="carat" src="../../img/carat.png" />
+      RedisInfoServer Struct Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Classes/Redis.html">Redis</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Classes/RedisMulti.html">RedisMulti</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Classes/RedisString.html">RedisString</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Enums.html">Enums</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/RedisResponse.html">RedisResponse</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Functions.html#/s:F10SwiftRedisoi2eeFTCS_11RedisStringS0__Sb">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Functions.html#/s:F10SwiftRedisoi2eeFTOS_13RedisResponseS0__Sb">==(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Structs.html">Structs</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RedisInfo.html">RedisInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RedisInfo/RedisInfoClient.html">– RedisInfoClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RedisInfo/RedisInfoServer.html">– RedisInfoServer</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            <h1>RedisInfoServer</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">RedisInfoServer</span></code></pre>
+
+                </div>
+              </div>
+            <p>A struct that contains a subset of the server information returned by the
+Redis INFO command in a parsed and more consumable fashion.</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer13redis_versionSS"></a>
+                    <a name="//apple_ref/swift/Property/redis_version" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer13redis_versionSS">redis_version</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The version of Redis server</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">redis_version</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer10redis_modeSS"></a>
+                    <a name="//apple_ref/swift/Property/redis_mode" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer10redis_modeSS">redis_mode</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The mode of the Redis server</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">redis_mode</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer2osSS"></a>
+                    <a name="//apple_ref/swift/Property/os" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer2osSS">os</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The O/S the Redis server is running on.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">os</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer9arch_bitsSi"></a>
+                    <a name="//apple_ref/swift/Property/arch_bits" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer9arch_bitsSi">arch_bits</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The number of bits in the architecture (32 or 64) of the hardware
+the Redis server is running on.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">arch_bits</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer10process_idSi"></a>
+                    <a name="//apple_ref/swift/Property/process_id" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer10process_idSi">process_id</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The process id of the Redis server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">process_id</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer8tcp_portSi"></a>
+                    <a name="//apple_ref/swift/Property/tcp_port" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer8tcp_portSi">tcp_port</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The port the Redis server is listening on.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">tcp_port</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer17uptime_in_secondsSi"></a>
+                    <a name="//apple_ref/swift/Property/uptime_in_seconds" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer17uptime_in_secondsSi">uptime_in_seconds</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The amount of time, in seconds, the Redis server has been up.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">uptime_in_seconds</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer14uptime_in_daysSi"></a>
+                    <a name="//apple_ref/swift/Property/uptime_in_days" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vVV10SwiftRedis9RedisInfo15RedisInfoServer14uptime_in_daysSi">uptime_in_days</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The amount of time, in days, the Redis server has been up.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">uptime_in_days</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FVV10SwiftRedis9RedisInfo15RedisInfoServer22checkVersionCompatibleFT5majorSi5minorSi_Sb"></a>
+                    <a name="//apple_ref/swift/Method/checkVersionCompatible(major:minor:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FVV10SwiftRedis9RedisInfo15RedisInfoServer22checkVersionCompatibleFT5majorSi5minorSi_Sb">checkVersionCompatible(major:minor:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Check if the Redis server is compatable with a certain Major.Minor version of Redis</p>
+
+<div class="aside aside-parameter">
+    <p class="aside-title">Parameter</p>
+    Parameter major: The major portion of the Redis server version to compare against.
+
+</div>
+
+<div class="aside aside-parameter">
+    <p class="aside-title">Parameter</p>
+    <p>Parameter minor: The minor portion of the Redis server version to compare against.</p>
+
+</div>
+
+<div class="aside aside-returns">
+    <p class="aside-title">Returns</p>
+    <p>true if the Redis server is compatable with the
+      specified major and minor Redis version number.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">checkVersionCompatible</span><span class="p">(</span><span class="nv">major</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">minor</span><span class="p">:</span> <span class="kt">Int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>major</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The major portion of the Redis server version to compare against.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>minor</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The minor portion of the Redis server version to compare against.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>true if the Redis server is compatable with the specified major and minor Redis version number.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FVV10SwiftRedis9RedisInfo15RedisInfoServer22checkVersionCompatibleFT5majorSi5minorSi5microSi_Sb"></a>
+                    <a name="//apple_ref/swift/Method/checkVersionCompatible(major:minor:micro:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FVV10SwiftRedis9RedisInfo15RedisInfoServer22checkVersionCompatibleFT5majorSi5minorSi5microSi_Sb">checkVersionCompatible(major:minor:micro:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Check if the Redis server is compatable with a certain Major.Minor.Micro version of Redis</p>
+
+<div class="aside aside-parameter">
+    <p class="aside-title">Parameter</p>
+    Parameter major: The major portion of the Redis server version to compare against.
+
+</div>
+
+<div class="aside aside-parameter">
+    <p class="aside-title">Parameter</p>
+    Parameter minor: The minor portion of the Redis server version to compare against.
+
+</div>
+
+<div class="aside aside-parameter">
+    <p class="aside-title">Parameter</p>
+    <p>Parameter micro: The micro portion of the Redis server version to compare against.</p>
+
+</div>
+
+<div class="aside aside-returns">
+    <p class="aside-title">Returns</p>
+    <p>true if the Redis server is compatable with the
+      specified major, minor, and micro Redis version number.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">checkVersionCompatible</span><span class="p">(</span><span class="nv">major</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">minor</span><span class="p">:</span> <span class="kt">Int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nv">micro</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>major</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The major portion of the Redis server version to compare against.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>minor</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The minor portion of the Redis server version to compare against.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>micro</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The micro portion of the Redis server version to compare against.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>true if the Redis server is compatable with the specified major, minor, and micro Redis version number.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2016 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2016-10-06)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>
