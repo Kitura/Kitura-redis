@@ -402,6 +402,7 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter newKey: The new name for the key.
+    /// - Parameter exists: If true, will rename the key even if the newKey already exists.
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult

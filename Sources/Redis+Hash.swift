@@ -18,6 +18,10 @@ import Foundation
 
 /// Extend Redis by adding the Hash operations
 extension Redis {
+    
+    //
+    //  MARK: Hash API functions
+    //
 
     /// Removes the specified fields from the hash stored at a key. Specified fields that do not
     /// exist within this hash are ignored. If key does not exist, it is treated as an empty hash
@@ -38,7 +42,7 @@ extension Redis {
         }
     }
 
-    /// Returns if the specified field exists in the hash stored at a key
+    /// Determine if the specified field exists in the hash stored at a key
     ///
     /// - Parameter key: The key.
     /// - Parameter field: The field.
@@ -50,8 +54,8 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
-    /// Returns the value associated with field in the hash stored at a key.
+    
+    /// Get the value associated with a field in the hash stored at a key.
     ///
     /// - Parameter key: The key.
     /// - Parameter field: The field.
@@ -64,7 +68,7 @@ extension Redis {
         }
     }
 
-    /// Returns all fields and values of the hash stored at a key.
+    /// Get all fields and values of the hash stored at a key.
     ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Dictionary<String, RedisString> contains
@@ -127,8 +131,7 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
-
-    /// Returns all field names in the hash stored at a key
+    /// Get all of the field names in the hash stored at a key
     ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Array<String> will contain
@@ -157,8 +160,8 @@ extension Redis {
             callback(error == nil ? strings : nil, _: error)
         }
     }
-
-    /// Returns the number of fields contained in the hash stored at a key
+    
+    /// Get the number of fields contained in the hash stored at a key
     ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Int will contain the number
@@ -170,7 +173,7 @@ extension Redis {
         }
     }
 
-    /// Returns the values associated with the specified fields in the hash stored at a key.
+    /// Get the values associated with the specified fields in the hash stored at a key.
     ///
     /// - Parameter key: The key.
     /// - Parameter fields: The list of field names.
@@ -280,8 +283,8 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
-
-    /// Returns the string length of the value in a field in a hash stored at a key.
+    
+    /// Get the string length of the value in a field in a hash stored at a key.
     /// If the key or the field do not exist, 0 is returned.
     ///
     /// - Parameter key: The key.
@@ -295,7 +298,7 @@ extension Redis {
         }
     }
 
-    /// Returns all values in the hash stored at a key.
+    /// Get all of the values in the hash stored at a key.
     ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Array<RedisString> will contain the

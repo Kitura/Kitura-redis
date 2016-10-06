@@ -19,10 +19,14 @@ import Foundation
 /// Extend Redis by adding the Set operations
 extension Redis {
 
+    //
+    //  MARK: Set API functions
+    //
+    
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: The values to be added to the set.
+    /// - Parameter members: The values to be added to the set.
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      number of elements that were added to the set.
     ///                      NSError will be non-nil if an error occurred.
@@ -33,7 +37,7 @@ extension Redis {
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: An array of values to be added to the set.
+    /// - Parameter members: An array of values to be added to the set.
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      number of elements that were added to the set.
     ///                      NSError will be non-nil if an error occurred.
@@ -50,7 +54,7 @@ extension Redis {
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: The `RedisString` values to be added to the set.
+    /// - Parameter members: The `RedisString` values to be added to the set.
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      number of elements that were added to the set.
     ///                      NSError will be non-nil if an error occurred.
@@ -61,7 +65,7 @@ extension Redis {
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: An array of `RedisString` values to be added to the set.
+    /// - Parameter members: An array of `RedisString` values to be added to the set.
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      number of elements that were added to the set.
     ///                      NSError will be non-nil if an error occurred.
@@ -76,6 +80,7 @@ extension Redis {
     }
 
     /// Get the number of members in a set
+    ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Int will contain the cardinality
     ///                      (number of elements) of the set, or 0 if key does not exist.
@@ -87,6 +92,7 @@ extension Redis {
     }
 
     /// Get the number of members in a set
+    ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Int will contain the cardinality
     ///                      (number of elements) of the set, or 0 if key does not exist.
@@ -609,6 +615,8 @@ extension Redis {
 
     /// Add multiple sets
     ///
+    /// - Parameter destination: The destination of the resulting set, if the
+    ///                         destination already exists, it is overwritten.
     /// - Parameter keys: The list of the keys to union.
     /// - Parameter callback: The callback function, the Int will contain
     ///                      the number of elements in the resulting set.
@@ -619,6 +627,8 @@ extension Redis {
 
     /// Add multiple sets
     ///
+    /// - Parameter destination: The destination of the resulting set, if the
+    ///                         destination already exists, it is overwritten.
     /// - Parameter keys: The list of the keys to union.
     /// - Parameter callback: The callback function, the Int will contain
     ///                      the number of elements in the resulting set.
@@ -635,6 +645,8 @@ extension Redis {
 
     /// Add multiple sets
     ///
+    /// - Parameter destination: The destination of the resulting set, if the
+    ///                         destination already exists, it is overwritten.
     /// - Parameter keys: The list of the keys to union.
     /// - Parameter callback: The callback function, the Int will contain
     ///                      the number of elements in the resulting set.
@@ -645,6 +657,8 @@ extension Redis {
 
     /// Add multiple sets
     ///
+    /// - Parameter destination: The destination of the resulting set, if the
+    ///                         destination already exists, it is overwritten.
     /// - Parameter keys: The list of the keys to union.
     /// - Parameter callback: The callback function, the Int will contain
     ///                      the number of elements in the resulting set.

@@ -18,6 +18,10 @@ import Foundation
 
 /// Extend Redis by adding the List operations
 extension Redis {
+    
+    //
+    //  MARK: List API functions
+    //
 
     /// Retrieve an element from one of many lists, potentially blocking until one of
     /// the lists has an element
@@ -68,6 +72,7 @@ extension Redis {
     ///
     /// - Parameter source: The list to pop an item from.
     /// - Parameter destination: The list to push the poped item onto.
+    /// - Parameter timeout: The amount of time to wait or zero to wait for ever.
     /// - Parameter callback: The callback function, when a time out didn't occur, the
     ///                      `RedisString` will contain the value of the element that
     ///                      was poped. NSError will be non-nil if an error occurred.
@@ -97,7 +102,7 @@ extension Redis {
     /// - Parameter pivot: The pivot around which the value will be inserted.
     /// - Parameter value: The value to be inserted.
     /// - Parameter callback: The callback function, the Int will contain the length of
-    ///                      the list after the insert or -1 if the pivt wasn't found.
+    ///                      the list after the insert or -1 if the pivot wasn't found.
     ///                      NSError will be non-nil if an error occurred.
     public func linsert(_ key: String, before: Bool, pivot: String, value: String, callback: (Int?, NSError?) -> Void) {
         issueCommand("LINSERT", key, (before ? "BEFORE" : "AFTER"), pivot, value) {(response: RedisResponse) in
@@ -111,9 +116,9 @@ extension Redis {
     /// - Parameter before: If true, the value is inserted before the pivot.
     /// - Parameter pivot: The pivot, in the form of a `RedisString`, around which
     ///                   the value will be inserted.
-    /// - Parameter value: The value to be inserted.
+    /// - Parameter value: The value, in the form of a `RedisString`, to be inserted.
     /// - Parameter callback: The callback function, the Int will contain the length of
-    ///                      the list after the insert or -1 if the pivt wasn't found.
+    ///                      the list after the insert or -1 if the pivot wasn't found.
     ///                      NSError will be non-nil if an error occurred.
     public func linsert(_ key: String, before: Bool, pivot: RedisString, value: RedisString, callback: (Int?, NSError?) -> Void) {
         issueCommand(RedisString("LINSERT"), RedisString(key), RedisString(before ? "BEFORE" : "AFTER"), pivot, value) {(response: RedisResponse) in

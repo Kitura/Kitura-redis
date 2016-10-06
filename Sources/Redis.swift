@@ -35,7 +35,7 @@ public class Redis {
 
     /// Connects to a redis server
     ///
-    /// - Parameter ipAddress: the server IP address.
+    /// - Parameter host: the server IP address.
     /// - Parameter port: port number.
     /// - Parameter callback: callback function for on completion, NSError will be nil if successful.
     public func connect (host: String, port: Int32, callback: (NSError?) -> Void) {

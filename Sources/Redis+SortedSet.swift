@@ -18,7 +18,11 @@ import Foundation
 
 /// Extend Redis by adding the Sorted Set operations
 extension Redis {
-
+    
+    //
+    //  MARK: Sorted set API functions
+    //
+    
     /// Add elements to a sorted set.
     ///
     /// - Parameter key: The key.
@@ -82,7 +86,6 @@ extension Redis {
     /// Get the sorted set's cardinality (number of elements).
     ///
     /// - Parameter key: The key.
-    /// - Parameter callback: A function returning the sorted set cardinality of the sorted set.
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      number of elements in the sorted set.
     ///                      NSError will be non-nil if an error occurred.

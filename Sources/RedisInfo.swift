@@ -107,7 +107,7 @@ public struct RedisInfo {
         /// Check if the Redis server is compatable with a certain Major.Minor version of Redis
         ///
         /// - Parameter major: The major portion of the Redis server version to compare against.
-        /// - Parameter major: The minor portion of the Redis server version to compare against.
+        /// - Parameter minor: The minor portion of the Redis server version to compare against.
         ///
         /// - Returns: true if the Redis server is compatable with the
         ///           specified major and minor Redis version number.
@@ -119,8 +119,8 @@ public struct RedisInfo {
         /// Check if the Redis server is compatable with a certain Major.Minor.Micro version of Redis
         ///
         /// - Parameter major: The major portion of the Redis server version to compare against.
-        /// - Parameter major: The minor portion of the Redis server version to compare against.
-        /// - Parameter major: The micro portion of the Redis server version to compare against.
+        /// - Parameter minor: The minor portion of the Redis server version to compare against.
+        /// - Parameter micro: The micro portion of the Redis server version to compare against.
         ///
         /// - Returns: true if the Redis server is compatable with the
         ///           specified major, minor, and micro Redis version number.
