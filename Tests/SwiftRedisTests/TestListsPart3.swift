@@ -28,7 +28,7 @@ import XCTest
 
 
 public class TestListsPart3: XCTestCase {
-    static var allTests : [(String, (TestListsPart3) -> () throws -> Void)] {
+    static var allTests: [(String, (TestListsPart3) -> () throws -> Void)] {
         return [
             ("test_blpopBrpopAndBrpoplpushEmptyLists", test_blpopBrpopAndBrpoplpushEmptyLists),
             ("test_blpop", test_blpop),
@@ -38,53 +38,53 @@ public class TestListsPart3: XCTestCase {
     }
 
     let secondConnection = Redis()
-    
+
     let queue = DispatchQueue(label: "unblocker", attributes: DispatchQueue.Attributes.concurrent)
 
     var key1: String { return "test1" }
     var key2: String { return "test2" }
     var key3: String { return "test3" }
-    
+
     func localSetup(block: () -> Void) {
         connectRedis() {(error: NSError?) in
             if error != nil {
                 XCTFail("Could not connect to Redis")
                 return
             }
-        
+
             redis.del(self.key1, self.key2, self.key3) {(deleted: Int?, error: NSError?) in
                 block()
             }
         }
     }
-    
+
     func extendedSetup(block: () -> Void) {
         localSetup() {
             let password = read(fileName: "password.txt")
             let host = read(fileName: "host.txt")
-            
+
             self.secondConnection.connect(host: host, port: 6379) {(error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                
+
                 self.secondConnection.auth(password) {(error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    
+
                     block()
                 }
             }
         }
     }
-    
+
     func test_blpopBrpopAndBrpoplpushEmptyLists() {
         localSetup() {
             redis.blpop(self.key1, self.key2, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssertNil(retrievedValue, "A blpop that timed out should have returned nil. It returned \(retrievedValue)")
-                
-                redis.brpop(self.key3, self.key1, timeout: 5.0)  {(retrievedValue: [RedisString?]?, error: NSError?) in
+
+                redis.brpop(self.key3, self.key1, timeout: 5.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNil(retrievedValue, "A brpop that timed out should have returned nil. It returned \(retrievedValue)")
-                    
+
                     redis.brpoplpush(self.key2, destination: self.key2, timeout: 3.0) {(retrievedValue: RedisString?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssertNil(retrievedValue, "A brpoplpush that timed out should have returned nil. It returned \(retrievedValue)")
@@ -93,11 +93,11 @@ public class TestListsPart3: XCTestCase {
             }
         }
     }
-    
+
     func test_blpop() {
         extendedSetup() {
             let value1 = "testing 1 2 3"
-                    
+
             self.queue.async { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key2, values: value1) {(listSize: Int?, error: NSError?) in
@@ -105,7 +105,7 @@ public class TestListsPart3: XCTestCase {
                     XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key1) should exist")
                 }
             }
-                    
+
             redis.blpop(self.key1, self.key2, self.key3, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssertNotNil(retrievedValue, "blpop should not have returned nil.")
@@ -115,7 +115,7 @@ public class TestListsPart3: XCTestCase {
             }
         }
     }
-    
+
     func test_brpop() {
         extendedSetup() {
             let value2 = "over the hill and through the woods"
@@ -126,7 +126,7 @@ public class TestListsPart3: XCTestCase {
                     XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key1) should exist")
                 }
             }
-            
+
             redis.brpop(self.key1, self.key2, self.key3, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssertNotNil(retrievedValue, "brpop should not have returned nil.")
@@ -136,11 +136,11 @@ public class TestListsPart3: XCTestCase {
             }
         }
     }
-    
+
     func test_brpoplpush() {
         extendedSetup() {
             let value3 = "to grandmothers house we go"
-            
+
             self.queue.async { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key1, values: value3) {(listSize: Int?, error: NSError?) in
@@ -148,7 +148,7 @@ public class TestListsPart3: XCTestCase {
                     XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key1) should exist")
                 }
             }
-            
+
             redis.brpoplpush(self.key1, destination: self.key2, timeout: 4.0) {(retrievedValue: RedisString?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssertNotNil(retrievedValue, "brpoplpush should not have returned nil.")
@@ -156,5 +156,5 @@ public class TestListsPart3: XCTestCase {
             }
         }
     }
-    
+
 }

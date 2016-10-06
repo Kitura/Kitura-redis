@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 public class TestTransactionsPart2: XCTestCase {
-    static var allTests : [(String, (TestTransactionsPart2) -> () throws -> Void)] {
+    static var allTests: [(String, (TestTransactionsPart2) -> () throws -> Void)] {
         return [
             ("test_msetAndMget", test_msetAndMget),
             ("test_binarySafeMsetAndMget", test_binarySafeMsetAndMget),
@@ -50,7 +50,7 @@ public class TestTransactionsPart2: XCTestCase {
             multi.del(self.key2)
             multi.mset((self.key2, self.expVal2), (self.key3, self.expVal3), (self.key4, self.expVal4), exists: false)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(self.expVal1)), "get didn't return '\(self.expVal1), returned \(nestedResponses[1])")
                     let innerResponses = nestedResponses[2].asArray
@@ -77,7 +77,7 @@ public class TestTransactionsPart2: XCTestCase {
             let expDat3 = Data(bytes: bytes, count: bytes.count)
             bytes = [0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6]
             let expDat4 = Data(bytes: bytes, count: bytes.count)
-            
+
             let multi = redis.multi()
             multi.mset((self.key1, RedisString(expDat1)), (self.key2, RedisString(expDat2))).get(self.key1)
             multi.mget(self.key1, self.key3, self.key2)
@@ -85,7 +85,7 @@ public class TestTransactionsPart2: XCTestCase {
             multi.del(self.key2)
             multi.mset((self.key2, RedisString(expDat2)), (self.key3, RedisString(expDat3)), (self.key4, RedisString(expDat4)), exists: false)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(expDat1)), "get didn't return '\(expDat1), returned \(nestedResponses[1])")
                     let innerResponses = nestedResponses[2].asArray
@@ -110,7 +110,7 @@ public class TestTransactionsPart2: XCTestCase {
             multi.getrange(self.key1, start: 7, end: 11).setrange(self.key1, offset: 7, value: self.updVal1)
             multi.get(self.key1)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 6)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 6) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
                     let updatedLength = Int64(self.expVal1.characters.count+self.expVal2.characters.count)
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(updatedLength), "Length of updated \(self.key1) is incorrect")
@@ -137,7 +137,7 @@ public class TestTransactionsPart2: XCTestCase {
             multi.bitpos(self.key1, bit: true, start: 1, end: 2)
             */
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 3)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 3) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(2), "Bit count should have been 2, was \(nestedResponses[4].asInteger)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Bit count should have been 1, was \(nestedResponses[5].asInteger)")
@@ -160,7 +160,7 @@ public class TestTransactionsPart2: XCTestCase {
             multi.set(self.key1, value: RedisString(expVal1)).getbit(self.key1, offset: 14)
             multi.setbit(self.key1, offset: 13, value: true).get(self.key1)
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 4)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 4) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(0), "The bit should have been a 0, it was \(nestedResponses[1].asInteger)")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(0), "The bit should have been a 0, it was \(nestedResponses[2].asInteger)")
@@ -188,7 +188,7 @@ public class TestTransactionsPart2: XCTestCase {
             multi.bitop(self.key3, not: self.key1).get(self.key3)
 
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 9)  {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 9) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(nestedResponses[1].asInteger)")
                     bytes = [0x00, 0x00, 0x00, 0x04]
