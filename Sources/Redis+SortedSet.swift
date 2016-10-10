@@ -332,6 +332,7 @@ extension Redis {
 
     /// Remove all members in a sorted set between the fiven lexicographical range.
     ///
+    /// - Parameter key: The key.
     /// - Parameter min: The minimum score to remove from the set.
     /// - Parameter max: The maximum score to remove from the set.
     /// - Parameter callback: The callback function, the Int will contain the
@@ -435,6 +436,7 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Parameter member: The member to get the rank of.
     /// - Parameter callback: The callback function, the Int will contain the rank of the member
+    ///                       when the set is in reverse order.
     ///                       If member does not exist in the sorted set or key does not exist
     ///                       returns nil.
     ///                       NSError will be non-nil if an error occurred.
