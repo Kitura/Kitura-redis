@@ -330,7 +330,7 @@ extension Redis {
         }
     }
 
-    /// Remove all members in a sorted set between the fiven lexicographical range.
+    /// Remove all members in a sorted set between the given lexicographical range.
     ///
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to remove from the set.
