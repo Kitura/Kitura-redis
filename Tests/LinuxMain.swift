@@ -33,6 +33,7 @@ XCTMain([
 	testCase(TestTransactionsPart2.allTests),
 	testCase(TestTransactionsPart3.allTests),
 	testCase(TestTransactionsPart4.allTests),
+	testCase(TestTransactionsPart5.allTests),
 	testCase(AuthTests.allTests),
 	testCase(TestSetCommands.allTests),
 	testCase(TestSetCommandsPart2.allTests)
