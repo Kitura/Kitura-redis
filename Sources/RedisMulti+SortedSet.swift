@@ -23,16 +23,19 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zadd(_ key: String, tuples: (Int, String)...) -> RedisMulti {
-        zaddArrayOfScoreMembers(key, tuples: tuples)
-        return self
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
     }
     
     /// Add an ZADD command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, String)]) -> RedisMulti {
         var command = [RedisString("ZADD"), RedisString(key)]
@@ -48,16 +51,19 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zadd(_ key: String, tuples: (Int, RedisString)...) -> RedisMulti {
-        zaddArrayOfScoreMembers(key, tuples: tuples)
-        return self
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
     }
     
     /// Add an ZADD command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)]) -> RedisMulti {
         var command = [RedisString("ZADD"), RedisString(key)]
@@ -83,6 +89,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to count from the set.
     /// - Parameter max: The maximum score to count from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zcount(_ key: String, min: String, max: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZCOUNT"), RedisString(key), RedisString(min), RedisString(max)])
@@ -94,6 +102,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter increment: The amount to increment the member by.
     /// - Parameter member: The member to increment.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zincrby(_ key: String, increment: Int, member: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZINCRBY"), RedisString(key), RedisString(increment), RedisString(member)])
@@ -105,6 +115,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter increment: The amount to increment the member by.
     /// - Parameter member: The member to increment.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zincrby(_ key: String, increment: Int, member: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("ZINCRBY"), RedisString(key), RedisString(increment), member])
@@ -116,6 +128,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter increment: The amount to increment the member by.
     /// - Parameter member: The member to increment.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zinterstore(_ destination: String, numkeys: Int, keys: String..., weights: [Int] = [], aggregate: String = "") -> RedisMulti {
         var command = [RedisString("ZINTERSTORE"), RedisString(destination), RedisString(numkeys)]
@@ -141,6 +155,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to count from the set.
     /// - Parameter max: The maximum score to count from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zlexcount(_ key: String, min: String, max: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZLEXCOUNT"), RedisString(key), RedisString(min), RedisString(max)])
@@ -151,6 +167,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter increment: The amount to increment the member by.
     /// - Parameter member: The member to increment.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrange(_ key: String, start: Int, stop: Int) -> RedisMulti {
         queuedCommands.append([RedisString("ZRANGE"), RedisString(key), RedisString(start), RedisString(stop)])
@@ -162,6 +180,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to count from the set.
     /// - Parameter max: The maximum score to count from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrangebylex(_ key: String, min: String, max: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZRANGEBYLEX"), RedisString(key), RedisString(min), RedisString(max)])
@@ -173,6 +193,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to count from the set.
     /// - Parameter max: The maximum score to count from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrangebyscore(_ key: String, min: String, max: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZRANGEBYSCORE"), RedisString(key), RedisString(min), RedisString(max)])
@@ -183,6 +205,8 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter member: The member to get the rank of.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrank(_ key: String, member: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZRANK"), RedisString(key), RedisString(member)])
@@ -193,16 +217,19 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter members: The list of the member(s) to remove.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrem(_ key: String, members: String...) -> RedisMulti {
-        zremArrayOfMembers(key, members: members)
-        return self
+        return zremArrayOfMembers(key, members: members)
     }
     
     /// Add an ZREM command to the "transactions"
     ///
     /// - Parameter key: The key.
     /// - Parameter members: The list of the member(s) to remove.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zremArrayOfMembers(_ key: String, members: [String]) -> RedisMulti {
         var command = [RedisString("ZREM"), RedisString(key)]
@@ -218,6 +245,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to remove from the set.
     /// - Parameter max: The maximum score to remove from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zremrangebylex(_ key: String, min: String, max: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZREMRANGEBYLEX"), RedisString(key), RedisString(min), RedisString(max)])
@@ -229,9 +258,11 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter start: The starting index to remove from the set.
     /// - Parameter stop: The ending index to remove from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
-    public func zremrangebyrank(_ key: String, min: String, max: String) -> RedisMulti {
-        queuedCommands.append([RedisString("ZREMRANGEBYRANK"), RedisString(key), RedisString(min), RedisString(max)])
+    public func zremrangebyrank(_ key: String, start: Int, stop: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("ZREMRANGEBYRANK"), RedisString(key), RedisString(start), RedisString(stop)])
         return self
     }
 
@@ -240,6 +271,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to remove from the set.
     /// - Parameter max: The maximum score to remove from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zremrangebyscore(_ key: String, min: String, max: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZREMRANGEBYSCORE"), RedisString(key), RedisString(min), RedisString(max)])
@@ -252,6 +285,8 @@ extension RedisMulti {
     /// - Parameter start: The starting index to return from the set.
     /// - Parameter stop: The stoping index to return from the set.
     /// - Parameter withscores: Whether or not to return scores as well.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrevrange(_ key: String, start: Int, stop: Int, withscores: Bool = false) -> RedisMulti {
         if !withscores {
@@ -267,6 +302,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to remove from the set.
     /// - Parameter max: The maximum score to remove from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrevrangebylex(_ key: String, min: String, max: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZREVRANGEBYLEX"), RedisString(key), RedisString(min), RedisString(max)])
@@ -278,6 +315,8 @@ extension RedisMulti {
     /// - Parameter key: The key.
     /// - Parameter min: The minimum score to remove from the set.
     /// - Parameter max: The maximum score to remove from the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrevrangebyscore(_ key: String, min: String, max: String, withscore: Bool = false) -> RedisMulti {
         if !withscore {
@@ -292,19 +331,23 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter member: The member to get the rank of.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zrevrank(_ key: String, member: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZREVRANK"), RedisString(key), RedisString(member)])
         return self
     }
     
-    /// Add an ZCAN command to the "transactions"
+    /// Add an ZSCAN command to the "transactions"
     ///
     /// - Parameter key: The key.
     /// - Parameter cursor: iterator
     /// - Parameter match: glob-style pattern
     /// - parameter count: The amount of work that should be done at every call in order
     ///                   to retrieve elements from the collection.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zscan(_ key: String, cursor: Int, match: String? = nil, count: Int? = nil) -> RedisMulti {
         let ZSCAN = RedisString("ZSCAN")
@@ -324,30 +367,33 @@ extension RedisMulti {
         return self
     }
     
-    /// Add an ZCAN command to the "transactions"
+    /// Add an ZSCORE command to the "transactions"
     ///
     /// - Parameter key: The key.
     /// - Parameter member: The member to get the score from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zscore(_ key: String, member: String) -> RedisMulti {
         queuedCommands.append([RedisString("ZSCORE"), RedisString(key), RedisString(member)])
         return self
     }
     
-    /// Add an ZCAN command to the "transactions"
+    /// Add an ZUNIONSTORE command to the "transactions"
     ///
     /// - Parameter destination: The destination where the result will be stored.
     /// - Parameter numkeys: The number of keys to union.
     /// - Parameter keys: The keys.
     /// - Parameter weights: A multiplication factor for each input sorted set.
     /// - Parameter aggregate: Specify how the results of the union are aggregated.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zunionstore(_ destination: String, numkeys: Int, keys: String..., weights: [Int] = [], aggregate: String = "") -> RedisMulti {
-        zunionstoreWithArray(destination, numkeys: numkeys, keys: keys, weights: weights, aggregate: aggregate)
-        return self
+        return zunionstoreWithArray(destination, numkeys: numkeys, keys: keys, weights: weights, aggregate: aggregate)
     }
     
-    /// Add an ZCAN command to the "transactions"
+    /// Add an ZUNIONSTORE command to the "transactions"
     ///
     /// - Parameter destination: The destination where the result will be stored.
     /// - Parameter numkeys: The number of keys to union.
@@ -357,6 +403,8 @@ extension RedisMulti {
     /// - Parameter callback: The callback function, the Int will contain the number of elements
     ///                       in the resulting sorted set at destination.
     ///                       NSError will be non-nil if an error occured.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zunionstoreWithArray(_ destination: String, numkeys: Int, keys: [String], weights: [Int], aggregate: String) -> RedisMulti {
         queuedCommands.append(appendValues(operation: "ZUNIONSTORE", destination, numkeys: numkeys, keys: keys, weights: weights, aggregate: aggregate))

@@ -25,7 +25,8 @@ public class TestTransactionsPart6: XCTestCase {
         return [
             ("test_keyManipulation", test_keyManipulation),
             ("test_MemberManipulation", test_MemberManipulation),
-            ("test_ranges", test_ranges)
+            ("test_ranges", test_ranges),
+            ("tests_Remove", tests_Remove),
         ]
     }
     
@@ -113,6 +114,7 @@ public class TestTransactionsPart6: XCTestCase {
             multi.zrange(self.key1, start: 1, stop: 3)
             multi.zrangebylex(self.key2, min: "[aaa", max: "(g")
             multi.zrangebyscore(self.key1, min: "2", max: "(5")
+            multi.zrank(self.key1, member: self.expVal4)
             
             multi.zrevrange(self.key1, start: 0, stop: -1)
             multi.zrevrank(self.key1, member: self.expVal4)
@@ -120,21 +122,57 @@ public class TestTransactionsPart6: XCTestCase {
             multi.zrevrangebyscore(self.key1, min: "+inf", max: "-inf")
             
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 9) {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 10) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(5), "Added only \(nestedResponses[0]) not 5")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(7), "Added only \(nestedResponses[1]) not 7")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.Array(expectedRange))
                     XCTAssertEqual(nestedResponses[3], RedisResponse.Array(expectedRangeLex))
                     XCTAssertEqual(nestedResponses[4], RedisResponse.Array(expectedRangeScore))
-                    XCTAssertEqual(nestedResponses[5], RedisResponse.Array(expectedRevRange), "Not equal")
-                    XCTAssertEqual(nestedResponses[6], RedisResponse.IntegerValue(1))
-                    XCTAssertEqual(nestedResponses[7], RedisResponse.Array(expectedRevRangeLex))
-                    XCTAssertEqual(nestedResponses[8], RedisResponse.Array(expectedRevRange))
+                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(3))
+                    
+                    XCTAssertEqual(nestedResponses[6], RedisResponse.Array(expectedRevRange), "Not equal")
+                    XCTAssertEqual(nestedResponses[7], RedisResponse.IntegerValue(1))
+                    XCTAssertEqual(nestedResponses[8], RedisResponse.Array(expectedRevRangeLex))
+                    XCTAssertEqual(nestedResponses[9], RedisResponse.Array(expectedRevRange))
                 }
             }
         }
     }
     
+    func tests_Remove() {
+        setupTests {
+            let multi = redis.multi()
+            multi.zadd(self.key1, tuples: (1, "a"), (1, "b"), (1, "c"), (1, "d"), (1, "e"), (1, "f"), (1, "g"))
+            multi.zcount(self.key1, min: "-inf", max: "+inf")
+            multi.zlexcount(self.key1, min: "[b", max: "[f")
+            multi.zremrangebylex(self.key1, min: "[b", max: "[f")
+            
+            multi.zadd(self.key2, tuples: (1, "a"), (2, "b"), (3, "c"), (4, "d"), (5, "e"), (6, "f"), (7, "g"))
+            multi.zremrangebyrank(self.key2, start: 4, stop: 6)
+            multi.zcount(self.key2, min: "-inf", max: "+inf")
+            
+            multi.zadd(self.key3, tuples: (1, "a"), (2, "b"), (3, "c"), (4, "d"), (5, "e"), (6, "f"), (7, "g"))
+            multi.zremrangebyscore(self.key3, min: "-inf", max: "(4")
+            multi.zcount(self.key3, min: "-inf", max: "+inf")
+            
+            multi.exec() {(response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 10){
+                    XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(7), "Added only \(nestedResponses[0]) not 7")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(7), "There were only \(nestedResponses[1]) in \(self.key1)")
+                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(5), "Returned \(nestedResponses[2]) not 5")
+                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(5), "Removed \(nestedResponses[3]) not 5")
+                    
+                    XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(7), "Added only \(nestedResponses[4]) not 7")
+                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(3), "Removed \(nestedResponses[5]) not 3")
+                    XCTAssertEqual(nestedResponses[6], RedisResponse.IntegerValue(4), "There are \(nestedResponses[6]) not 4 in \(self.key2)")
+                    
+                    XCTAssertEqual(nestedResponses[7], RedisResponse.IntegerValue(7), "Added only \(nestedResponses[7]) not 7")
+                    XCTAssertEqual(nestedResponses[8], RedisResponse.IntegerValue(3), "Removed \(nestedResponses[5]) not 3")
+                    XCTAssertEqual(nestedResponses[9], RedisResponse.IntegerValue(4), "There are \(nestedResponses[6]) not 4 in \(self.key2)")
+                }
+            }
+        }
+    }
     
     private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
         switch(response) {
