@@ -25,7 +25,8 @@ public class TestTransactionsPart5: XCTestCase {
         return [
             ("test_keyUnion", test_keyUnion),
             ("test_Move", test_Move),
-            ("test_Diffstorespop", test_Diffstorespop)
+            ("test_Diffstorespop", test_Diffstorespop),
+            ("test_Inter", test_Inter),
         ]
     }
     
@@ -47,12 +48,17 @@ public class TestTransactionsPart5: XCTestCase {
             multi.sadd(self.key1, members: self.expVal1)
             multi.sadd(self.key2, members: self.expVal2)
             multi.sunion(self.key1, self.key2)
-            
+            multi.sunionstore(self.key3, keys: self.key1, self.key2)
+            multi.sismember(self.key3, member: self.expVal2)
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 3) {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(1), "sadd didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(1), "sadd didn't return an 'OK'")
                     XCTAssertNotNil(nestedResponses[2], "Union failed")
+                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(2), "Unionstore failed")
+                    XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "\(self.expVal2) is not a member of \(self.key3)")
+                    
                 }
             }
         }
@@ -66,11 +72,11 @@ public class TestTransactionsPart5: XCTestCase {
             multi.srem(self.key1, members: self.expVal2)
             multi.smove(source: self.key1, destination: self.key2, member: self.expVal1)
             multi.scard(self.key2)
-            
+
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(3), "Added only \(nestedResponses[0]) not 3")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(1), "set didn't return an 'OK'")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(1), "Added only \(nestedResponses[1]) not 1")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Should have removed \(self.expVal2)")
                     XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(1), "\(self.expVal2) should no longer exist in \(self.key1)")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "There should be 1 member in \(self.key2)")
@@ -84,21 +90,48 @@ public class TestTransactionsPart5: XCTestCase {
             let multi = redis.multi()
             multi.sadd(self.key1, members: self.expVal1, self.expVal2, self.expVal3)
             multi.sadd(self.key2, members: self.expVal2, self.expVal4)
+            multi.sdiff(keys: self.key1, self.key2)
             multi.sdiffstore(destination: self.key3, keys: self.key1, self.key2)
             multi.spop(self.key3)
-            
+
             multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 4) {
+                if  let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(3), "Added only \(nestedResponses[0]) not 3")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(2), "Added only \(nestedResponses[1]) not 2")
-                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(2), "Added only \(nestedResponses[2]) not 2")
-                    XCTAssertNotNil(nestedResponses[3], "Nothing was popped")
+                    XCTAssertTrue((nestedResponses[2].asArray?.contains(RedisResponse.StringValue(RedisString(self.expVal1))))!, "'\(self.expVal1)' is not in \(nestedResponses[2])")
+                    XCTAssertTrue((nestedResponses[2].asArray?.contains(RedisResponse.StringValue(RedisString(self.expVal3))))!, "'\(self.expVal3)' is not in \(nestedResponses[2])")
+                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(2), "Added only \(nestedResponses[2]) not 2")
+                    XCTAssertNotEqual(nestedResponses[4], RedisResponse.Nil, "Nothing was popped")
                 }
             }
         }
     }
     
-    
+    func test_Inter() {
+        setupTests {
+            let expectedResults = [RedisResponse.StringValue(RedisString(self.expVal2)), RedisResponse.StringValue(RedisString(self.expVal4))]
+            let multi = redis.multi()
+            multi.sadd(self.key1, members: self.expVal1, self.expVal2, self.expVal3, self.expVal4, self.expVal5)
+            multi.sadd(self.key2, members: self.expVal2, self.expVal4)
+            multi.sinter(self.key1, self.key2)
+            multi.sinterstore(self.key3, keys: self.key1, self.key2)
+            multi.smembers(self.key3)
+            multi.srandmember(self.key3)
+
+            multi.exec() {(response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 6) {
+                    XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(5), "Added only \(nestedResponses[0]) not 5")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(2), "Added only \(nestedResponses[1]) not 2")
+                    XCTAssertNotNil(nestedResponses[2], "Inter failed")
+                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(2), "Only \(nestedResponses[3]) are stored in \(self.key3)")
+                    XCTAssertTrue((nestedResponses[4].asArray?.contains(RedisResponse.StringValue(RedisString(self.expVal2))))!, "\(self.expVal2) is not in \(nestedResponses[4])")
+                    XCTAssertTrue((nestedResponses[4].asArray?.contains(RedisResponse.StringValue(RedisString(self.expVal4))))!, "\(self.expVal4) is not in \(nestedResponses[4])")
+                    XCTAssertTrue(expectedResults.contains(nestedResponses[5]), "\(nestedResponses[5]) is not an expected result")
+                }
+            }
+        }
+    }
+
     private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
         switch(response) {
         case .Array(let responses):

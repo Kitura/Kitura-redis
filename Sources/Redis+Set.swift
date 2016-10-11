@@ -177,8 +177,7 @@ extension Redis {
     ///                      NSError will be non-nil if an error occurred.
     public func sdiffstoreArrayOfKeys(destination: String, keys: [String],
                                       callback: (Int?, NSError?) -> Void) {
-
-        var command = ["sdiffstore"]
+        var command = ["SDIFFSTORE", destination]
         for key in keys {
             command.append(key)
         }
@@ -210,7 +209,7 @@ extension Redis {
     public func sdiffstoreArrayOfKeys(destination: RedisString, keys: [RedisString],
                                       callback: (Int?, NSError?) -> Void) {
 
-        var command = [RedisString("sdiffstore")]
+        var command = [RedisString("SDIFFSTORE"), destination]
         for key in keys {
             command.append(key)
         }

@@ -347,6 +347,11 @@ public class TestSetCommandsPart2: XCTestCase {
                             XCTAssertNil(error)
                             XCTAssertNotNil(retrievedTotalElementAdded)
                             XCTAssertEqual(retrievedTotalElementAdded!, 2)
+                                
+                                redis.scard(self.key3) {
+                                    (retrievedTotalElements: Int?, error: NSError?) in
+                                    XCTAssertEqual(retrievedTotalElements!, 2)
+                                }
 
                             expectation1.fulfill()
                         }

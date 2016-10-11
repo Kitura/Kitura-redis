@@ -23,16 +23,19 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: The values to be added to the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sadd(_ key: String, members: String...) -> RedisMulti {
-        saddArrayOfMembers(key, members: members)
-        return self
+        return saddArrayOfMembers(key, members: members)
     }
     
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: An array of values to be added to the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func saddArrayOfMembers(_ key: String, members: [String]) -> RedisMulti {
         var command = [RedisString("SADD"), RedisString(key)]
@@ -47,16 +50,19 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: The `RedisString` values to be added to the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sadd(_ key: RedisString, members: RedisString...) -> RedisMulti {
-        saddArrayOfMembers(key, members: members)
-        return self
+        return saddArrayOfMembers(key, members: members)
     }
     
     /// Add one or more members to a set
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: An array of `RedisString` values to be added to the set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func saddArrayOfMembers(_ key: RedisString, members: [RedisString]) -> RedisMulti {
         var command = [RedisString("SADD"), key]
@@ -70,6 +76,8 @@ extension RedisMulti {
     /// Get the number of members in a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func scard(_ key: String) -> RedisMulti {
         queuedCommands.append([RedisString("SCARD"), RedisString(key)])
@@ -79,6 +87,8 @@ extension RedisMulti {
     /// Get the number of members in a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func scard(_ key: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("SCARD"), key])
@@ -88,15 +98,18 @@ extension RedisMulti {
     /// Subtract multiple sets
     ///
     /// - Parameter keys: The list of keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiff(keys: String...) -> RedisMulti {
-        sdiffArrayOfKeys(keys: keys)
-        return self
+        return sdiffArrayOfKeys(keys: keys)
     }
     
     /// Subtract multiple sets
     ///
     /// - Parameter keys: An array of the keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiffArrayOfKeys(keys: [String]) -> RedisMulti {
         var command = [RedisString("SDIFF")]
@@ -110,15 +123,18 @@ extension RedisMulti {
     /// Subtract multiple sets
     ///
     /// - Parameter keys: The list of the keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiff(keys: RedisString...) -> RedisMulti {
-        sdiffArrayOfKeys(keys: keys)
-        return self
+        return sdiffArrayOfKeys(keys: keys)
     }
     
     /// Subtract multiple sets
     ///
     /// - Parameter keys: An array of the keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiffArrayOfKeys(keys: [RedisString]) -> RedisMulti {
         var command = [RedisString("SDIFF")]
@@ -134,20 +150,23 @@ extension RedisMulti {
     /// - Parameter destination: The destination of the result, if the
     ///                         destination already exists, it is overwritten
     /// - Parameter keys: The list of the keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiffstore(destination: String, keys: String...) -> RedisMulti {
-        sdiffstoreArrayOfKeys(destination: destination, keys: keys)
-        return self
+        return sdiffstoreArrayOfKeys(destination: destination, keys: keys)
     }
     
     /// Subtract multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: An array of the keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiffstoreArrayOfKeys(destination: String, keys: [String]) -> RedisMulti {
         
-        var command = [RedisString("sdiffstore")]
+        var command = [RedisString("SDIFFSTORE"), RedisString(destination)]
         for key in keys {
             command.append(RedisString(key))
         }
@@ -160,20 +179,24 @@ extension RedisMulti {
     /// - Parameter destination: The destination of the result, if the
     ///                         destination already exists, it is overwritten
     /// - Parameter keys: The list of the keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiffstore(destination: RedisString, keys: RedisString...) -> RedisMulti {
-        self.sdiffstoreArrayOfKeys(destination: destination, keys: keys)
-        return self
+        return sdiffstoreArrayOfKeys(destination: destination, keys: keys)
+        
     }
     
     /// Subtract multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: Tthe destination of the result.
     /// - Parameter keys: An array of keys to get the difference from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sdiffstoreArrayOfKeys(destination: RedisString, keys: [RedisString]) -> RedisMulti {
         
-        var command = [RedisString("sdiffstore")]
+        var command = [RedisString("SDIFFSTORE"), destination]
         for key in keys {
             command.append(key)
         }
@@ -184,6 +207,8 @@ extension RedisMulti {
     /// Get all the members in a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func smembers(_ key: String) -> RedisMulti {
         queuedCommands.append([RedisString("SMEMBERS"), RedisString(key)])
@@ -193,6 +218,8 @@ extension RedisMulti {
     /// Get all the members in a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func smembers(_ key: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("SMEMBERS"), key])
@@ -201,14 +228,18 @@ extension RedisMulti {
     /// Intersect multiple sets
     ///
     /// - Parameter keys: The list of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func sinter(_ keys: String...) -> RedisMulti {
-        self.sinterArrayOfKeys(keys)
-        return self
+        return sinterArrayOfKeys(keys)
     }
     
     /// Intersect multiple sets
     ///
     /// - Parameter keys: An array of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sinterArrayOfKeys(_ keys: [String]) -> RedisMulti {
         var command = [RedisString("SINTER")]
@@ -222,14 +253,17 @@ extension RedisMulti {
     /// Intersect multiple sets
     ///
     /// - Parameter keys: The list of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     public func sinter(_ keys: RedisString...) -> RedisMulti {
-        self.sinterArrayOfKeys(keys)
-        return self
+        return sinterArrayOfKeys(keys)
     }
     
     /// Intersect multiple sets
     ///
     /// - Parameter keys: An array of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sinterArrayOfKeys(_ keys: [RedisString]) -> RedisMulti {
         var command = [RedisString("SINTER")]
@@ -244,16 +278,19 @@ extension RedisMulti {
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: The list of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sinterstore(_ destination: String, keys: String...) -> RedisMulti {
-        self.sinterstoreArrayOfKeys(destination, keys: keys)
-        return self
+        return sinterstoreArrayOfKeys(destination, keys: keys)
     }
     
     /// Intersect multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: An array of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sinterstoreArrayOfKeys(_ destination: String, keys: [String]) -> RedisMulti {
         var command = [RedisString("SINTERSTORE"), RedisString(destination)]
@@ -268,16 +305,19 @@ extension RedisMulti {
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: The list of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sinterstore(_ destination: RedisString, keys: RedisString...) -> RedisMulti {
-        self.sinterstoreArrayOfKeys(destination, keys: keys)
-        return self
+        return sinterstoreArrayOfKeys(destination, keys: keys)
     }
     
     /// Intersect multiple sets and store the resulting set in a key
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: An array of the keys to intersect from.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sinterstoreArrayOfKeys(_ destination: RedisString, keys: [RedisString]) -> RedisMulti {
         var command = [RedisString("SINTERSTORE"), destination]
@@ -292,6 +332,8 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter member: The String parameter for the member.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sismember(_ key: String, member: String) -> RedisMulti {
         queuedCommands.append([RedisString("SISMEMBER"), RedisString(key), RedisString(member)])
@@ -302,6 +344,8 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter member: The `RedisString` parameter for the member.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sismember(_ key: RedisString, member: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("SISMEMBER"), key, member])
@@ -313,6 +357,8 @@ extension RedisMulti {
     /// - Parameter source: The Source set from where to move the member from.
     /// - Parameter destination: The Destination set from where to move the member to.
     /// - Parameter member: The String parameter for the member to be moved.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func smove(source: String, destination: String, member: String) -> RedisMulti {
         queuedCommands.append([RedisString("SMOVE"), RedisString(source), RedisString(destination), RedisString(member)])
@@ -324,6 +370,8 @@ extension RedisMulti {
     /// - Parameter source: The Source set from where to move the member from.
     /// - Parameter destination: The Destination set from where to move the member to.
     /// - Parameter member: The RedisString parameter for the member to be moved.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func smove(source: RedisString, destination: RedisString, member: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("SMOVE"), source, destination, member])
@@ -333,6 +381,8 @@ extension RedisMulti {
     /// Remove and return a random member from a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func spop(_ key: String) -> RedisMulti {
         queuedCommands.append([RedisString("SPOP"), RedisString(key)])
@@ -343,6 +393,8 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to pop.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func spop(_ key: String, count: Int) -> RedisMulti {
         queuedCommands.append([RedisString("SPOP"), RedisString(key), RedisString(count)])
@@ -352,6 +404,8 @@ extension RedisMulti {
     /// Remove and return a random member from a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func spop(_ key: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("SPOP"), key])
@@ -362,6 +416,8 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to pop.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func spop(_ key: RedisString, count: Int) -> RedisMulti {
         queuedCommands.append([RedisString("SPOP"), key, RedisString(count)])
@@ -371,6 +427,8 @@ extension RedisMulti {
     /// Get a random member from a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func srandmember(_ key: String) -> RedisMulti {
         queuedCommands.append([RedisString("SRANDMEMBER"), RedisString(key)])
@@ -381,6 +439,8 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to return.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func srandmember(_ key: String, count: Int) -> RedisMulti {
         queuedCommands.append([RedisString("SRANDMEMBER"), RedisString(key), RedisString(count)])
@@ -390,6 +450,8 @@ extension RedisMulti {
     /// Get a random member from a set
     ///
     /// - Parameter key: The key.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func srandmember(_ key: RedisString) -> RedisMulti {
         queuedCommands.append([RedisString("SRANDMEMBER"), key])
@@ -400,6 +462,8 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to return.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func srandmember(_ key: RedisString, count: Int) -> RedisMulti {
         queuedCommands.append([RedisString("SRANDMEMBER"), key, RedisString(count)])
@@ -409,16 +473,19 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter members: The list of the members to be removed.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func srem(_ key: String, members: String...) -> RedisMulti {
-        self.sremArrayOfMembers(key, members: members)
-        return self
+        return sremArrayOfMembers(key, members: members)
     }
     
     /// Remove one or more members from a set
     ///
     /// - Parameter key: The key.
     /// - Parameter members: An Array of the members to be removed.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sremArrayOfMembers(_ key: String, members: [String]) -> RedisMulti {
         var command = [RedisString("SREM"), RedisString(key)]
@@ -433,16 +500,19 @@ extension RedisMulti {
     ///
     /// - Parameter key: The key.
     /// - Parameter members: The list of the members to be removed.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func srem(_ key: RedisString, members: RedisString...) -> RedisMulti {
-        self.sremArrayOfMembers(key, members: members)
-        return self
+        return sremArrayOfMembers(key, members: members)
     }
     
     /// Remove one or more members from a set
     ///
     /// - Parameter key: The key.
     /// - Parameter members: An array of the members to be removed.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sremArrayOfMembers(_ key: RedisString, members: [RedisString]) -> RedisMulti {
         var command = [RedisString("SREM"), key]
@@ -456,15 +526,18 @@ extension RedisMulti {
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunion(_ keys: String...) -> RedisMulti {
-        self.sunionArrayOfKeys(keys)
-        return self
+        return sunionArrayOfKeys(keys)
     }
     
     /// Add multiple sets
     ///
     /// - Parameter keys: An array of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunionArrayOfKeys(_ keys: [String]) -> RedisMulti {
         var command = [RedisString("SUNION")]
@@ -478,15 +551,18 @@ extension RedisMulti {
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunion(_ keys: RedisString...) -> RedisMulti {
-        self.sunionArrayOfKeys(keys)
-        return self
+        return sunionArrayOfKeys(keys)
     }
     
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunionArrayOfKeys(_ keys: [RedisString]) -> RedisMulti {
         var command = [RedisString("SUNION")]
@@ -500,15 +576,18 @@ extension RedisMulti {
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunionstore(_ destination: String, keys: String...) -> RedisMulti {
-        self.sunionstoreArrayOfKeys(destination, keys: keys)
-        return self
+        return sunionstoreArrayOfKeys(destination, keys: keys)
     }
     
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunionstoreArrayOfKeys(_ destination: String, keys: [String]) -> RedisMulti {
         var command = [RedisString("SUNIONSTORE"), RedisString(destination)]
@@ -522,15 +601,18 @@ extension RedisMulti {
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunionstore(_ destination: RedisString, keys: RedisString...) -> RedisMulti {
-        self.sunionstoreArrayOfKeys(destination, keys: keys)
-        return self
+        return sunionstoreArrayOfKeys(destination, keys: keys)
     }
     
     /// Add multiple sets
     ///
     /// - Parameter keys: The list of the keys to union.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sunionstoreArrayOfKeys(_ destination: RedisString, keys: [RedisString]) -> RedisMulti {
         var command = [RedisString("SUNIONSTORE"), destination]
@@ -548,6 +630,8 @@ extension RedisMulti {
     /// - Parameter match: glob-style pattern
     /// - parameter count: The amount of work that should be done at every call in order
     ///                   to retrieve elements from the collection.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sscan(_ key: String, cursor: Int, match: String? = nil, count: Int? = nil)
         -> RedisMulti {
@@ -570,6 +654,8 @@ extension RedisMulti {
     /// - Parameter match: glob-style pattern
     /// - parameter count: The amount of work that should be done at every call in order
     ///                   to retrieve elements from the collection.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func sscan(_ key: RedisString, cursor: Int, match: RedisString? = nil, count: Int? = nil)
         -> RedisMulti {
