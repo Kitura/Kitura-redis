@@ -19,7 +19,7 @@ import Foundation
 /// Extend Redis by adding the Set operations
 extension RedisMulti {
     
-    /// Add one or more members to a set
+    /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: The values to be added to the set.
@@ -30,7 +30,7 @@ extension RedisMulti {
         return saddArrayOfMembers(key, members: members)
     }
     
-    /// Add one or more members to a set
+    /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: An array of values to be added to the set.
@@ -46,7 +46,7 @@ extension RedisMulti {
         return self
     }
 
-    /// Add one or more members to a set
+    /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: The `RedisString` values to be added to the set.
@@ -57,7 +57,7 @@ extension RedisMulti {
         return saddArrayOfMembers(key, members: members)
     }
     
-    /// Add one or more members to a set
+    /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter memebers: An array of `RedisString` values to be added to the set.
@@ -73,7 +73,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Get the number of members in a set
+    /// Add a SCARD command to the "transaction"
     ///
     /// - Parameter key: The key.
     ///
@@ -84,7 +84,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Get the number of members in a set
+    /// Add a SCARD command to the "transaction"
     ///
     /// - Parameter key: The key.
     ///
@@ -95,7 +95,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Subtract multiple sets
+    /// Add a SDIFF command to the "transaction"
     ///
     /// - Parameter keys: The list of keys to get the difference from.
     ///
@@ -105,7 +105,7 @@ extension RedisMulti {
         return sdiffArrayOfKeys(keys: keys)
     }
     
-    /// Subtract multiple sets
+    /// Add a SDIFF command to the "transaction"
     ///
     /// - Parameter keys: An array of the keys to get the difference from.
     ///
@@ -120,7 +120,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Subtract multiple sets
+    /// Add a SDIFF command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to get the difference from.
     ///
@@ -130,7 +130,7 @@ extension RedisMulti {
         return sdiffArrayOfKeys(keys: keys)
     }
     
-    /// Subtract multiple sets
+    /// Add a SDIFF command to the "transaction"
     ///
     /// - Parameter keys: An array of the keys to get the difference from.
     ///
@@ -145,7 +145,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Subtract multiple sets and store the resulting set in a key
+    /// Add a SDIFF command to the "transaction"
     ///
     /// - Parameter destination: The destination of the result, if the
     ///                         destination already exists, it is overwritten
@@ -157,7 +157,7 @@ extension RedisMulti {
         return sdiffstoreArrayOfKeys(destination: destination, keys: keys)
     }
     
-    /// Subtract multiple sets and store the resulting set in a key
+    /// Add a SDIFFSTORE command to the "transaction"
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: An array of the keys to get the difference from.
@@ -174,7 +174,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Subtract multiple sets and store the resulting set in a key
+    /// Add a SDIFFSTORE command to the "transaction"
     ///
     /// - Parameter destination: The destination of the result, if the
     ///                         destination already exists, it is overwritten
@@ -187,7 +187,7 @@ extension RedisMulti {
         
     }
     
-    /// Subtract multiple sets and store the resulting set in a key
+    /// Add a SDIFFSTORE command to the "transaction"
     ///
     /// - Parameter destination: Tthe destination of the result.
     /// - Parameter keys: An array of keys to get the difference from.
@@ -204,7 +204,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Get all the members in a set
+    /// Add a SMEMBERS command to the "transaction"
     ///
     /// - Parameter key: The key.
     ///
@@ -215,7 +215,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Get all the members in a set
+    /// Add a SMEMBERS command to the "transaction"
     ///
     /// - Parameter key: The key.
     ///
@@ -225,7 +225,8 @@ extension RedisMulti {
         queuedCommands.append([RedisString("SMEMBERS"), key])
         return self
     }
-    /// Intersect multiple sets
+    
+    /// Add a SINTER command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to intersect from.
     ///
@@ -235,7 +236,7 @@ extension RedisMulti {
         return sinterArrayOfKeys(keys)
     }
     
-    /// Intersect multiple sets
+    /// Add a SINTER command to the "transaction"
     ///
     /// - Parameter keys: An array of the keys to intersect from.
     ///
@@ -250,7 +251,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Intersect multiple sets
+    /// Add a SINTER command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to intersect from.
     ///
@@ -259,7 +260,7 @@ extension RedisMulti {
         return sinterArrayOfKeys(keys)
     }
     
-    /// Intersect multiple sets
+    /// Add a SINTER command to the "transaction"
     ///
     /// - Parameter keys: An array of the keys to intersect from.
     ///
@@ -274,7 +275,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Intersect multiple sets and store the resulting set in a key
+    /// Add a SINTERSTORE command to the "transaction"
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: The list of the keys to intersect from.
@@ -285,7 +286,7 @@ extension RedisMulti {
         return sinterstoreArrayOfKeys(destination, keys: keys)
     }
     
-    /// Intersect multiple sets and store the resulting set in a key
+    /// Add a SINTERSTORE command to the "transaction"
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: An array of the keys to intersect from.
@@ -301,7 +302,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Intersect multiple sets and store the resulting set in a key
+    /// Add a SINTERSTORE command to the "transaction"
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: The list of the keys to intersect from.
@@ -312,7 +313,7 @@ extension RedisMulti {
         return sinterstoreArrayOfKeys(destination, keys: keys)
     }
     
-    /// Intersect multiple sets and store the resulting set in a key
+    /// Add a SINTERSTORE command to the "transaction"
     ///
     /// - Parameter destination: The destination of the result.
     /// - Parameter keys: An array of the keys to intersect from.
@@ -328,7 +329,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Determine if a given value is a member of a set
+    /// Add a SISMEMBER command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter member: The String parameter for the member.
@@ -340,7 +341,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Determine if a given value is a member of a set
+    /// Add a SISMEMBER command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter member: The `RedisString` parameter for the member.
@@ -352,7 +353,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Move a member from one set to another
+    /// Add a SMOVE command to the "transaction"
     ///
     /// - Parameter source: The Source set from where to move the member from.
     /// - Parameter destination: The Destination set from where to move the member to.
@@ -365,7 +366,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Move a member from one set to another
+    /// Add a SMOVE command to the "transaction"
     ///
     /// - Parameter source: The Source set from where to move the member from.
     /// - Parameter destination: The Destination set from where to move the member to.
@@ -378,7 +379,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Remove and return a random member from a set
+    /// Add a SPOP command to the "transaction"
     ///
     /// - Parameter key: The key.
     ///
@@ -389,7 +390,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Remove and return one or multiple random members from a set
+    /// Add a SPOP command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to pop.
@@ -401,7 +402,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Remove and return a random member from a set
+    /// Add a SPOP command to the "transaction"
     ///
     /// - Parameter key: The key.
     ///
@@ -412,7 +413,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Remove and return one or multiple random members from a set
+    /// Add a SPOP command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to pop.
@@ -424,7 +425,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Get a random member from a set
+    /// Add a SRANDMEMBER command to the "transaction"
     ///
     /// - Parameter key: The key.
     ///
@@ -435,7 +436,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Get one or multiple random members from a set
+    /// Add a SRANDMEMBER command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to return.
@@ -458,7 +459,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Get one or multiple random members from a set
+    /// Add a SRANDMEMBER command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter count: The number of members to return.
@@ -469,7 +470,8 @@ extension RedisMulti {
         queuedCommands.append([RedisString("SRANDMEMBER"), key, RedisString(count)])
         return self
     }
-    /// Remove one or more members from a set
+    
+    /// Add a SREM command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter members: The list of the members to be removed.
@@ -480,7 +482,7 @@ extension RedisMulti {
         return sremArrayOfMembers(key, members: members)
     }
     
-    /// Remove one or more members from a set
+    /// Add a SREM command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter members: An Array of the members to be removed.
@@ -496,7 +498,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Remove one or more members from a set
+    /// Add a SREM command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter members: The list of the members to be removed.
@@ -507,7 +509,7 @@ extension RedisMulti {
         return sremArrayOfMembers(key, members: members)
     }
     
-    /// Remove one or more members from a set
+    /// Add a SREM command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter members: An array of the members to be removed.
@@ -523,7 +525,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Add multiple sets
+    /// Add a SUNION command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to union.
     ///
@@ -533,7 +535,7 @@ extension RedisMulti {
         return sunionArrayOfKeys(keys)
     }
     
-    /// Add multiple sets
+    /// Add a SUNION command to the "transaction"
     ///
     /// - Parameter keys: An array of the keys to union.
     ///
@@ -548,7 +550,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Add multiple sets
+    /// Add a SUNION command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to union.
     ///
@@ -558,7 +560,7 @@ extension RedisMulti {
         return sunionArrayOfKeys(keys)
     }
     
-    /// Add multiple sets
+    /// Add a SUNION command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to union.
     ///
@@ -573,7 +575,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Add multiple sets
+    /// Add a SUNIONSTORE command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to union.
     ///
@@ -583,7 +585,7 @@ extension RedisMulti {
         return sunionstoreArrayOfKeys(destination, keys: keys)
     }
     
-    /// Add multiple sets
+    /// Add a SUNIONSTORE command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to union.
     ///
@@ -598,7 +600,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Add multiple sets
+    /// Add a SUNIONSTORE command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to union.
     ///
@@ -608,7 +610,7 @@ extension RedisMulti {
         return sunionstoreArrayOfKeys(destination, keys: keys)
     }
     
-    /// Add multiple sets
+    /// Add a SUNIONSTORE command to the "transaction"
     ///
     /// - Parameter keys: The list of the keys to union.
     ///
@@ -623,7 +625,7 @@ extension RedisMulti {
         return self
     }
     
-    /// Iterates elements of Sets types.
+    /// Add a SSCAN command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter cursor: iterator
@@ -647,7 +649,7 @@ extension RedisMulti {
             return self
     }
     
-    /// Iterates elements of Sets types.
+    /// Add a SSCAN command to the "transaction"
     ///
     /// - Parameter key: The key.
     /// - Parameter cursor: iterator
