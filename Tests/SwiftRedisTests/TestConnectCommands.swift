@@ -22,10 +22,47 @@ import XCTest
 public class TestConnectCommands: XCTestCase {
     static var allTests: [(String, (TestConnectCommands) -> () throws -> Void)] {
         return [
+            ("test_connectFailure", test_connectFailure),
             ("test_info", test_info),
             ("test_pingAndEcho", test_pingAndEcho),
             ("test_select", test_select)
         ]
+    }
+    
+    func test_connectFailure() {
+        let expectation1 = expectation(description: "Tests a connection failure to a redis server")
+        
+        let failingRedis = Redis()
+        failingRedis.connect(host: "localhostx", port: 6379) {(error: NSError?) in
+            XCTAssertNotNil(error, "Connected to Redis when it shouldn't have")
+            expectation1.fulfill()
+        }
+        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
+    }
+    
+    func test_info() {
+        let expectation1 = expectation(description: "Shows some information about the redis server")
+        
+        connectRedis() {(error: NSError?) in
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
+            
+            redis.info() {
+                (info: RedisInfo?, error: NSError?) in
+                
+                XCTAssertNil(error)
+                XCTAssertNotNil(info)
+                
+                if let theInfo = info {
+                    print("The Redis server version is \(theInfo.server.redis_version)")
+                }
+                
+                expectation1.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
 
     func test_pingAndEcho() {
@@ -110,25 +147,5 @@ public class TestConnectCommands: XCTestCase {
                 }
             }
         }
-    }
-
-    func test_info() {
-        let expectation1 = expectation(description: "Shows some information about the redis server")
-
-        connectRedis() {(error: NSError?) in
-            if error != nil {
-                XCTFail("Could not connect to Redis")
-                return
-            }
-
-            redis.info() {
-                (info: RedisInfo?, error: NSError?) in
-
-                XCTAssertNil(error)
-                XCTAssertNotNil(info)
-                expectation1.fulfill()
-            }
-        }
-        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
 }
