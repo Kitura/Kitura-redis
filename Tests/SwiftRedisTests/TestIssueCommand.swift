@@ -22,8 +22,38 @@ import XCTest
 class TestIssueCommand: XCTestCase {
     static var allTests: [(String, (TestIssueCommand) -> () throws -> Void)] {
         return [
-            ("test_SetAndGet", test_SetAndGet)
+            ("test_emptyCommand", test_emptyCommand),
+            ("test_SetAndGet", test_SetAndGet),
+            ("test_unconnectedHandle", test_unconnectedHandle)
         ]
+    }
+    
+    func test_emptyCommand() {
+        let emptyStringArray = [String]()
+        let emptyRedisStringArray = [RedisString]()
+        
+        connectRedis() {(error: NSError?) in
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
+            
+            redis.issueCommandInArray(emptyStringArray) {(response: RedisResponse) in
+                switch response {
+                case .Error:
+                    redis.issueCommandInArray(emptyRedisStringArray) {(response: RedisResponse) in
+                        switch response {
+                        case .Error:
+                            break
+                        default:
+                            XCTFail("Failed to receive an error when the command array was empty")
+                        }
+                    }
+                default:
+                    XCTFail("Failed to receive an error when the command array was empty")
+                }
+            }
+        }
     }
 
     func test_SetAndGet() {
@@ -60,6 +90,27 @@ class TestIssueCommand: XCTestCase {
                     default:
                         XCTFail("Received a RedisResponse of \(response) from a SET")
                 }
+            }
+        }
+    }
+    
+    func test_unconnectedHandle() {
+        let unconnectedRedis = Redis()
+        unconnectedRedis.issueCommand("PING") {(response: RedisResponse) in
+            switch response {
+            case .Error:
+                unconnectedRedis.issueCommand(RedisString("PING")) {(response: RedisResponse) in
+                    switch response {
+                    case .Error:
+                        break
+                        
+                    default:
+                        XCTFail("Didn't return an error when issueing a command with an unconnected Redis handle")
+                    }
+                }
+                
+            default:
+                XCTFail("Didn't return an error when issueing a command with an unconnected Redis handle")
             }
         }
     }
