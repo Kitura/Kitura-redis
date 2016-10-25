@@ -22,10 +22,53 @@ import XCTest
 public class TestConnectCommands: XCTestCase {
     static var allTests: [(String, (TestConnectCommands) -> () throws -> Void)] {
         return [
+            ("test_connectFailure", test_connectFailure),
             ("test_info", test_info),
             ("test_pingAndEcho", test_pingAndEcho),
             ("test_select", test_select)
         ]
+    }
+    
+    func test_connectFailure() {
+        let expectation1 = expectation(description: "Tests a connection failure to a redis server")
+        
+        let failingRedis = Redis()
+        failingRedis.connect(host: "localhostx", port: 6379) {(error: NSError?) in
+            XCTAssertNotNil(error, "Connected to Redis when it shouldn't have")
+            expectation1.fulfill()
+        }
+        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
+    }
+    
+    func test_info() {
+        let expectation1 = expectation(description: "Shows some information about the redis server")
+        
+        connectRedis() {(error: NSError?) in
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
+            
+            redis.info() {
+                (info: RedisInfo?, error: NSError?) in
+                
+                XCTAssertNil(error)
+                XCTAssertNotNil(info)
+                
+                if let theInfo = info {
+                    print("The Redis server version is \(theInfo.server.redis_version)")
+                }
+                
+                redis.info() {(info: RedisString?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(info)
+                
+                    expectation1.fulfill()
+                }
+            }
+        }
+        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
 
     func test_pingAndEcho() {
@@ -38,18 +81,17 @@ public class TestConnectCommands: XCTestCase {
             redis.ping() {(error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
 
-                /* Changed for Redis 2.8.0
                 let pingText = "Hello, hello, hello, hi there"
                 redis.ping(pingText) {(error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                */
+                
                     let echoText = "Echo, echo, echo......"
                     redis.echo(echoText) {(text: RedisString?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssertNotNil(text, "Received a nil for echo text")
                         XCTAssertEqual(text!.asString, echoText, "Echo returned '\(text!)'. Should have returned '\(echoText)'.")
                     }
-               /* } */
+                }
             }
         }
     }
@@ -110,25 +152,5 @@ public class TestConnectCommands: XCTestCase {
                 }
             }
         }
-    }
-
-    func test_info() {
-        let expectation1 = expectation(description: "Shows some information about the redis server")
-
-        connectRedis() {(error: NSError?) in
-            if error != nil {
-                XCTFail("Could not connect to Redis")
-                return
-            }
-
-            redis.info() {
-                (info: RedisInfo?, error: NSError?) in
-
-                XCTAssertNil(error)
-                XCTAssertNotNil(info)
-                expectation1.fulfill()
-            }
-        }
-        waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
     }
 }
