@@ -59,7 +59,13 @@ public class TestConnectCommands: XCTestCase {
                     print("The Redis server version is \(theInfo.server.redis_version)")
                 }
                 
-                expectation1.fulfill()
+                redis.info() {(info: RedisString?, error: NSError?) in
+                    
+                    XCTAssertNil(error)
+                    XCTAssertNotNil(info)
+                
+                    expectation1.fulfill()
+                }
             }
         }
         waitForExpectations(timeout: 5, handler: {error in XCTAssertNil(error, "Timeout") })
