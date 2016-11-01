@@ -22,6 +22,7 @@ matrix:
       sudo: required
 
 before_install:
+  - git clone https://github.com/IBM-Swift/Kitura-CI.git
   - git submodule update --init --remote --merge --recursive
 
 script:
