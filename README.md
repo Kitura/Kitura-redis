@@ -21,7 +21,8 @@ This example uses Docker to run Redis detached with the required password define
   - `swift test`
 
 ## Usage:
-```
+
+```swift
 import Foundation
 import SwiftRedis
 
