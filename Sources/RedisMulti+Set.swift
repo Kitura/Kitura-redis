@@ -22,7 +22,7 @@ extension RedisMulti {
     /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: The values to be added to the set.
+    /// - Parameter members: The values to be added to the set.
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
@@ -33,7 +33,7 @@ extension RedisMulti {
     /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: An array of values to be added to the set.
+    /// - Parameter members: An array of values to be added to the set.
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
@@ -49,7 +49,7 @@ extension RedisMulti {
     /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: The `RedisString` values to be added to the set.
+    /// - Parameter members: The `RedisString` values to be added to the set.
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
@@ -60,7 +60,7 @@ extension RedisMulti {
     /// Add a SADD command to the "transaction"
     ///
     /// - Parameter key: The key.
-    /// - Parameter memebers: An array of `RedisString` values to be added to the set.
+    /// - Parameter members: An array of `RedisString` values to be added to the set.
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult

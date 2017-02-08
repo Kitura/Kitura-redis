@@ -370,7 +370,7 @@ public class TestSetCommands: XCTestCase {
     }
 
     func test_ZRemrangebylex() {
-        let expectation1 = expectation(description: "Removes all memebers in the set between the given lexicographical range")
+        let expectation1 = expectation(description: "Removes all members in the set between the given lexicographical range")
         setupTests {
             redis.zadd(self.key1, tuples: (0, "a"), (0, "b"), (0, "c"), (0, "d"), (0, "e")) {
                 (totalElementAdd: Int?, error: NSError?) in
