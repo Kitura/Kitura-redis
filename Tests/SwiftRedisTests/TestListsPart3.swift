@@ -102,7 +102,7 @@ public class TestListsPart3: XCTestCase {
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key2, values: value1) {(listSize: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key1) should exist")
+                    XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key2) should exist")
                 }
             }
 

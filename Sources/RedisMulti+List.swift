@@ -75,4 +75,15 @@ extension RedisMulti {
         return self
     }
     
+    /// Add a LINDEX command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter index: The index of the element to retrieve.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func lindex(_ key: String, index: Int) -> RedisMulti {
+        queuedCommands.append([RedisString("LINDEX"), RedisString(key), RedisString(index)])
+        return self
+    }
 }
