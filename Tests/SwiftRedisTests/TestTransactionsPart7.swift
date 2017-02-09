@@ -33,6 +33,9 @@ public class TestTransactionsPart7: XCTestCase {
             // Part 2
             ("test_lindexLinsertAndLlen", test_lindexLinsertAndLlen),
             ("test_binaryLindexLinsertAndLlen", test_binaryLindexLinsertAndLlen),
+            ("test_lsetAndLtrim", test_lsetAndLtrim),
+            ("test_binaryLsetAndLtrim", test_binaryLsetAndLtrim),
+            ("test_rpoplpush", test_rpoplpush),
             
             // Part 3
             ("test_blpopBrpopAndBrpoplpushEmptyLists", test_blpopBrpopAndBrpoplpushEmptyLists),
@@ -67,10 +70,10 @@ public class TestTransactionsPart7: XCTestCase {
             let host = read(fileName: "host.txt")
             
             self.secondConnection.connect(host: host, port: 6379) {(error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
                 
                 self.secondConnection.auth(password) {(error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
                     
                     block()
                 }
@@ -317,24 +320,30 @@ public class TestTransactionsPart7: XCTestCase {
             let value2 = "oussah"
             let value3 = "howbowda"
             
-            redis.lpush(self.key1, values: value3, value1) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                
-                let multi = redis.multi()
-                
-                multi.linsert(self.key1, before: true, pivot: value3, value: value2)
-                multi.llen(self.key1)
-                multi.lindex(self.key1, index: 0)
-                
-                multi.exec() { (response: RedisResponse) in
-                    if let nestedResponses = self.baseAsserts(response: response, count: 3) {
-                        let response1 = nestedResponses[0].asInteger
-                        let response2 = nestedResponses[1].asInteger
-                        let response3 = nestedResponses[2].asString
-                        XCTAssertEqual(response1, 3, "LINSERT returned \(response1), should be 3")
-                        XCTAssertEqual(response2, 3, "LLET returned \(response2), should be 3")
-                        XCTAssertEqual(response3, RedisString(value1), "LINDEX returned \(response3), should be \(value1).")
-                    }
+            let multi = redis.multi()
+            
+            multi.lpush(self.key1, values: value1, value3)
+            multi.linsert(self.key1, before: true, pivot: value3, value: value2)
+            multi.llen(self.key1)
+            multi.lindex(self.key1, index: 2)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 4) {
+                    let response2 = nestedResponses[1].asInteger
+                    let response3 = nestedResponses[2].asInteger
+                    let response4 = nestedResponses[3].asString
+                    
+                    // linsert(self.key1, before: true, pivot: value3, value: value2)
+                    XCTAssertNotNil(response2, "Result of linsert was nil, but \(self.key1) should exist")
+                    XCTAssertEqual(response2, 3, "Returned \(response2) for \(self.key1) instead of 3")
+                    
+                    // llen(self.key1)
+                    XCTAssertNotNil(response3, "Result of llen was nil, but \(self.key1) should exist")
+                    XCTAssertEqual(response3, 3, "Returned \(response3) for \(self.key1) instead of 3")
+                    
+                    // lindex(self.key1, index: 2)
+                    XCTAssertNotNil(response4, "Result of lindex was nil, but \(self.key1) should exist")
+                    XCTAssertEqual(response4, RedisString(value1), "Result of lindex was \(response4). It should have been \(value1)")
                 }
             }
         }
@@ -343,27 +352,143 @@ public class TestTransactionsPart7: XCTestCase {
     func test_binaryLindexLinsertAndLlen() {
         localSetup() {
             let value1 = RedisString("cash me")
-            let value2 = RedisString("ousside")
+            let value2 = RedisString("oussah")
             let value3 = RedisString("howbowda")
             
-            redis.lpush(self.key1, values: value3, value1) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                
-                let multi = redis.multi()
-                
-                multi.linsert(self.key1, before: true, pivot: value3, value: value2)
-                multi.llen(self.key1)
-                multi.lindex(self.key1, index: 0)
-                
-                multi.exec() { (response: RedisResponse) in
-                    if let nestedResponses = self.baseAsserts(response: response, count: 3) {
-                        let response1 = nestedResponses[0].asInteger
-                        let response2 = nestedResponses[1].asInteger
-                        let response3 = nestedResponses[2].asString
-                        XCTAssertEqual(response1, 3, "LINSERT returned \(response1), should be 3")
-                        XCTAssertEqual(response2, 3, "LLET returned \(response2), should be 3")
-                        XCTAssertEqual(response3, value1, "LINDEX returned \(response3), should be \(value1).")
-                    }
+            let multi = redis.multi()
+            
+            multi.lpush(self.key1, values: value1, value3)
+            multi.linsert(self.key1, before: true, pivot: value3, value: value2)
+            multi.llen(self.key1)
+            multi.lindex(self.key1, index: 2)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 4) {
+                    let response2 = nestedResponses[1].asInteger
+                    let response3 = nestedResponses[2].asInteger
+                    let response4 = nestedResponses[3].asString
+                    
+                    // linsert(self.key1, before: true, pivot: value3, value: value2)
+                    XCTAssertNotNil(response2, "Result of linsert was nil, but \(self.key1) should exist")
+                    XCTAssertEqual(response2, 3, "Returned \(response2) for \(self.key1) instead of 3")
+                    
+                    // llen(self.key1)
+                    XCTAssertNotNil(response3, "Result of llen was nil, but \(self.key1) should exist")
+                    XCTAssertEqual(response3, 3, "Returned \(response3) for \(self.key1) instead of 3")
+                    
+                    // lindex(self.key1, index: 2)
+                    XCTAssertNotNil(response4, "Result of lindex was nil, but \(self.key1) should exist")
+                    XCTAssertEqual(response4, value1, "Result of lindex was \(response4). It should have been \(value1)")
+                }
+            }
+        }
+    }
+    
+    func test_lsetAndLtrim() {
+        localSetup() {
+            let value1 = "testing 1 2 3"
+            let value2 = "over the hill and through the woods"
+            let value3 = "to grandmothers house we go"
+            
+            let multi = redis.multi()
+            
+            multi.lpush(self.key1, values: value1, value3)
+            multi.lset(self.key1, index: 1, value: value2)
+            multi.lindex(self.key1, index: 1)
+            multi.ltrim(self.key1, start: 0, end: 0)
+            multi.llen(self.key1)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 5) {
+                    let response2 = nestedResponses[1].asStatus
+                    let response3 = nestedResponses[2].asString
+                    let response4 = nestedResponses[3].asStatus
+                    let response5 = nestedResponses[4].asInteger
+                    
+                    // lset(self.key1, index: 1, value: value2)
+                    XCTAssertEqual(response2, "OK", "lset failed")
+                    
+                    // lindex(self.key1, index: 1)
+                    XCTAssertNotNil(response3, "Returned values of lindex was nil, even though no error occurred.")
+                    XCTAssertEqual(response3!, RedisString(value2), "lindex returned \(response3!). It should have returned \(value2)")
+                    
+                    // ltrim(self.key1, start: 0, end: 0)
+                    XCTAssertEqual(response4, "OK", "lset failed")
+                    
+                    // llen(self.key1)
+                    XCTAssertNotNil(response5, "Returned values of llen was nil, even though no error occurred.")
+                    XCTAssertEqual(response5!, 1, "The length of the list was \(response5!). It should have been 1.")
+                }
+            }
+        }
+    }
+    
+    func test_binaryLsetAndLtrim() {
+        localSetup() {
+            let value1 = RedisString("testing 1 2 3")
+            let value2 = RedisString("over the hill and through the woods")
+            let value3 = RedisString("to grandmothers house we go")
+            
+            let multi = redis.multi()
+            
+            multi.lpush(self.key1, values: value1, value3)
+            multi.lset(self.key1, index: 1, value: value2)
+            multi.lindex(self.key1, index: 1)
+            multi.ltrim(self.key1, start: 0, end: 0)
+            multi.llen(self.key1)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 5) {
+                    let response2 = nestedResponses[1].asStatus
+                    let response3 = nestedResponses[2].asString
+                    let response4 = nestedResponses[3].asStatus
+                    let response5 = nestedResponses[4].asInteger
+                    
+                    // lset(self.key1, index: 1, value: value2)
+                    XCTAssertEqual(response2, "OK", "lset failed")
+                    
+                    // lindex(self.key1, index: 1)
+                    XCTAssertNotNil(response3, "Returned values of lindex was nil, even though no error occurred.")
+                    XCTAssertEqual(response3!, value2, "lindex returned \(response3!). It should have returned \(value2)")
+                    
+                    // ltrim(self.key1, start: 0, end: 0)
+                    XCTAssertEqual(response4, "OK", "lset failed")
+                    
+                    // llen(self.key1)
+                    XCTAssertNotNil(response5, "Returned values of llen was nil, even though no error occurred.")
+                    XCTAssertEqual(response5!, 1, "The length of the list was \(response5!). It should have been 1.")
+                }
+            }
+        }
+    }
+    
+    func test_rpoplpush() {
+        localSetup() {
+            let value1 = "testing 1 2 3"
+            let value2 = "over the hill and through the woods"
+            let value3 = "to grandmothers house we go"
+            
+            let multi = redis.multi()
+            
+            multi.rpush(self.key1, values: value1, value2, value3)
+            multi.rpoplpush(self.key1, destination: self.key2)
+            multi.llen(self.key1)
+            multi.llen(self.key2)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 4) {
+                    let response2 = nestedResponses[1].asString
+                    let response3 = nestedResponses[2].asInteger
+                    let response4 = nestedResponses[3].asInteger
+                    
+                    XCTAssertNotNil(response2, "Returned values of rpoplpush was nil, even though no error occurred.")
+                    XCTAssertEqual(response2!, RedisString(value3), "rpoplpush returned \(response2!). It should have returned \(value3)")
+                    
+                    XCTAssertNotNil(response3, "Returned values of llen was nil, even though no error occurred.")
+                    XCTAssertEqual(response3!, 2, "The length of the list \(self.key1) was \(response3!). It should have been 2.")
+                    
+                    XCTAssertNotNil(response4, "Returned values of llen was nil, even though no error occurred.")
+                    XCTAssertEqual(response4!, 1, "The length of the list \(self.key2) was \(response4!). It should have been 1.")
                 }
             }
         }
@@ -394,7 +519,7 @@ public class TestTransactionsPart7: XCTestCase {
             self.queue.async { [unowned self] in
                 sleep(2)   // Wait a bit to let the main test block
                 self.secondConnection.lpush(self.key2, values: value1, value2) {(listSize: Int?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                    XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
                     XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key2) should exist")
                 }
             }
@@ -407,18 +532,18 @@ public class TestTransactionsPart7: XCTestCase {
             // It looks like BLPOP in a transcation block always returns nil.
             // The Redis docs say something similar.
             multi.exec() {(response: RedisResponse) in
-//                if let nestedResponses = self.baseAsserts(response: response, count: 2) {
-                    //                    XCTAssertEqual(nestedResponses[0], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[0])")
-                    //                    XCTAssertEqual(nestedResponses[1], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[1])")
-//                }
+                //                if let nestedResponses = self.baseAsserts(response: response, count: 2) {
+                //                    XCTAssertEqual(nestedResponses[0], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[0])")
+                //                    XCTAssertEqual(nestedResponses[1], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[1])")
+                //                }
             }
             
             redis.blpop(self.key1, self.key2, self.key3, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
                 XCTAssertNotNil(retrievedValue, "blpop should not have returned nil.")
-                XCTAssertEqual(retrievedValue!.count, 2, "blpop should have returned an array of two elements. It returned an array of \(retrievedValue!.count) elements")
-                XCTAssertEqual(retrievedValue![0], RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(retrievedValue![0])")
-                XCTAssertEqual(retrievedValue![1], RedisString(value2), "blpop's return value element #1 should have been \(value2). It was \(retrievedValue![1])")
+                XCTAssertEqual(retrievedValue?.count, 2, "blpop should have returned an array of two elements. It returned an array of \(retrievedValue?.count) elements")
+                XCTAssertEqual(retrievedValue?[0], RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(retrievedValue?[0])")
+                XCTAssertEqual(retrievedValue?[1], RedisString(value2), "blpop's return value element #1 should have been \(value2). It was \(retrievedValue?[1])")
             }
         }
     }
