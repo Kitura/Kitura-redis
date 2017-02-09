@@ -93,7 +93,7 @@ public class TestTransactionsPart7: XCTestCase {
             multi.lpop(self.key3)
             multi.lpushx(self.key3, value: value3)
             
-            multi.exec() {(response: RedisResponse) in
+            multi.exec() { (response: RedisResponse) in
                 if let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     let response1 = nestedResponses[0].asInteger
                     let response2 = nestedResponses[1].asString
@@ -101,10 +101,23 @@ public class TestTransactionsPart7: XCTestCase {
                     let response4 = nestedResponses[3]
                     let response5 = nestedResponses[4].asInteger
                     
+                    // lpush(self.key1, values: value1, value2)
+                    XCTAssertNotNil(response1, "Result of lpush was nil, without an error")
                     XCTAssertEqual(response1, 2, "Failed to lpush \(self.key1)")
+                    
+                    // lpop(self.key1)
+                    XCTAssertNotNil(response2, "Result of lpop was nil, but \(self.key1) should exist")
                     XCTAssertEqual(response2, RedisString(value2), "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    
+                    // lpushx(self.key1, value: value3)
+                    XCTAssertNotNil(response3, "Result of lpushx was nil, without an error")
                     XCTAssertEqual(response3, 2, "Failed to lpushx \(self.key1)")
+                    
+                    // lpop(self.key3)
                     XCTAssertEqual(response4, RedisResponse.Nil, "Result of lpop was not nil, but \(self.key3) does not exist")
+                    
+                    // lpushx(self.key3, value: value3)
+                    XCTAssertNotNil(response5, "Result of lpushx was nil, without an error")
                     XCTAssertEqual(response5, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
                 }
             }
@@ -125,7 +138,7 @@ public class TestTransactionsPart7: XCTestCase {
             multi.lpop(self.key3)
             multi.lpushx(self.key3, value: value3)
             
-            multi.exec() {(response: RedisResponse) in
+            multi.exec() { (response: RedisResponse) in
                 if let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     let response1 = nestedResponses[0].asInteger
                     let response2 = nestedResponses[1].asString
@@ -133,10 +146,23 @@ public class TestTransactionsPart7: XCTestCase {
                     let response4 = nestedResponses[3]
                     let response5 = nestedResponses[4].asInteger
                     
+                    // lpush(self.key1, values: value1, value2)
+                    XCTAssertNotNil(response1, "Result of lpush was nil, without an error")
                     XCTAssertEqual(response1, 2, "Failed to lpush \(self.key1)")
+                    
+                    // lpop(self.key1)
+                    XCTAssertNotNil(response2, "Result of lpop was nil, but \(self.key1) should exist")
                     XCTAssertEqual(response2, value2, "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    
+                    // lpushx(self.key1, value: value3)
+                    XCTAssertNotNil(response3, "Result of lpushx was nil, without an error")
                     XCTAssertEqual(response3, 2, "Failed to lpushx \(self.key1)")
+                    
+                    // lpop(self.key3)
                     XCTAssertEqual(response4, RedisResponse.Nil, "Result of lpop was not nil, but \(self.key3) does not exist")
+                    
+                    // lpushx(self.key3, value: value3)
+                    XCTAssertNotNil(response5, "Result of lpushx was nil, without an error")
                     XCTAssertEqual(response5, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
                 }
             }
@@ -157,7 +183,7 @@ public class TestTransactionsPart7: XCTestCase {
             multi.rpop(self.key3)
             multi.rpushx(self.key3, value: value3)
             
-            multi.exec() {(response: RedisResponse) in
+            multi.exec() { (response: RedisResponse) in
                 if let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     let response1 = nestedResponses[0].asInteger
                     let response2 = nestedResponses[1].asString
@@ -165,10 +191,23 @@ public class TestTransactionsPart7: XCTestCase {
                     let response4 = nestedResponses[3]
                     let response5 = nestedResponses[4].asInteger
                     
+                    // rpush(self.key1, values: value1, value2)
+                    XCTAssertNotNil(response1, "Result of rpush was nil, without an error")
                     XCTAssertEqual(response1, 2, "Failed to rpush \(self.key1)")
+                    
+                    // rpop(self.key1)
+                    XCTAssertNotNil(response2, "Result of rpop was nil, but \(self.key1) should exist")
                     XCTAssertEqual(response2, RedisString(value2), "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    
+                    // rpushx(self.key1, value: value3)
+                    XCTAssertNotNil(response3, "Result of rpushx was nil, without an error")
                     XCTAssertEqual(response3, 2, "Failed to rpushx \(self.key1)")
+                    
+                    // rpop(self.key3)
                     XCTAssertEqual(response4, RedisResponse.Nil, "Result of rpop was not nil, but \(self.key3) does not exist")
+                    
+                    // rpushx(self.key3, value: value3)
+                    XCTAssertNotNil(response5, "Result of rpushx was nil, without an error")
                     XCTAssertEqual(response5, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
                 }
             }
@@ -189,7 +228,7 @@ public class TestTransactionsPart7: XCTestCase {
             multi.rpop(self.key3)
             multi.rpushx(self.key3, value: value3)
             
-            multi.exec() {(response: RedisResponse) in
+            multi.exec() { (response: RedisResponse) in
                 if let nestedResponses = self.baseAsserts(response: response, count: 5) {
                     let response1 = nestedResponses[0].asInteger
                     let response2 = nestedResponses[1].asString
@@ -197,10 +236,23 @@ public class TestTransactionsPart7: XCTestCase {
                     let response4 = nestedResponses[3]
                     let response5 = nestedResponses[4].asInteger
                     
+                    // rpush(self.key1, values: value1, value2)
+                    XCTAssertNotNil(response1, "Result of rpush was nil, without an error")
                     XCTAssertEqual(response1, 2, "Failed to rpush \(self.key1)")
+                    
+                    // rpop(self.key1)
+                    XCTAssertNotNil(response2, "Result of rpop was nil, but \(self.key1) should exist")
                     XCTAssertEqual(response2, value2, "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    
+                    // rpushx(self.key1, value: value3)
+                    XCTAssertNotNil(response3, "Result of rpushx was nil, without an error")
                     XCTAssertEqual(response3, 2, "Failed to rpushx \(self.key1)")
+                    
+                    // rpop(self.key3)
                     XCTAssertEqual(response4, RedisResponse.Nil, "Result of rpop was not nil, but \(self.key3) does not exist")
+                    
+                    // rpushx(self.key3, value: value3)
+                    XCTAssertNotNil(response5, "Result of rpushx was nil, without an error")
                     XCTAssertEqual(response5, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
                 }
             }
@@ -213,44 +265,46 @@ public class TestTransactionsPart7: XCTestCase {
             let value2 = "over the hill and through the woods"
             let value3 = "to grandmothers house we go"
             let value4 = "singing away we go"
-            let binaryValue1 = RedisString("testing 1 2 3")
-            let binaryValue2 = RedisString("over the hill and through the woods")
-            let binaryValue3 = RedisString("to grandmothers house we go")
-            let binaryValue4 = RedisString("singing away we go")
+            let binaryValue1 = RedisString(value1)
+            let binaryValue2 = RedisString(value2)
+            let binaryValue3 = RedisString(value3)
+            let binaryValue4 = RedisString(value4)
             
-            redis.lpush(self.key1, values: value1, value2, value3, value4) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                
-                redis.lrange(self.key1, start: 1, end: 2) {(returnedValues: [RedisString?]?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
-                    XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
-                    XCTAssertEqual(returnedValues![0], RedisString(value3), "Returned value #1 was \(returnedValues![0]) should have been \(value3)")
-                    XCTAssertEqual(returnedValues![1], RedisString(value2), "Returned value #2 was \(returnedValues![1]) should have been \(value2)")
+            let multi = redis.multi()
+            
+            multi.lpush(self.key1, values: value1, value2, value3, value4)
+            multi.lrange(self.key1, start: 1, end: 2)
+            multi.lrem(self.key1, count: 3, value: value3)
+            multi.lpush(self.key2, values: binaryValue4, binaryValue3, binaryValue2, binaryValue1)
+            multi.lrange(self.key2, start: 1, end: 2)
+            multi.lrem(self.key1, count: 3, value: binaryValue2)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 6) {
+                    let response2 = nestedResponses[1].asArray
+                    let response3 = nestedResponses[2].asInteger
+                    let response5 = nestedResponses[4].asArray
+                    let response6 = nestedResponses[5].asInteger
                     
-                    redis.lrem(self.key1, count: 3, value: value3) {(removedValues: Int?, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(removedValues, "Result of lrem was nil, without an error")
-                        XCTAssertEqual(removedValues!, 1, "Number of values removed by lrem was \(removedValues!) should have been 1")
-                        
-                        redis.lpush(self.key2, values: binaryValue4, binaryValue3, binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            
-                            redis.lrange(self.key2, start: 1, end: 2) {(returnedValues: [RedisString?]?, error: NSError?) in
-                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
-                                XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
-                                XCTAssertEqual(returnedValues![0], binaryValue2, "Returned value #1 was \(returnedValues![0]) should have been \(binaryValue2)")
-                                XCTAssertEqual(returnedValues![1], binaryValue3, "Returned value #2 was \(returnedValues![1]) should have been \(binaryValue3)")
-                                
-                                redis.lrem(self.key1, count: 3, value: binaryValue2) {(removedValues: Int?, error: NSError?) in
-                                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                    XCTAssertNotNil(removedValues, "Result of lrem was nil, without an error")
-                                    XCTAssertEqual(removedValues!, 1, "Number of values removed by lrem was \(removedValues!) should have been 1")
-                                }
-                            }
-                        }
-                    }
+                    // lrange(self.key1, start: 1, end: 2)
+                    XCTAssertNotNil(response2, "Result of lrange was nil, without an error")
+                    XCTAssertEqual(response2?.count, 2, "Number of values returned by lrange was \(response2?.count) should have been 2")
+                    XCTAssertEqual(response2?[0].asString, RedisString(value3), "Returned value #1 was \(response2?[0]) should have been \(value3)")
+                    XCTAssertEqual(response2?[1].asString, RedisString(value2), "Returned value #2 was \(response2?[1]) should have been \(value2)")
+                    
+                    // lrem(self.key1, count: 3, value: value3)
+                    XCTAssertNotNil(response3, "Result of lrem was nil, without an error")
+                    XCTAssertEqual(response3, 1, "Number of values removed by lrem was \(response3) should have been 1")
+                    
+                    //(self.key2, values: binaryValue4, binaryValue3, binaryValue2, binaryValue1)
+                    XCTAssertNotNil(response5, "Result of lrange was nil, without an error")
+                    XCTAssertEqual(response5?.count, 2, "Number of values returned by lrange was \(response5?.count) should have been 2")
+                    XCTAssertEqual(response5?[0].asString, binaryValue2, "Returned value #1 was \(response5?[0]) should have been \(binaryValue2)")
+                    XCTAssertEqual(response5?[1].asString, binaryValue3, "Returned value #2 was \(response5?[1]) should have been \(binaryValue3)")
+                    
+                    // lrem(self.key1, count: 3, value: binaryValue2)
+                    XCTAssertNotNil(response6, "Result of lrem was nil, without an error")
+                    XCTAssertEqual(response6, 1, "Number of values removed by lrem was \(response6) should have been 1")
                 }
             }
         }
@@ -272,7 +326,7 @@ public class TestTransactionsPart7: XCTestCase {
                 multi.llen(self.key1)
                 multi.lindex(self.key1, index: 0)
                 
-                multi.exec() {(response: RedisResponse) in
+                multi.exec() { (response: RedisResponse) in
                     if let nestedResponses = self.baseAsserts(response: response, count: 3) {
                         let response1 = nestedResponses[0].asInteger
                         let response2 = nestedResponses[1].asInteger
@@ -301,7 +355,7 @@ public class TestTransactionsPart7: XCTestCase {
                 multi.llen(self.key1)
                 multi.lindex(self.key1, index: 0)
                 
-                multi.exec() {(response: RedisResponse) in
+                multi.exec() { (response: RedisResponse) in
                     if let nestedResponses = self.baseAsserts(response: response, count: 3) {
                         let response1 = nestedResponses[0].asInteger
                         let response2 = nestedResponses[1].asInteger
@@ -323,7 +377,7 @@ public class TestTransactionsPart7: XCTestCase {
             multi.blpop(self.key1, self.key2, timeout: 4.0)
             multi.blpop(self.key1, self.key2, timeout: 4.0)
             
-            multi.exec() {(response: RedisResponse) in
+            multi.exec() { (response: RedisResponse) in
                 if let nestedResponses = self.baseAsserts(response: response, count: 2) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[0])")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[1])")
