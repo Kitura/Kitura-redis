@@ -39,13 +39,11 @@ public class TestTransactionsPart7: XCTestCase {
             
             // Part 3
             ("test_blpopBrpopAndBrpoplpushEmptyLists", test_blpopBrpopAndBrpoplpushEmptyLists),
-            ("test_blpop", test_blpop)
+            ("test_blpop", test_blpop),
+            ("test_brpop", test_brpop),
+            ("test_brpoplpush", test_brpoplpush)
         ]
     }
-    
-    let secondConnection = Redis()
-    
-    let queue = DispatchQueue(label: "unblocker", attributes: DispatchQueue.Attributes.concurrent)
     
     var key1: String { return "test1" }
     var key2: String { return "test2" }
@@ -64,20 +62,23 @@ public class TestTransactionsPart7: XCTestCase {
         }
     }
     
-    func extendedSetup(block: () -> Void) {
-        localSetup() {
-            let password = read(fileName: "password.txt")
-            let host = read(fileName: "host.txt")
-            
-            self.secondConnection.connect(host: host, port: 6379) {(error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
-                
-                self.secondConnection.auth(password) {(error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
-                    
-                    block()
+    private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
+        switch(response) {
+        case .Array(let responses):
+            XCTAssertEqual(responses.count, count, "Number of nested responses wasn't \(count), was \(responses.count)")
+            for  nestedResponse in responses {
+                switch(nestedResponse) {
+                case .Error:
+                    XCTFail("Nested transaction response was a \(nestedResponse)")
+                    return nil
+                default:
+                    break
                 }
             }
+            return responses
+        default:
+            XCTFail("EXEC response wasn't an Array response. Was \(response)")
+            return nil
         }
     }
     
@@ -410,14 +411,14 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lindex(self.key1, index: 1)
                     XCTAssertNotNil(response3, "Returned values of lindex was nil, even though no error occurred.")
-                    XCTAssertEqual(response3!, RedisString(value2), "lindex returned \(response3!). It should have returned \(value2)")
+                    XCTAssertEqual(response3, RedisString(value2), "lindex returned \(response3). It should have returned \(value2)")
                     
                     // ltrim(self.key1, start: 0, end: 0)
                     XCTAssertEqual(response4, "OK", "lset failed")
                     
                     // llen(self.key1)
                     XCTAssertNotNil(response5, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response5!, 1, "The length of the list was \(response5!). It should have been 1.")
+                    XCTAssertEqual(response5, 1, "The length of the list was \(response5). It should have been 1.")
                 }
             }
         }
@@ -449,14 +450,14 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lindex(self.key1, index: 1)
                     XCTAssertNotNil(response3, "Returned values of lindex was nil, even though no error occurred.")
-                    XCTAssertEqual(response3!, value2, "lindex returned \(response3!). It should have returned \(value2)")
+                    XCTAssertEqual(response3, value2, "lindex returned \(response3). It should have returned \(value2)")
                     
                     // ltrim(self.key1, start: 0, end: 0)
                     XCTAssertEqual(response4, "OK", "lset failed")
                     
                     // llen(self.key1)
                     XCTAssertNotNil(response5, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response5!, 1, "The length of the list was \(response5!). It should have been 1.")
+                    XCTAssertEqual(response5, 1, "The length of the list was \(response5). It should have been 1.")
                 }
             }
         }
@@ -481,90 +482,135 @@ public class TestTransactionsPart7: XCTestCase {
                     let response3 = nestedResponses[2].asInteger
                     let response4 = nestedResponses[3].asInteger
                     
+                    // rpoplpush(self.key1, destination: self.key2)
                     XCTAssertNotNil(response2, "Returned values of rpoplpush was nil, even though no error occurred.")
-                    XCTAssertEqual(response2!, RedisString(value3), "rpoplpush returned \(response2!). It should have returned \(value3)")
+                    XCTAssertEqual(response2, RedisString(value3), "rpoplpush returned \(response2). It should have returned \(value3)")
                     
+                    // llen(self.key1)
                     XCTAssertNotNil(response3, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response3!, 2, "The length of the list \(self.key1) was \(response3!). It should have been 2.")
+                    XCTAssertEqual(response3, 2, "The length of the list \(self.key1) was \(response3). It should have been 2.")
                     
+                    // llen(self.key2)
                     XCTAssertNotNil(response4, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response4!, 1, "The length of the list \(self.key2) was \(response4!). It should have been 1.")
+                    XCTAssertEqual(response4, 1, "The length of the list \(self.key2) was \(response4). It should have been 1.")
                 }
             }
         }
     }
     
     // MARK: - Part 3
+    
+    // NOTE
+    //
+    // Blocking commands in transactions return nil immediately when their list parameters are empty.
+    // --as if their timeouts are immediately triggered
+    // --because they block the server and nothing else can push
+    //
+    // See https://redis.io/commands/blpop
+    
     func test_blpopBrpopAndBrpoplpushEmptyLists() {
         localSetup() {
             let multi = redis.multi()
             
             multi.blpop(self.key1, self.key2, timeout: 4.0)
-            multi.blpop(self.key1, self.key2, timeout: 4.0)
+            multi.brpop(self.key3, self.key1, timeout: 5.0)
+            multi.brpoplpush(self.key2, destination: self.key2, timeout: 3.0)
             
             multi.exec() { (response: RedisResponse) in
-                if let nestedResponses = self.baseAsserts(response: response, count: 2) {
-                    XCTAssertEqual(nestedResponses[0], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[0])")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[1])")
+                if let nestedResponses = self.baseAsserts(response: response, count: 3) {
+                    let response1 = nestedResponses[0]
+                    let response2 = nestedResponses[1]
+                    let response3 = nestedResponses[2]
+                    
+                    XCTAssertEqual(response1, RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(response1)")
+                    XCTAssertEqual(response2, RedisResponse.Nil, "A brpop that timed out should have returned nil. It returned \(response2)")
+                    XCTAssertEqual(response3, RedisResponse.Nil, "A brpoplpush that timed out should have returned nil. It returned \(response3)")
                 }
             }
         }
     }
     
     func test_blpop() {
-        extendedSetup() {
+        localSetup() {
             let value1 = "testing 1 2 3"
-            let value2 = "above and beyond"
-            
-            self.queue.async { [unowned self] in
-                sleep(2)   // Wait a bit to let the main test block
-                self.secondConnection.lpush(self.key2, values: value1, value2) {(listSize: Int?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
-                    XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key2) should exist")
-                }
-            }
             
             let multi = redis.multi()
             
-            multi.blpop(self.key2, timeout: 4.0)
-            multi.blpop(self.key2, timeout: 4.0)
+            multi.lpush(self.key2, values: value1)
+            multi.blpop(self.key1, self.key2, self.key3, timeout: 4.0)
             
-            // It looks like BLPOP in a transcation block always returns nil.
-            // The Redis docs say something similar.
-            multi.exec() {(response: RedisResponse) in
-                //                if let nestedResponses = self.baseAsserts(response: response, count: 2) {
-                //                    XCTAssertEqual(nestedResponses[0], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[0])")
-                //                    XCTAssertEqual(nestedResponses[1], RedisResponse.Nil, "A blpop that timed out should have returned nil. It returned \(nestedResponses[1])")
-                //                }
-            }
-            
-            redis.blpop(self.key1, self.key2, self.key3, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error?.localizedDescription : "")")
-                XCTAssertNotNil(retrievedValue, "blpop should not have returned nil.")
-                XCTAssertEqual(retrievedValue?.count, 2, "blpop should have returned an array of two elements. It returned an array of \(retrievedValue?.count) elements")
-                XCTAssertEqual(retrievedValue?[0], RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(retrievedValue?[0])")
-                XCTAssertEqual(retrievedValue?[1], RedisString(value2), "blpop's return value element #1 should have been \(value2). It was \(retrievedValue?[1])")
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 2) {
+                    
+                    let response1 = nestedResponses[0].asInteger
+                    let response2 = nestedResponses[1].asArray
+                    
+                    // lpush(self.key2, values: value1)
+                    XCTAssertNotNil(response1, "Result of lpush was nil, but \(self.key2) should exist")
+                    
+                    // blpop(self.key1, self.key2, self.key3, timeout: 4.0)
+                    XCTAssertNotNil(response2, "blpop should not have returned nil.")
+                    XCTAssertEqual(response2?.count, 2, "blpop should have returned an array of two elements. It returned an array of \(response2?.count) elements")
+                    XCTAssertEqual(response2?[0].asString, RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(response2?[0])")
+                    XCTAssertEqual(response2?[1].asString, RedisString(value1), "blpop's return value element #1 should have been \(value1). It was \(response2?[1])")
+                }
             }
         }
     }
     
-    private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
-        switch(response) {
-        case .Array(let responses):
-            XCTAssertEqual(responses.count, count, "Number of nested responses wasn't \(count), was \(responses.count)")
-            for  nestedResponse in responses {
-                switch(nestedResponse) {
-                case .Error:
-                    XCTFail("Nested transaction response was a \(nestedResponse)")
-                    return nil
-                default:
-                    break
+    func test_brpop() {
+        localSetup() {
+            let value2 = "over the hill and through the woods"
+            
+            let multi = redis.multi()
+            
+            multi.lpush(self.key3, values: value2)
+            multi.brpop(self.key1, self.key2, self.key3, timeout: 4.0)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 2) {
+                    
+                    let response1 = nestedResponses[0].asInteger
+                    let response2 = nestedResponses[1].asArray
+                    
+                    // lpush(self.key3, values: value2)
+                    XCTAssertNotNil(response1, "Result of lpush was nil, but \(self.key1) should exist")
+                    
+                    // brpop(self.key1, self.key2, self.key3, timeout: 4.0)
+                    XCTAssertNotNil(response2, "brpop should not have returned nil.")
+                    XCTAssertEqual(response2?.count, 2, "brpop should have returned an array of two elements. It returned an array of \(response2?.count) elements")
+                    XCTAssertEqual(response2?[0].asString, RedisString(self.key3), "brpop's return value element #0 should have been \(self.key3). It was \(response2?[0])")
+                    XCTAssertEqual(response2?[1].asString, RedisString(value2), "brpop's return value element #1 should have been \(value2). It was \(response2?[1])")
                 }
             }
-            return responses
-        default:
-            XCTFail("EXEC response wasn't an Array response. Was \(response)")
-            return nil
+        }
+    }
+    
+    func test_brpoplpush() {
+        localSetup() {
+            let value1 = "wet one"
+            let value2 = "tsunami two"
+            
+            let multi = redis.multi()
+            
+            multi.lpush(self.key1, values: value1, value2)
+            multi.brpoplpush(self.key1, destination: self.key2, timeout: 4.0)
+            multi.brpoplpush(self.key1, destination: self.key2, timeout: 4.0)
+            
+            multi.exec() { (response: RedisResponse) in
+                if let nestedResponses = self.baseAsserts(response: response, count: 3) {
+                    let response2 = nestedResponses[1].asString
+                    let response3 = nestedResponses[2].asString
+                    
+                    // brpoplpush(self.key1, destination: self.key2, timeout: 4.0)
+                    XCTAssertNotNil(response2, "brpoplpush should not have returned nil.")
+                    XCTAssertEqual(response2, RedisString(value1), "brpoplpush's return value  should have been \(value1). It was \(response2)")
+                    
+                    // brpoplpush(self.key1, destination: self.key2, timeout: 4.0)
+                    XCTAssertNotNil(response3, "brpoplpush should not have returned nil.")
+                    XCTAssertEqual(response3, RedisString(value2), "brpoplpush's return value  should have been \(value2). It was \(response3)")
+                }
+            }
         }
     }
 }
