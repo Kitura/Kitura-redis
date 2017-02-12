@@ -27,7 +27,7 @@ extension Redis {
     /// the lists has an element
     ///
     /// - Parameter keys: The keys of the lists to check for an element.
-    /// - Parameter timeout: The amount of time to wait or zero to wait for ever.
+    /// - Parameter timeout: The amount of time to wait or zero to wait forever.
     /// - Parameter callback: The callback function, when a time out didn't occur, the
     ///                      Array<RedisString> will contain two entries, the first one
     ///                      is the key of the list that had an element and the second
@@ -49,7 +49,7 @@ extension Redis {
     /// one of the lists has an element
     ///
     /// - Parameter keys: The keys of the lists to check for an element.
-    /// - Parameter timeout: The amount of time to wait or zero to wait for ever.
+    /// - Parameter timeout: The amount of time to wait or zero to wait forever.
     /// - Parameter callback: The callback function, when a time out didn't occur, the
     ///                      Array<RedisString> will contain two entries, the first one
     ///                      is the key of the list that had an element and the second
@@ -72,7 +72,7 @@ extension Redis {
     ///
     /// - Parameter source: The list to pop an item from.
     /// - Parameter destination: The list to push the poped item onto.
-    /// - Parameter timeout: The amount of time to wait or zero to wait for ever.
+    /// - Parameter timeout: The amount of time to wait or zero to wait forever.
     /// - Parameter callback: The callback function, when a time out didn't occur, the
     ///                      `RedisString` will contain the value of the element that
     ///                      was poped. NSError will be non-nil if an error occurred.
