@@ -500,13 +500,7 @@ public class TestTransactionsPart7: XCTestCase {
     
     // MARK: - Part 3
     
-    // NOTE
-    //
-    // Blocking commands in transactions return nil immediately when their list parameters are empty.
-    // --as if their timeouts are immediately triggered
-    // --because they block the server and nothing else can push
-    //
-    // See https://redis.io/commands/blpop
+    // SEE NOTE IN RedisMulti+List.swift
     
     func test_blpopBrpopAndBrpoplpushEmptyLists() {
         localSetup() {
