@@ -25,124 +25,116 @@ extension Redis {
     
     /// Posts a message to the given channel.
     ///
-    /// - Parameter channel: The channel to post to.
-    /// - Parameter message: The message to post.
-    /// - Parameter callback: The callback function:
-    //                        --Int: The number of clients that received the message.
-    ///                       --NSError: Non-nil if an error occurred.
-    public func publish(channel: String, message: String, callback: (Int?, NSError?) -> Void) {
+    /// - parameter channel: The channel to post to.
+    /// - parameter message: The message to post.
+    /// - parameter callback: The callback function.
+    /// - parameter result: The number of clients that received the message.
+    /// - parameter error: Non-nil if an error occurred.
+    public func publish(channel: String, message: String, callback: (_ result: Int?, _ error: NSError?) -> Void) {
         issueCommand("PUBLISH", channel, message) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
     
-    /// NOTE
-    ///
-    /// Once a connection calls (P)SUBSCRIBE, it becomes a subscriber connection
-    /// and can only issue (P)SUBSCRIBE or (P)UNSUBSCRIBE commands.
-    ///
-    /// If a connection unsubscribes from all its connections,
-    /// it returns to being a regular connection and can issue any command as normal.
-    ///
+    /*
+     * NOTE
+     *
+     * Once a connection calls (P)SUBSCRIBE, it becomes a subscriber connection
+     * and can only issue (P)SUBSCRIBE or (P)UNSUBSCRIBE commands.
+     *
+     * If a connection unsubscribes from all its connections,
+     * it returns to being a regular connection and can issue any command as normal.
+     *
+     */
     
     /// Subscribes the client to the specified channels.
     ///
-    /// - Parameter patterns: A list of channels to subscribe to.
-    /// - Parameter callback: The callback function.
-    public func subscribe(channels: String..., callback: () -> Void) {
-        subscribeArrayOfChannels(channels: channels, callback: callback)
+    /// - parameter channels: A list of channels to subscribe to.
+    public func subscribe(channels: String...) {
+        subscribeArrayOfChannels(channels: channels)
     }
     
     /// Subscribes the client to the specified channels.
     ///
-    /// - Parameter patterns: An array of channels to subscribe to.
-    /// - Parameter callback: The callback function.
-    public func subscribeArrayOfChannels(channels: [String], callback: () -> Void) {
+    /// - parameter channels: An array of channels to subscribe to.
+    public func subscribeArrayOfChannels(channels: [String]) {
         var command = ["SUBSCRIBE"]
         for channel in channels {
             command.append(channel)
         }
-        issueCommandInArray(command) { _ in
-            callback()
-        }
+        issueCommandInArray(command) { _ in }
     }
     
     /// Subscribes the client to the given patterns.
     ///
-    /// - Parameter patterns: A list of glob-style patterns to subscribe to.
-    public func psubscribe(patterns: String..., callback: () -> Void) {
-        psubscribeArrayOfPattens(patterns: patterns, callback: callback)
+    /// - parameter patterns: A list of glob-style patterns to subscribe to.
+    public func psubscribe(patterns: String...) {
+        psubscribeArrayOfPattens(patterns: patterns)
     }
     
     /// Subscribes the client to the given patterns.
     ///
-    /// - Parameter patterns: An array of glob-style patterns to subscribe to.
-    public func psubscribeArrayOfPattens(patterns: [String], callback: () -> Void) {
+    /// - parameter patterns: An array of glob-style patterns to subscribe to.
+    public func psubscribeArrayOfPattens(patterns: [String]) {
         var command = ["PSUBSCRIBE"]
         for pattern in patterns {
             command.append(pattern)
         }
-        issueCommandInArray(command) { _ in
-            callback()
-        }
+        issueCommandInArray(command) { _ in }
     }
     
     /// Unsubscribes the client from the given patterns,
     /// or from all of them if none is given.
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
-    /// - Parameter patterns: A list of glob-style patterns to unsubscribe to.
-    public func unsubscribe(channels: String..., callback: () -> Void) {
-        unsubscribeArrayOfChannels(channels: channels, callback: callback)
+    /// - parameter patterns: A list of glob-style patterns to unsubscribe to.
+    public func unsubscribe(channels: String...) {
+        unsubscribeArrayOfChannels(channels: channels)
     }
     
     /// Unsubscribes the client from the given patterns,
     /// or from all of them if none is given.
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
-    /// - Parameter patterns: An array of glob-style patterns to unsubscribe to.
-    public func unsubscribeArrayOfChannels(channels: [String], callback: () -> Void) {
+    /// - parameter channels: An array of glob-style patterns to unsubscribe to.
+    public func unsubscribeArrayOfChannels(channels: [String]) {
         var command = ["UNSUBSCRIBE"]
         for channels in channels {
             command.append(channels)
         }
-        issueCommandInArray(command) { _ in
-            callback()
-        }
+        issueCommandInArray(command) { _ in }
     }
     
     /// Unsubscribes the client from the given patterns,
     /// or from all of them if none is given.
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
-    /// - Parameter patterns: A list of glob-style patterns to unsubscribe to.
-    public func punsubscribe(patterns: String..., callback: () -> Void) {
-        punsubscribeArrayOfPatterns(patterns: patterns, callback: callback)
+    /// - parameter patterns: A list of glob-style patterns to unsubscribe to.
+    public func punsubscribe(patterns: String...) {
+        punsubscribeArrayOfPatterns(patterns: patterns)
     }
     
     /// Unsubscribes the client from the given patterns,
     /// or from all of them if none is given.
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
-    /// - Parameter patterns: An array of glob-style patterns to unsubscribe to.
-    public func punsubscribeArrayOfPatterns(patterns: [String], callback: () -> Void) {
+    /// - parameter patterns: An array of glob-style patterns to unsubscribe to.
+    public func punsubscribeArrayOfPatterns(patterns: [String]) {
         var command = ["PUNSUBSCRIBE"]
         for pattern in patterns {
             command.append(pattern)
         }
-        issueCommandInArray(command) { _ in
-            callback()
-        }
+        issueCommandInArray(command) { _ in }
     }
     
     /// Lists the currently active channels.
     ///
-    /// - Parameter pattern: The pattern to match channels against glob-style.
+    /// - parameter pattern: The pattern to match channels against glob-style.
     ///                      If unspecified, lists all channels.
-    /// - Parameter callback: The callback function:
-    //                        --RedisString: A list of active channels.
-    ///                       --NSError: Non-nil if an error occurred.
-    public func pubsubChannels(pattern: String? = nil, callback: ([RedisString?]?, NSError?) -> Void) {
+    /// - parameter callback: The callback function:
+    /// - parameter result: A list of active channels.
+    /// - parameter error: Non-nil if an error occurred.
+    public func pubsubChannels(pattern: String? = nil, callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
         var command = ["PUBSUB", "CHANNELS"]
         if let pattern = pattern {
             command.append(pattern)
@@ -155,26 +147,24 @@ extension Redis {
     /// Returns the number of subscribers for the specified channels.
     /// (not counting clients subscribed to patterns)
     ///
-    /// - Parameter channels: A list of zero or more channels to look up.
-    /// - Parameter callback: The callback function:
-    //                        --RedisString: A list of channels and number of subscribers for every channel.
-    ///                                      The format is channel, count, channel, count, etc.
-    ///                                      If no channel given, this is empty.
-    ///                       --NSError: Non-nil if an error occurred.
-    public func pubsubNumsub(channels: String..., callback: ([RedisString?]?, NSError?) -> Void) {
+    /// - parameter channels: A list of zero or more channels to look up.
+    /// - parameter callback: The callback function:
+    /// - parameter result: A list of channels and number of subscribers for every channel.
+    ///                     The format is channel, count, channel, count, etc. If no channel given, this is empty.
+    /// - parameter error: Non-nil if an error occurred.
+    public func pubsubNumsub(channels: String..., callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
         pubsubNumsubArrayOfChannels(channels: channels, callback: callback)
     }
     
     /// Returns the number of subscribers for the specified channels.
     /// (not counting clients subscribed to patterns)
     ///
-    /// - Parameter channels: An array of zero or more channels to look up.
-    /// - Parameter callback: The callback function:
-    //                        --RedisString: A list of channels and number of subscribers for every channel.
-    ///                                      The format is channel, count, channel, count, etc.
-    ///                                      If no channel given, this is empty.
-    ///                       --NSError: Non-nil if an error occurred.
-    public func pubsubNumsubArrayOfChannels(channels: [String], callback: ([RedisString?]?, NSError?) -> Void) {
+    /// - parameter channels: An array of zero or more channels to look up.
+    /// - parameter callback: The callback function:
+    /// - parameter result: A list of channels and number of subscribers for every channel.
+    ///                     The format is channel, count, channel, count, etc. If no channel given, this is empty.
+    /// - parameter error: Non-nil if an error occurred.
+    public func pubsubNumsubArrayOfChannels(channels: [String], callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
         var command = ["PUBSUB", "NUMSUB"]
         for channel in channels {
             command.append(channel)
@@ -187,10 +177,10 @@ extension Redis {
     /// Returns the number of subscriptions to patterns.
     /// (that are performed using the PSUBSCRIBE command)
     ///
-    /// - Parameter callback: The callback function:
-    //                        --Int: The number of patterns all the clients are subscribed to.
-    ///                       --NSError: Non-nil if an error occurred.
-    public func pubsubNumpat(callback: (Int?, NSError?) -> Void) {
+    /// - parameter callback: The callback function:
+    /// - parameter result: The number of patterns all the clients are subscribed to.
+    /// - parameter error: Non-nil if an error occurred.
+    public func pubsubNumpat(callback: (_ result: Int?, _ error: NSError?) -> Void) {
         issueCommand("PUBSUB", "NUMPAT") { (response) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
