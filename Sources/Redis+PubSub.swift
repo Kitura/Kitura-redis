@@ -23,24 +23,6 @@ extension Redis {
     //  MARK: Pub/Sub API functions
     //
     
-    /// Subscribes the client to the given patterns.
-    ///
-    /// - Parameter patterns: A list of glob-style patterns to subscribe to.
-    public func psubscribe(patterns: String...) {
-        psubscribeArrayOfPattens(patterns: patterns)
-    }
-    
-    /// Subscribes the client to the given patterns.
-    ///
-    /// - Parameter patterns: An array of glob-style patterns to subscribe to.
-    public func psubscribeArrayOfPattens(patterns: [String]) {
-        var command = ["PSUBSCRIBE"]
-        for pattern in patterns {
-            command.append(pattern)
-        }
-        issueCommandInArray(command) { _ in }
-    }
-    
     /// Posts a message to the given channel.
     ///
     /// - Parameter channel: The channel to post to.
@@ -51,6 +33,105 @@ extension Redis {
     public func publish(channel: String, message: String, callback: (Int?, NSError?) -> Void) {
         issueCommand("PUBLISH", channel, message) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    /// NOTE
+    ///
+    /// Once a connection calls (P)SUBSCRIBE, it becomes a subscriber connection
+    /// and can only issue (P)SUBSCRIBE or (P)UNSUBSCRIBE commands.
+    ///
+    /// If a connection unsubscribes from all its connections,
+    /// it returns to being a regular connection and can issue any command as normal.
+    ///
+    
+    /// Subscribes the client to the specified channels.
+    ///
+    /// - Parameter patterns: A list of channels to subscribe to.
+    /// - Parameter callback: The callback function.
+    public func subscribe(channels: String..., callback: () -> Void) {
+        subscribeArrayOfChannels(channels: channels, callback: callback)
+    }
+    
+    /// Subscribes the client to the specified channels.
+    ///
+    /// - Parameter patterns: An array of channels to subscribe to.
+    /// - Parameter callback: The callback function.
+    public func subscribeArrayOfChannels(channels: [String], callback: () -> Void) {
+        var command = ["SUBSCRIBE"]
+        for channel in channels {
+            command.append(channel)
+        }
+        issueCommandInArray(command) { _ in
+            callback()
+        }
+    }
+    
+    /// Subscribes the client to the given patterns.
+    ///
+    /// - Parameter patterns: A list of glob-style patterns to subscribe to.
+    public func psubscribe(patterns: String..., callback: () -> Void) {
+        psubscribeArrayOfPattens(patterns: patterns, callback: callback)
+    }
+    
+    /// Subscribes the client to the given patterns.
+    ///
+    /// - Parameter patterns: An array of glob-style patterns to subscribe to.
+    public func psubscribeArrayOfPattens(patterns: [String], callback: () -> Void) {
+        var command = ["PSUBSCRIBE"]
+        for pattern in patterns {
+            command.append(pattern)
+        }
+        issueCommandInArray(command) { _ in
+            callback()
+        }
+    }
+    
+    /// Unsubscribes the client from the given patterns,
+    /// or from all of them if none is given.
+    /// In this case, a message for every unsubscribed pattern will be sent to the client.
+    ///
+    /// - Parameter patterns: A list of glob-style patterns to unsubscribe to.
+    public func unsubscribe(channels: String..., callback: () -> Void) {
+        unsubscribeArrayOfChannels(channels: channels, callback: callback)
+    }
+    
+    /// Unsubscribes the client from the given patterns,
+    /// or from all of them if none is given.
+    /// In this case, a message for every unsubscribed pattern will be sent to the client.
+    ///
+    /// - Parameter patterns: An array of glob-style patterns to unsubscribe to.
+    public func unsubscribeArrayOfChannels(channels: [String], callback: () -> Void) {
+        var command = ["UNSUBSCRIBE"]
+        for channels in channels {
+            command.append(channels)
+        }
+        issueCommandInArray(command) { _ in
+            callback()
+        }
+    }
+    
+    /// Unsubscribes the client from the given patterns,
+    /// or from all of them if none is given.
+    /// In this case, a message for every unsubscribed pattern will be sent to the client.
+    ///
+    /// - Parameter patterns: A list of glob-style patterns to unsubscribe to.
+    public func punsubscribe(patterns: String..., callback: () -> Void) {
+        punsubscribeArrayOfPatterns(patterns: patterns, callback: callback)
+    }
+    
+    /// Unsubscribes the client from the given patterns,
+    /// or from all of them if none is given.
+    /// In this case, a message for every unsubscribed pattern will be sent to the client.
+    ///
+    /// - Parameter patterns: An array of glob-style patterns to unsubscribe to.
+    public func punsubscribeArrayOfPatterns(patterns: [String], callback: () -> Void) {
+        var command = ["PUNSUBSCRIBE"]
+        for pattern in patterns {
+            command.append(pattern)
+        }
+        issueCommandInArray(command) { _ in
+            callback()
         }
     }
     
@@ -113,45 +194,5 @@ extension Redis {
         issueCommand("PUBSUB", "NUMPAT") { (response) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
-    }
-    
-    /// Unsubscribes the client from the given patterns,
-    /// or from all of them if none is given.
-    /// In this case, a message for every unsubscribed pattern will be sent to the client.
-    ///
-    /// - Parameter patterns: A list of glob-style patterns to unsubscribe to.
-    public func punsubscribe(patterns: String...) {
-        punsubscribeArrayOfPatterns(patterns: patterns)
-    }
-    
-    /// Unsubscribes the client from the given patterns,
-    /// or from all of them if none is given.
-    /// In this case, a message for every unsubscribed pattern will be sent to the client.
-    ///
-    /// - Parameter patterns: An array of glob-style patterns to unsubscribe to.
-    public func punsubscribeArrayOfPatterns(patterns: [String]) {
-        var command = ["PUNSUBSCRIBE"]
-        for pattern in patterns {
-            command.append(pattern)
-        }
-        issueCommandInArray(command) { _ in }
-    }
-    
-    /// Subscribes the client to the specified channels.
-    ///
-    /// - Parameter patterns: A list of channels to subscribe to.
-    public func subscribe(channels: String...) {
-        subscribeArrayOfChannels(channels: channels)
-    }
-
-    /// Subscribes the client to the specified channels.
-    ///
-    /// - Parameter patterns: An array of channels to subscribe to.
-    public func subscribeArrayOfChannels(channels: [String]) {
-        var command = ["SUBSCRIBE"]
-        for channel in channels {
-            command.append(channel)
-        }
-        issueCommandInArray(command) { _ in }
     }
 }

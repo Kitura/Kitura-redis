@@ -30,10 +30,8 @@ import XCTest
 public class TestPubSub: XCTestCase {
     static var allTests: [(String, (TestPubSub) -> () throws -> Void)] {
         return [
-            ("test_blpopBrpopAndBrpoplpushEmptyLists", test_blpopBrpopAndBrpoplpushEmptyLists),
-            ("test_blpop", test_blpop),
-            ("test_brpop", test_brpop),
-            ("test_brpoplpush", test_brpoplpush)
+            ("test_1", test_1),
+            ("test_2", test_2)
         ]
     }
     
@@ -41,18 +39,21 @@ public class TestPubSub: XCTestCase {
     
     let queue = DispatchQueue(label: "unblocker", attributes: DispatchQueue.Attributes.concurrent)
     
-    var key1: String { return "test1" }
-    var key2: String { return "test2" }
-    var key3: String { return "test3" }
+    var channel1: String { return "1" }
+    var channel2: String { return "2" }
+    var channel3: String { return "2" }
+    var messageA: String { return "A" }
+    var messageB: String { return "B" }
+    var messageC: String { return "C" }
     
     func localSetup(block: () -> Void) {
-        connectRedis() {(error: NSError?) in
+        connectRedis() { (error: NSError?) in
             if error != nil {
                 XCTFail("Could not connect to Redis")
                 return
             }
             
-            redis.del(self.key1, self.key2, self.key3) {(deleted: Int?, error: NSError?) in
+            redis.del(self.channel1, self.channel2, self.channel3, self.messageA, self.messageB, self.messageC) { (deleted: Int?, error: NSError?) in
                 block()
             }
         }
@@ -63,10 +64,10 @@ public class TestPubSub: XCTestCase {
             let password = read(fileName: "password.txt")
             let host = read(fileName: "host.txt")
             
-            self.secondConnection.connect(host: host, port: 6379) {(error: NSError?) in
+            self.secondConnection.connect(host: host, port: 6379) { (error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 
-                self.secondConnection.auth(password) {(error: NSError?) in
+                self.secondConnection.auth(password) { (error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     
                     block()
@@ -75,85 +76,91 @@ public class TestPubSub: XCTestCase {
         }
     }
     
-    func test_blpopBrpopAndBrpoplpushEmptyLists() {
-        localSetup() {
-            redis.blpop(self.key1, self.key2, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
+    // PUBLISH, SUBSCRIBE, UNSUBSCRIBE
+    func test_1() {
+        extendedSetup() {
+            
+            // Publish to channel1
+            redis.publish(channel: self.channel1, message: self.messageA, callback: { (result, error) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNil(retrievedValue, "A blpop that timed out should have returned nil. It returned \(retrievedValue)")
+                XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                XCTAssertEqual(result, 0, "PUBLISH should return 0, not \(result).")
                 
-                redis.brpop(self.key3, self.key1, timeout: 5.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNil(retrievedValue, "A brpop that timed out should have returned nil. It returned \(retrievedValue)")
+                // Subscribe to channel1
+                self.secondConnection.subscribe(channels: self.channel1, callback: {
                     
-                    redis.brpoplpush(self.key2, destination: self.key2, timeout: 3.0) {(retrievedValue: RedisString?, error: NSError?) in
+                    // Publish to channel1
+                    redis.publish(channel: self.channel1, message: self.messageA, callback: { (result, error) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNil(retrievedValue, "A brpoplpush that timed out should have returned nil. It returned \(retrievedValue)")
-                    }
-                }
-            }
+                        XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                        XCTAssertEqual(result, 1, "PUBLISH should return 1, not \(result).")
+                        
+                        // Unsubscribe to channel1
+                        self.secondConnection.unsubscribe(channels: self.channel1, callback: { 
+                            
+                            // Publish to channel1
+                            redis.publish(channel: self.channel1, message: self.messageA, callback: { (result, error) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                                XCTAssertEqual(result, 0, "PUBLISH should return 0, not \(result).")
+                            })
+                        })
+                    })
+                })
+            })
         }
     }
     
-    func test_blpop() {
+    // PUBLISH, SUBSCRIBE, UNSUBSCRIBE with multiple channels
+    func test_2() {
         extendedSetup() {
-            let value1 = "testing 1 2 3"
             
-            self.queue.async { [unowned self] in
-                sleep(2)   // Wait a bit to let the main test block
-                self.secondConnection.lpush(self.key2, values: value1) {(listSize: Int?, error: NSError?) in
+            // Subscribe to channel1, channel2, channel3
+            self.secondConnection.subscribe(channels: self.channel1, self.channel2, self.channel3, callback: {
+                
+                // Publish to channel1
+                redis.publish(channel: self.channel1, message: self.messageA, callback: { (result, error) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key2) should exist")
-                }
-            }
-            
-            redis.blpop(self.key1, self.key2, self.key3, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNotNil(retrievedValue, "blpop should not have returned nil.")
-                XCTAssertEqual(retrievedValue!.count, 2, "blpop should have returned an array of two elements. It returned an array of \(retrievedValue!.count) elements")
-                XCTAssertEqual(retrievedValue![0], RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(retrievedValue![0])")
-                XCTAssertEqual(retrievedValue![1], RedisString(value1), "blpop's return value element #1 should have been \(value1). It was \(retrievedValue![1])")
-            }
-        }
-    }
-    
-    func test_brpop() {
-        extendedSetup() {
-            let value2 = "over the hill and through the woods"
-            self.queue.async { [unowned self] in
-                sleep(2)   // Wait a bit to let the main test block
-                self.secondConnection.lpush(self.key3, values: value2) {(listSize: Int?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key1) should exist")
-                }
-            }
-            
-            redis.brpop(self.key1, self.key2, self.key3, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNotNil(retrievedValue, "brpop should not have returned nil.")
-                XCTAssertEqual(retrievedValue!.count, 2, "brpop should have returned an array of two elements. It returned an array of \(retrievedValue!.count) elements")
-                XCTAssertEqual(retrievedValue![0], RedisString(self.key3), "brpop's return value element #0 should have been \(self.key3). It was \(retrievedValue![0])")
-                XCTAssertEqual(retrievedValue![1], RedisString(value2), "brpop's return value element #1 should have been \(value2). It was \(retrievedValue![1])")
-            }
-        }
-    }
-    
-    func test_brpoplpush() {
-        extendedSetup() {
-            let value3 = "to grandmothers house we go"
-            
-            self.queue.async { [unowned self] in
-                sleep(2)   // Wait a bit to let the main test block
-                self.secondConnection.lpush(self.key1, values: value3) {(listSize: Int?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(listSize, "Result of lpush was nil, but \(self.key1) should exist")
-                }
-            }
-            
-            redis.brpoplpush(self.key1, destination: self.key2, timeout: 4.0) {(retrievedValue: RedisString?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNotNil(retrievedValue, "brpoplpush should not have returned nil.")
-                XCTAssertEqual(retrievedValue!, RedisString(value3), "brpoplpush's return value  should have been \(value3). It was \(retrievedValue!)")
-            }
+                    XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                    XCTAssertEqual(result, 1, "PUBLISH should return 1, not \(result).")
+                    
+                    // Publish to channel2
+                    redis.publish(channel: self.channel2, message: self.messageA, callback: { (result, error) in
+                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                        XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                        XCTAssertEqual(result, 1, "PUBLISH should return 1, not \(result).")
+                        
+                        // Unsubscribe from channel2, channel3
+                        self.secondConnection.unsubscribe(channels: self.channel2, self.channel3, callback: {
+                            
+                            // Publish to channel2
+                            redis.publish(channel: self.channel2, message: self.messageA, callback: { (result, error) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                                XCTAssertEqual(result, 0, "PUBLISH should return 0, not \(result).")
+                            })
+                            
+                            // Publish to channel3
+                            redis.publish(channel: self.channel3, message: self.messageA, callback: { (result, error) in
+                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                                XCTAssertEqual(result, 0, "PUBLISH should return 0, not \(result).")
+                            })
+                            
+                            // Unsubscribe from all channels
+                            self.secondConnection.unsubscribe(callback: {
+                                
+                                // Publish to channel1
+                                redis.publish(channel: self.channel1, message: self.messageA, callback: { (result, error) in
+                                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                                    XCTAssertNotNil(result, "PUBLISH should not have returned nil.")
+                                    XCTAssertEqual(result, 0, "PUBLISH should return 0, not \(result).")
+                                })
+                            })
+                        })
+                    })
+                })
+            })
         }
     }
 }

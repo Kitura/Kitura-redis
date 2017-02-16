@@ -18,13 +18,13 @@ import Foundation
 
 /// Extend RedisMulti by adding the List operations
 
-// NOTE
-//
-// Blocking commands in transactions return nil immediately when their list parameters are empty.
-// --as if their timeouts are immediately triggered
-// --because they block the server and nothing else can push
-//
-// See https://redis.io/commands/blpop
+/// NOTE
+///
+/// Blocking commands in transactions return nil immediately when their list parameters are empty.
+/// --as if their timeouts are immediately triggered
+/// --because they block the server and nothing else can push
+///
+/// See https://redis.io/commands/blpop
 
 extension RedisMulti {
     
