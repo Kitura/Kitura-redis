@@ -40,33 +40,23 @@ public class TestPubSub: XCTestCase {
     
     let secondConnection = Redis()
     
-    let queue = DispatchQueue(label: "unblocker", attributes: DispatchQueue.Attributes.concurrent)
+    var channel1 = "channel1"
+    var channel2 = "channel2"
+    var channel3 = "channel3"
     
-    var channel1: String { return "channel1" }
-    var channel2: String { return "channel2" }
-    var channel3: String { return "channel3" }
+    var pattern1 = "c?annel1"
+    var pattern2 = "*2"
+    var pattern3 = "c[ha]annel3"
     
-    var pattern1: String { return "c?annel1" }
-    var pattern2: String { return "*2" }
-    var pattern3: String { return "c[ha]annel3" }
-    
-    var messageA: String { return "A" }
-    var messageB: String { return "B" }
-    var messageC: String { return "C" }
+    var messageA = "messageA"
     
     func localSetup(block: () -> Void) {
         connectRedis() { (error: NSError?) in
-            if error != nil {
+            guard error == nil else {
                 XCTFail("Could not connect to Redis")
                 return
             }
-            
-            redis.del(channel1, channel2, channel3,
-                      pattern1, pattern2, pattern3,
-                      messageA, messageB, messageC)
-            { (deleted: Int?, error: NSError?) in
-                block()
-            }
+            block()
         }
     }
     
@@ -80,11 +70,15 @@ public class TestPubSub: XCTestCase {
                 
                 secondConnection.auth(password) { (error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    
                     block()
                 }
             }
         }
+    }
+    
+    override public func tearDown() {
+        secondConnection.unsubscribe {}
+        secondConnection.punsubscribe {}
     }
     
     // PUBLISH, SUBSCRIBE, UNSUBSCRIBE
@@ -232,7 +226,7 @@ public class TestPubSub: XCTestCase {
     func test_4() {
         extendedSetup() {
             
-            // NUMSUB with no channels
+            // NUMSUB no channels
             redis.pubsubNumsub(callback: { (result, error) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssertNotNil(result, "PUBSUB CHANNELS should not have returned nil.")
