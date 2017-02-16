@@ -292,6 +292,8 @@ public class Redis {
                 switch(innerResponse) {
                 case .StringValue(let str):
                     strings.append(str)
+                case .IntegerValue(let val):
+                    strings.append(RedisString(String(val)))
                 case .Nil:
                     strings.append(nil)
                 default:
