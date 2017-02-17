@@ -29,10 +29,10 @@ extension Redis {
     /// - parameter message: The message to post.
     /// - parameter callback: The callback function.
     /// - parameter result: The number of clients that received the message.
-    /// - parameter error: Non-nil if an error occurred.
-    public func publish(channel: String, message: String, callback: (_ result: Int?, _ error: NSError?) -> Void) {
-        issueCommand("PUBLISH", channel, message) {(response: RedisResponse) in
-            redisIntegerResponseHandler(response, callback: callback)
+    /// - parameter err: Non-nil if an err occurred.
+    public func publish(channel: String, message: String, callback: (_ result: Int?, _ err: NSError?) -> Void) {
+        issueCommand("PUBLISH", channel, message) {(res: RedisResponse) in
+            redisIntegerResponseHandler(res, callback: callback)
         }
     }
     
@@ -50,19 +50,21 @@ extension Redis {
     /// Subscribes the client to the specified channels.
     ///
     /// - parameter channels: A list of channels to subscribe to.
-    public func subscribe(channels: String...) {
-        subscribeArrayOfChannels(channels: channels)
+    public func subscribe(channels: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
+        subscribeArrayOfChannels(channels: channels, callback: callback)
     }
     
     /// Subscribes the client to the specified channels.
     ///
     /// - parameter channels: An array of channels to subscribe to.
-    public func subscribeArrayOfChannels(channels: [String]) {
+    public func subscribeArrayOfChannels(channels: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["SUBSCRIBE"]
         for channel in channels {
             command.append(channel)
         }
-        issueCommandInArray(command) { _ in }
+        issueCommandInArray(command) { res in
+            redisAnyArrayResponseHandler(response: res, callback: callback)
+        }
     }
     
     /// Subscribes the client to the given patterns.
@@ -83,26 +85,28 @@ extension Redis {
         issueCommandInArray(command) { _ in }
     }
     
-    /// Unsubscribes the client from the given patterns,
+    /// Unsubscribes the client from the given channels,
     /// or from all of them if none is given.
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
     /// - parameter patterns: A list of glob-style patterns to unsubscribe to.
-    public func unsubscribe(channels: String...) {
-        unsubscribeArrayOfChannels(channels: channels)
+    public func unsubscribe(channels: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
+        unsubscribeArrayOfChannels(channels: channels, callback: callback)
     }
     
-    /// Unsubscribes the client from the given patterns,
+    /// Unsubscribes the client from the given channels,
     /// or from all of them if none is given.
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
     /// - parameter channels: An array of glob-style patterns to unsubscribe to.
-    public func unsubscribeArrayOfChannels(channels: [String]) {
+    public func unsubscribeArrayOfChannels(channels: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["UNSUBSCRIBE"]
         for channels in channels {
             command.append(channels)
         }
-        issueCommandInArray(command) { _ in }
+        issueCommandInArray(command) { res in
+            redisAnyArrayResponseHandler(response: res, callback: callback)
+        }
     }
     
     /// Unsubscribes the client from the given patterns,
@@ -133,14 +137,14 @@ extension Redis {
     ///                      If unspecified, lists all channels.
     /// - parameter callback: The callback function:
     /// - parameter result: A list of active channels.
-    /// - parameter error: Non-nil if an error occurred.
-    public func pubsubChannels(pattern: String? = nil, callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
+    /// - parameter err: Non-nil if an err occurred.
+    public func pubsubChannels(pattern: String? = nil, callback: (_ result: [RedisString?]?, _ err: NSError?) -> Void) {
         var command = ["PUBSUB", "CHANNELS"]
         if let pattern = pattern {
             command.append(pattern)
         }
-        issueCommandInArray(command) { (response) in
-            redisStringArrayResponseHandler(response, callback: callback)
+        issueCommandInArray(command) { (res) in
+            redisStringArrayResponseHandler(res, callback: callback)
         }
     }
     
@@ -151,8 +155,8 @@ extension Redis {
     /// - parameter callback: The callback function:
     /// - parameter result: A list of channels and number of subscribers for every channel.
     ///                     The format is channel, count, channel, count, etc. If no channel given, this is empty.
-    /// - parameter error: Non-nil if an error occurred.
-    public func pubsubNumsub(channels: String..., callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+    /// - parameter err: Non-nil if an err occurred.
+    public func pubsubNumsub(channels: String..., callback: (_ result: [Any?]?, _ err: NSError?) -> Void) {
         pubsubNumsubArrayOfChannels(channels: channels, callback: callback)
     }
     
@@ -163,14 +167,14 @@ extension Redis {
     /// - parameter callback: The callback function:
     /// - parameter result: A list of channels and number of subscribers for every channel.
     ///                     The format is channel, count, channel, count, etc. If no channel given, this is empty.
-    /// - parameter error: Non-nil if an error occurred.
-    public func pubsubNumsubArrayOfChannels(channels: [String], callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+    /// - parameter err: Non-nil if an err occurred.
+    public func pubsubNumsubArrayOfChannels(channels: [String], callback: (_ result: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["PUBSUB", "NUMSUB"]
         for channel in channels {
             command.append(channel)
         }
-        issueCommandInArray(command) { (response) in
-            redisAnyArrayResponseHandler(response, callback: callback)
+        issueCommandInArray(command) { (res) in
+            redisAnyArrayResponseHandler(response: res, callback: callback)
         }
     }
 
@@ -179,10 +183,10 @@ extension Redis {
     ///
     /// - parameter callback: The callback function:
     /// - parameter result: The number of patterns all the clients are subscribed to.
-    /// - parameter error: Non-nil if an error occurred.
-    public func pubsubNumpat(callback: (_ result: Int?, _ error: NSError?) -> Void) {
-        issueCommand("PUBSUB", "NUMPAT") { (response) in
-            redisIntegerResponseHandler(response, callback: callback)
+    /// - parameter err: Non-nil if an err occurred.
+    public func pubsubNumpat(callback: (_ result: Int?, _ err: NSError?) -> Void) {
+        issueCommand("PUBSUB", "NUMPAT") { (res) in
+            redisIntegerResponseHandler(res, callback: callback)
         }
     }
 }

@@ -122,7 +122,7 @@ extension Redis {
             command.append(member)
         }
         issueCommandInArray(command) { (response) in
-            redisAnyArrayResponseHandler(response, callback: callback)
+            redisAnyArrayResponseHandler(response: response, callback: callback)
         }
     }
 
@@ -201,7 +201,7 @@ extension Redis {
             }
         }
         issueCommandInArray(command) { (response) in
-            redisAnyArrayResponseHandler(response, callback: callback)
+            redisAnyArrayResponseHandler(response: response, callback: callback)
         }
     }
     
@@ -256,7 +256,7 @@ extension Redis {
             }
         }
         issueCommandInArray(command) { (response) in
-            redisAnyArrayResponseHandler(response, callback: callback)
+            redisAnyArrayResponseHandler(response: response, callback: callback)
         }
     }
 }

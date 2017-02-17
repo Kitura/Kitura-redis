@@ -316,7 +316,7 @@ public class Redis {
     /// - parameter result: The array constructed from parsing the RedisResponse. Elements will be RedisString,
     ///                     [RedisResponse], or nil.
     /// - parameter error: Non-nil if an error occurred.
-    func redisAnyArrayResponseHandler(_ response: RedisResponse, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+    func redisAnyArrayResponseHandler(response: RedisResponse, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
         var error: NSError? = nil
         var result: [Any?]?
         
