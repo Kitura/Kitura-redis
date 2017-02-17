@@ -32,8 +32,8 @@ extension Redis {
     ///                  It will be created if it does not exist.
     /// - parameter geospatialItems: A geospatial item is (latitude: Double, longitude: Double, name: String).
     /// - parameter callback: The callback function.
-    /// - parameter result: The number of elements added to the sorted set, not including elements already existing for 
-    ///                     which the score was updated.
+    /// - parameter result: The number of elements added to the sorted set, not including elements already 
+    ///                     existing for which the score was updated.
     /// - parameter error: Non-nil if error occurred.
     public func geoadd(key: String, geospatialItems: GeospatialItem..., callback: (_ result: Int?, _ error: NSError?) -> Void) {
         geoaddArrayOfGeospatialItems(key: key, geospatialItems: geospatialItems, callback: callback)
@@ -45,8 +45,8 @@ extension Redis {
     ///                  It will be created if it does not exist.
     /// - parameter geospatialItems: A geospatial item is (latitude: Double, longitude: Double, name: String).
     /// - parameter callback: The callback function.
-    /// - parameter result: The number of elements added to the sorted set, not including elements already existing for
-    ///                     which the score was updated.
+    /// - parameter result: The number of elements added to the sorted set, not including elements already 
+    ///                     existing for which the score was updated.
     /// - parameter error: Non-nil if error occurred.
     public func geoaddArrayOfGeospatialItems(key: String, geospatialItems: [GeospatialItem], callback: (_ result: Int?, _ error: NSError?) -> Void) {
         var command = ["GEOADD", key]
@@ -60,27 +60,27 @@ extension Redis {
         }
     }
     
-    /// Return valid Geohash strings representing the position of one or more elements in a sorted set value representing
-    /// a geospatial index (where elements were added using GEOADD).
+    /// Return valid Geohash strings representing the position of one or more elements in a sorted set value 
+    /// representing a geospatial index (where elements were added using GEOADD).
     ///
     /// - parameter key: The key of the geospatial index.
     /// - parameter members: List of members from which to get their Geohash strings.
     /// - parameter callback: The callback function.
-    /// - parameter result: An array where each element is the Geohash corresponding to each member name passed as
-    ///                     argument to the command.
+    /// - parameter result: An array where each element is the Geohash corresponding to each member name passed 
+    ///                     as argument to the command.
     /// - parameter error: Non-nil if error occurred.
     public func geohash(key: String, members: String..., callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
         geohashArrayOfMembers(key: key, members: members, callback: callback)
     }
 
-    /// Return valid Geohash strings representing the position of one or more elements in a sorted set value representing
-    /// a geospatial index (where elements were added using GEOADD).
+    /// Return valid Geohash strings representing the position of one or more elements in a sorted set value 
+    /// representing a geospatial index (where elements were added using GEOADD).
     ///
     /// - parameter key: The key of the geospatial index.
     /// - parameter members: Array of members from which to get their Geohash strings.
     /// - parameter callback: The callback function.
-    /// - parameter result: An array where each element is the Geohash corresponding to each member name passed as
-    ///                     argument to the command.
+    /// - parameter result: An array where each element is the Geohash corresponding to each member name passed 
+    ///                     as argument to the command.
     /// - parameter error: Non-nil if error occurred.
     public func geohashArrayOfMembers(key: String, members: [String], callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
         var command = ["GEOHASH", key]
@@ -92,37 +92,37 @@ extension Redis {
         }
     }
     
-    /// Return the positions (longitude,latitude) of all the specified members of the geospatial index represented by the
-    /// sorted set at key.
+    /// Return the positions (longitude,latitude) of all the specified members of the geospatial index 
+    /// represented by the sorted set at key.
     ///
     /// - parameter key: The key of the geospatial index.
     /// - parameter members: The members from which to get their positions.
     /// - parameter callback: The callback function.
-    /// - parameter result: An array where each element is a two elements array representing longitude and latitude (x,y)
-    ///                     of each member name passed as argument to the command.
+    /// - parameter result: An array where each element is a two elements array representing longitude and 
+    ///                     latitude (x,y) of each member name passed as argument to the command.
     ///                     Non existing elements are reported as NULL elements of the array.
     /// - parameter error: Non-nil if error occurred.
-    public func geopos(key: String, members: String..., callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
+    public func geopos(key: String, members: String..., callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
         geoposArrayOfMembers(key: key, members: members, callback: callback)
     }
 
-    /// Return the positions (longitude,latitude) of all the specified members of the geospatial index represented by the
-    /// sorted set at key.
+    /// Return the positions (longitude,latitude) of all the specified members of the geospatial index 
+    /// represented by the sorted set at key.
     ///
     /// - parameter key: The key of the geospatial index.
     /// - parameter members: The members from which to get their positions.
     /// - parameter callback: The callback function.
-    /// - parameter result: An array where each element is a two elements array representing longitude and latitude (x,y)
-    ///                     of each member name passed as argument to the command.
+    /// - parameter result: An array where each element is a two elements array representing longitude and 
+    ///                     latitude (x,y) of each member name passed as argument to the command.
     ///                     Non existing elements are reported as NULL elements of the array.
     /// - parameter error: Non-nil if error occurred.
-    public func geoposArrayOfMembers(key: String, members: [String], callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
+    public func geoposArrayOfMembers(key: String, members: [String], callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
         var command = ["GEOPOS", key]
         for member in members {
             command.append(member)
         }
         issueCommandInArray(command) { (response) in
-            redisStringArrayResponseHandler(response, callback: callback)
+            redisAnyArrayResponseHandler(response, callback: callback)
         }
     }
 
@@ -137,16 +137,126 @@ extension Redis {
     ///                   mi - miles
     ///                   ft - feet
     /// - parameter callback: The callback function.
-    /// - parameter result: Distance as a double (represented as a string) in the specified unit, or NULL if one or both
-    ///                     the elements are missing.
+    /// - parameter result: Distance as a double (represented as a string) in the specified unit, or NULL if one 
+    ///                     or both the elements are missing.
     /// - parameter error: Non-nil if error occurred.
-    public func geodist(key: String, member1: String, member2: String, unit: String?, callback: (_ result: RedisString?, _ error: NSError?) -> Void) {
+    public func geodist(key: String, member1: String, member2: String, unit: String?=nil, callback: (_ result: RedisString?, _ error: NSError?) -> Void) {
         var command = ["GEODIST", key, member1, member2]
         if let unit = unit {
             command.append(unit)
         }
         issueCommandInArray(command) { (response) in
             redisStringResponseHandler(response, callback: callback)
+        }
+    }
+    
+    /// Return the members of a sorted set populated with geospatial information using GEOADD, which are within 
+    /// the borders of the area specified with the center location and the maximum distance from the center (the 
+    /// radius).
+    ///
+    /// - parameter key: The key of the geospatial index.
+    /// - parameter longitude: The longitude of the center area of which to perform the search.
+    /// - parameter latitude: The latitude of the center area of which to perform the search.
+    /// - parameter radius: The radius of the circle from which to perform the search.
+    /// - parameter unit: The unit of distance for the radius.
+    ///                   m - meters
+    ///                   km - kilometers
+    ///                   mi - miles
+    ///                   ft - feet
+    /// - parameter withCoord: If true, result will also return the longitude,latitude coordinates of the
+    ///                        matching items.
+    /// - parameter withDist: If true, result will also return the distance of the returned items from the
+    ///                       specified center. The distance is returned in the same unit as the unit specified
+    ///                       as the radius argument of the command.
+    /// - parameter withHash: If true, result will also return the raw geohash-encoded sorted set score of the
+    ///                       item, in the form of a 52 bit unsigned integer. This is only useful for low level
+    ///                       hacks or debugging and is otherwise of little interest for the general user.
+    /// - parameter count: Amount to limit number of results to. Exclude to retrieve all results.
+    /// - parameter ascending: If true, return results sorted nearest to farthest. If false, return results
+    ///                        sorted farthest to nearest. If excluded, results are unsorted.
+    /// - parameter callback: The callback function.
+    /// - parameter result: With no `WITH` options included, returns a linear array of location names. If any
+    ///                     `WITH` options are included, returns an array of sub-arrays, where each represents
+    ///                     an item with its extra data.
+    /// - parameter error: Non-nil if error occurred.
+    public func georadius(key: String, longitude: Double, latitude: Double, radius: Double, unit: String, withCoord: Bool?=nil, withDist: Bool?=nil, withHash: Bool?=nil, count: Int?=nil, ascending: Bool?=nil, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+        var command = ["GEORADIUS", key, String(longitude), String(latitude), String(radius), unit]
+        if let withCoord = withCoord, withCoord {
+            command.append("WITHCOORD")
+        }
+        if let withDist = withDist, withDist {
+            command.append("WITHDIST")
+        }
+        if let withHash = withHash, withHash {
+            command.append("WITHHASH")
+        }
+        if let count = count {
+            command.append(String(count))
+        }
+        if let ascending = ascending {
+            if ascending {
+                command.append("ASC")
+            } else {
+                command.append("DESC")
+            }
+        }
+        issueCommandInArray(command) { (response) in
+            redisAnyArrayResponseHandler(response, callback: callback)
+        }
+    }
+    
+    /// This command is exactly like GEORADIUS with the sole difference that instead of taking, as the center of 
+    /// the area to query, a longitude and latitude value, it takes the name of a member already existing inside 
+    /// the geospatial index represented by the sorted set.
+    ///
+    /// - parameter key: The key of the geospatial index.
+    /// - parameter member: The existing member of the geospatial index in which to set as the center of the
+    ///                     search.
+    /// - parameter radius: The radius of the circle from which to perform the search.
+    /// - parameter unit: The unit of distance for the radius.
+    ///                   m - meters
+    ///                   km - kilometers
+    ///                   mi - miles
+    ///                   ft - feet
+    /// - parameter withCoord: If true, result will also return the longitude,latitude coordinates of the
+    ///                        matching items.
+    /// - parameter withDist: If true, result will also return the distance of the returned items from the
+    ///                       specified center. The distance is returned in the same unit as the unit specified
+    ///                       as the radius argument of the command.
+    /// - parameter withHash: If true, result will also return the raw geohash-encoded sorted set score of the
+    ///                       item, in the form of a 52 bit unsigned integer. This is only useful for low level
+    ///                       hacks or debugging and is otherwise of little interest for the general user.
+    /// - parameter count: Amount to limit number of results to. Exclude to retrieve all results.
+    /// - parameter ascending: If true, return results sorted nearest to farthest. If false, return results
+    ///                        sorted farthest to nearest. If excluded, results are unsorted.
+    /// - parameter callback: The callback function.
+    /// - parameter result: With no `WITH` options included, returns a linear array of location names. If any
+    ///                     `WITH` options are included, returns an array of sub-arrays, where each represents
+    ///                     an item with its extra data.
+    /// - parameter error: Non-nil if error occurred.
+    public func georadiusbymember(key: String, member: String, radius: Double, unit: String, withCoord: Bool?=nil, withDist: Bool?=nil, withHash: Bool?=nil, count: Int?=nil, ascending: Bool?=nil, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+        var command = ["GEORADIUSBYMEMBER", key, member, String(radius), unit]
+        if let withCoord = withCoord, withCoord {
+            command.append("WITHCOORD")
+        }
+        if let withDist = withDist, withDist {
+            command.append("WITHDIST")
+        }
+        if let withHash = withHash, withHash {
+            command.append("WITHHASH")
+        }
+        if let count = count {
+            command.append(String(count))
+        }
+        if let ascending = ascending {
+            if ascending {
+                command.append("ASC")
+            } else {
+                command.append("DESC")
+            }
+        }
+        issueCommandInArray(command) { (response) in
+            redisAnyArrayResponseHandler(response, callback: callback)
         }
     }
 }

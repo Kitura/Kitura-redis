@@ -27,8 +27,8 @@ import Foundation
 import XCTest
 
 
-public class TestPubSub: XCTestCase {
-    static var allTests: [(String, (TestPubSub) -> () throws -> Void)] {
+public class TestPubSubCommands: XCTestCase {
+    static var allTests: [(String, (TestPubSubCommands) -> () throws -> Void)] {
         return [
             ("test_1", test_1),
             ("test_2", test_2),

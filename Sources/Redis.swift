@@ -313,9 +313,8 @@ public class Redis {
     ///
     /// - parameter response: The RedisResponse to be parsed.
     /// - parameter callback: The callback function.
-    /// - parameter result: The constructed array from the parsed RedisResponse.
-    ///                     To extract idx 0 as a String do `(result?[0] as? RedisString)?.asString`.
-    ///                     To extract idx 1 as an Int do `(result?[1] as? RedisString)?.asInteger`.
+    /// - parameter result: The array constructed from parsing the RedisResponse. Elements will be RedisString,
+    ///                     [RedisResponse], or nil.
     /// - parameter error: Non-nil if an error occurred.
     func redisAnyArrayResponseHandler(_ response: RedisResponse, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
         var error: NSError? = nil
