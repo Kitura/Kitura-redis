@@ -250,10 +250,10 @@ public class TestPubSub: XCTestCase {
                 let count = result?.count
                 XCTAssertEqual(count, 4, "PUBSUB NUMSUB result.count should be 4, not \(count)")
                 
-                let result0 = result?[0]?.asString
-                let result1 = result?[1]?.asInteger
-                let result2 = result?[2]?.asString
-                let result3 = result?[3]?.asInteger
+                let result0 = (result?[0] as? RedisString)?.asString
+                let result1 = (result?[1] as? RedisString)?.asInteger
+                let result2 = (result?[2] as? RedisString)?.asString
+                let result3 = (result?[3] as? RedisString)?.asInteger
                 XCTAssertEqual(result0, channel1, "PUBSUB NUMSUB result[0] should be \(channel1), not \(result0)")
                 XCTAssertEqual(result1, 1, "PUBSUB NUMSUB result[1] should be 1, not \(result1)")
                 XCTAssertEqual(result2, channel3, "PUBSUB NUMSUB result[2] should be \(channel3), not \(result2)")

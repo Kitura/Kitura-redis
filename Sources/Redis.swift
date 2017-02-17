@@ -292,8 +292,46 @@ public class Redis {
                 switch(innerResponse) {
                 case .StringValue(let str):
                     strings.append(str)
-                case .IntegerValue(let val):
-                    strings.append(RedisString(String(val)))
+                case .Nil:
+                    strings.append(nil)
+                default:
+                    error = self.createUnexpectedResponseError(response)
+                }
+            }
+            result = strings
+        case .Nil:
+            result = nil
+        case .Error(let err):
+            error = self.createError("Error: \(err)", code: 1)
+        default:
+            error = self.createUnexpectedResponseError(response)
+        }
+        callback(error == nil ? result : nil, _: error)
+    }
+    
+    /// Parses through a RedisResponse and builds an [Any?] array.
+    ///
+    /// - parameter response: The RedisResponse to be parsed.
+    /// - parameter callback: The callback function.
+    /// - parameter result: The constructed array from the parsed RedisResponse.
+    ///                     To extract idx 0 as a String do `(result?[0] as? RedisString)?.asString`.
+    ///                     To extract idx 1 as an Int do `(result?[1] as? RedisString)?.asInteger`.
+    /// - parameter error: Non-nil if an error occurred.
+    func redisAnyArrayResponseHandler(_ response: RedisResponse, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+        var error: NSError? = nil
+        var result: [Any?]?
+        
+        switch(response) {
+        case .Array(let responses):
+            var strings = [Any?]()
+            for innerResponse in responses {
+                switch(innerResponse) {
+                case .StringValue(let str):
+                    strings.append(str)
+                case .IntegerValue(let i):
+                    strings.append(RedisString(String(i)))
+                case .Array(let arr):
+                    strings.append(arr)
                 case .Nil:
                     strings.append(nil)
                 default:

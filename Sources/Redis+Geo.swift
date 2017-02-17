@@ -28,7 +28,8 @@ extension Redis {
     
     /// Adds the specified geospatial items (latitude, longitude, name) to the specified key.
     /// 
-    /// - parameter key: The key to add the geospacial items to.
+    /// - parameter key: The key of the geospatial index to add the geospacial items to.
+    ///                  It will be created if it does not exist.
     /// - parameter geospatialItems: A geospatial item is (latitude: Double, longitude: Double, name: String).
     /// - parameter callback: The callback function.
     /// - parameter result: The number of elements added to the sorted set, not including elements already existing for 
@@ -40,7 +41,8 @@ extension Redis {
     
     /// Adds the specified geospatial items (latitude, longitude, name) to the specified key.
     ///
-    /// - parameter key: The key to add the geospacial items to.
+    /// - parameter key: The key of the geospatial index to add the geospacial items to.
+    ///                  It will be created if it does not exist.
     /// - parameter geospatialItems: A geospatial item is (latitude: Double, longitude: Double, name: String).
     /// - parameter callback: The callback function.
     /// - parameter result: The number of elements added to the sorted set, not including elements already existing for
@@ -123,6 +125,28 @@ extension Redis {
             redisStringArrayResponseHandler(response, callback: callback)
         }
     }
-    
-    
+
+    /// Return the distance between two members in the geospatial index represented by the sorted set.
+    ///
+    /// - parameter key: The key of the geospatial index.
+    /// - parameter member1: The first member to find the distance from.
+    /// - parameter member2: The second member to find the distance from.
+    /// - parameter unit: The unit of measurement desired for the result.
+    ///                   m - meters (default)
+    ///                   km - kilometers
+    ///                   mi - miles
+    ///                   ft - feet
+    /// - parameter callback: The callback function.
+    /// - parameter result: Distance as a double (represented as a string) in the specified unit, or NULL if one or both
+    ///                     the elements are missing.
+    /// - parameter error: Non-nil if error occurred.
+    public func geodist(key: String, member1: String, member2: String, unit: String?, callback: (_ result: RedisString?, _ error: NSError?) -> Void) {
+        var command = ["GEODIST", key, member1, member2]
+        if let unit = unit {
+            command.append(unit)
+        }
+        issueCommandInArray(command) { (response) in
+            redisStringResponseHandler(response, callback: callback)
+        }
+    }
 }
