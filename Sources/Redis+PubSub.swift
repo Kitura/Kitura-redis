@@ -70,19 +70,21 @@ extension Redis {
     /// Subscribes the client to the given patterns.
     ///
     /// - parameter patterns: A list of glob-style patterns to subscribe to.
-    public func psubscribe(patterns: String...) {
-        psubscribeArrayOfPattens(patterns: patterns)
+    public func psubscribe(patterns: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
+        psubscribeArrayOfPattens(patterns: patterns, callback: callback)
     }
     
     /// Subscribes the client to the given patterns.
     ///
     /// - parameter patterns: An array of glob-style patterns to subscribe to.
-    public func psubscribeArrayOfPattens(patterns: [String]) {
+    public func psubscribeArrayOfPattens(patterns: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["PSUBSCRIBE"]
         for pattern in patterns {
             command.append(pattern)
         }
-        issueCommandInArray(command) { _ in }
+        issueCommandInArray(command) { res in
+            redisAnyArrayResponseHandler(response: res, callback: callback)
+        }
     }
     
     /// Unsubscribes the client from the given channels,
@@ -114,8 +116,8 @@ extension Redis {
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
     /// - parameter patterns: A list of glob-style patterns to unsubscribe to.
-    public func punsubscribe(patterns: String...) {
-        punsubscribeArrayOfPatterns(patterns: patterns)
+    public func punsubscribe(patterns: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
+        punsubscribeArrayOfPatterns(patterns: patterns, callback: callback)
     }
     
     /// Unsubscribes the client from the given patterns,
@@ -123,12 +125,14 @@ extension Redis {
     /// In this case, a message for every unsubscribed pattern will be sent to the client.
     ///
     /// - parameter patterns: An array of glob-style patterns to unsubscribe to.
-    public func punsubscribeArrayOfPatterns(patterns: [String]) {
+    public func punsubscribeArrayOfPatterns(patterns: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["PUNSUBSCRIBE"]
         for pattern in patterns {
             command.append(pattern)
         }
-        issueCommandInArray(command) { _ in }
+        issueCommandInArray(command) { res in
+            redisAnyArrayResponseHandler(response: res, callback: callback)
+        }
     }
     
     /// Lists the currently active channels.
