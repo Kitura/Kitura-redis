@@ -75,41 +75,18 @@ public class TestPubSubCommands: XCTestCase {
         }
     }
     
-    private func checkNumsubResponse(res: [Any?]?, err: NSError?) {
-        XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
-        XCTAssertNotNil(res, "PUBSUB NUMSUB should not have returned nil.")
-        
-        let count = res?.count
-        XCTAssertEqual(count, 6, "PUBSUB NUMSUB res.count should be 6, not \(count)")
-        
-        let res1 = (res?[1] as? RedisString)?.asInteger
-        let res2 = (res?[3] as? RedisString)?.asInteger
-        let res3 = (res?[5] as? RedisString)?.asInteger
-        XCTAssertEqual(res1, 0, "Channel1 should have 0 subscribers, not \(res1)")
-        XCTAssertEqual(res2, 0, "Channel2 should have 0 subscribers, not \(res2)")
-        XCTAssertEqual(res3, 0, "Channel3 should have 0 subscribers, not \(res3)")
-    }
-    
     override public func tearDown() {
         let dispatchGroup = DispatchGroup()
         dispatchGroup.enter()
         secondConnection.unsubscribe { (res, err) in
             XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
             XCTAssertNotNil(res, "UNSUBSCRIBE should not have returned nil.")
-            redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                checkNumsubResponse(res: res, err: err)
-            })
-            
             secondConnection.punsubscribe { (res, err) in
                 XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
                 XCTAssertNotNil(res, "PUNSUBSCRIBE should not have returned nil.")
-                redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                    checkNumsubResponse(res: res, err: err)
-                    dispatchGroup.leave()
-                })
+                dispatchGroup.leave()
             }
         }
-        
         dispatchGroup.wait()
     }
     

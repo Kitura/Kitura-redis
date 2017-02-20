@@ -19,7 +19,7 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-//Tests the List operations
+// Tests the List transaction operations
 public class TestTransactionsPart7: XCTestCase {
     static var allTests: [(String, (TestTransactionsPart7) -> () throws -> Void)] {
         return [

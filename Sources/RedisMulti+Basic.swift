@@ -18,7 +18,7 @@ import Foundation
 
 /// Extend RedisMulti by adding the Basic operations
 extension RedisMulti {
-
+    
     /// Add an APPEND command to the "transaction"
     ///
     /// - Parameter key: The key.

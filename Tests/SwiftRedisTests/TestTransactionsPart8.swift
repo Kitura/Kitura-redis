@@ -19,11 +19,13 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-//Tests the Pub/Sub operations
+// Tests the Pub/Sub transaction operations
 public class TestTransactionsPart8: XCTestCase {
     static var allTests: [(String, (TestTransactionsPart8) -> () throws -> Void)] {
         return [
-            
+            ("test_publish", test_publish),
+            ("test_subscribePsubscribe", test_subscribePsubscribe),
+            ("test_pubsubChannelsNumsubNumpat", test_pubsubChannelsNumsubNumpat),
         ]
     }
     
@@ -178,7 +180,7 @@ public class TestTransactionsPart8: XCTestCase {
         }
     }
     
-    func test_pubsubChannelsNumsubNumPat() {
+    func test_pubsubChannelsNumsubNumpat() {
         extendedSetup {
             let multi = redis.multi()
             
