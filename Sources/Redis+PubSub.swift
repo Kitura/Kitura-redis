@@ -237,7 +237,6 @@ extension Redis {
     }
 
     /// Returns the number of subscriptions to patterns.
-    /// (that are performed using the PSUBSCRIBE command)
     ///
     /// - parameter callback: The callback function:
     /// - parameter result: The number of patterns all the clients are 

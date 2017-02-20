@@ -72,6 +72,7 @@ extension RedisMulti {
     /// - parameter patterns: A list of glob-style patterns to subscribe to.
     ///
     /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func psubscribe(patterns: String...) -> RedisMulti {
         return psubscribeArrayOfPattens(patterns: patterns)
     }
@@ -81,6 +82,7 @@ extension RedisMulti {
     /// - parameter patterns: A list of glob-style patterns to subscribe to.
     ///
     /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func psubscribeArrayOfPattens(patterns: [String]) -> RedisMulti {
         var command = ["PSUBSCRIBE"]
         for pattern in patterns {
@@ -97,6 +99,7 @@ extension RedisMulti {
     /// - parameter channels: A list of channels to unsubscribe to.
     ///
     /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func unsubscribe(channels: String...) -> RedisMulti {
         return unsubscribeArrayOfChannels(channels: channels)
     }
@@ -108,6 +111,7 @@ extension RedisMulti {
     /// - parameter channels: An array of channels to unsubscribe to.
     ///
     /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func unsubscribeArrayOfChannels(channels: [String]) -> RedisMulti {
         var command = ["UNSUBSCRIBE"]
         for channels in channels {
@@ -124,6 +128,7 @@ extension RedisMulti {
     /// - parameter patterns: A list of glob-style patterns to unsubscribe to.
     ///
     /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func punsubscribe(patterns: String...) -> RedisMulti {
         return punsubscribeArrayOfPatterns(patterns: patterns)
     }
@@ -135,12 +140,65 @@ extension RedisMulti {
     /// - parameter patterns: An array of glob-style patterns to unsubscribe to.
     ///
     /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func punsubscribeArrayOfPatterns(patterns: [String]) -> RedisMulti {
         var command = ["PUNSUBSCRIBE"]
         for pattern in patterns {
             command.append(pattern)
         }
         queuedCommands.append(stringArrToRedisStringArr(command))
+        return self
+    }
+    
+    /// Lists the currently active channels.
+    ///
+    /// - parameter pattern: The pattern to match channels against glob-style.
+    ///                      If unspecified, lists all channels.
+    ///
+    /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func pubsubChannels(pattern: String? = nil) -> RedisMulti {
+        var command = ["PUBSUB", "CHANNELS"]
+        if let pattern = pattern {
+            command.append(pattern)
+        }
+        queuedCommands.append(stringArrToRedisStringArr(command))
+        return self
+    }
+    
+    /// Returns the number of subscribers for the specified channels.
+    /// (not counting clients subscribed to patterns)
+    ///
+    /// - parameter channels: A list of zero or more channels to look up.
+    ///
+    /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func pubsubNumsub(channels: String...) -> RedisMulti {
+        return pubsubNumsubArrayOfChannels(channels: channels)
+    }
+
+    /// Returns the number of subscribers for the specified channels.
+    /// (not counting clients subscribed to patterns)
+    ///
+    /// - parameter channels: An array of zero or more channels to look up.
+    ///
+    /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func pubsubNumsubArrayOfChannels(channels: [String]) -> RedisMulti {
+        var command = ["PUBSUB", "NUMSUB"]
+        for channel in channels {
+            command.append(channel)
+        }
+        queuedCommands.append(stringArrToRedisStringArr(command))
+        return self
+    }
+    
+    /// Returns the number of subscriptions to patterns.
+    ///
+    /// - returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func pubsubNumpat() -> RedisMulti {
+        queuedCommands.append(stringArrToRedisStringArr(["PUBSUB", "NUMPAT"]))
         return self
     }
 }

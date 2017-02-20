@@ -26,7 +26,6 @@ import Dispatch
 import Foundation
 import XCTest
 
-
 public class TestPubSubCommands: XCTestCase {
     static var allTests: [(String, (TestPubSubCommands) -> () throws -> Void)] {
         return [
@@ -39,7 +38,6 @@ public class TestPubSubCommands: XCTestCase {
     }
     
     let secondConnection = Redis()
-    let sleepTime: UInt32 = 1
     
     var channel1 = "channel1"
     var channel2 = "channel2"
@@ -77,19 +75,42 @@ public class TestPubSubCommands: XCTestCase {
         }
     }
     
+    private func checkNumsubResponse(res: [Any?]?, err: NSError?) {
+        XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+        XCTAssertNotNil(res, "PUBSUB NUMSUB should not have returned nil.")
+        
+        let count = res?.count
+        XCTAssertEqual(count, 6, "PUBSUB NUMSUB res.count should be 6, not \(count)")
+        
+        let res1 = (res?[1] as? RedisString)?.asInteger
+        let res2 = (res?[3] as? RedisString)?.asInteger
+        let res3 = (res?[5] as? RedisString)?.asInteger
+        XCTAssertEqual(res1, 0, "Channel1 should have 0 subscribers, not \(res1)")
+        XCTAssertEqual(res2, 0, "Channel2 should have 0 subscribers, not \(res2)")
+        XCTAssertEqual(res3, 0, "Channel3 should have 0 subscribers, not \(res3)")
+    }
+    
     override public func tearDown() {
-        secondConnection.unsubscribe { (res, _) in
-            XCTAssertNotNil(res, "Should not return nil.")
+        let dispatchGroup = DispatchGroup()
+        dispatchGroup.enter()
+        secondConnection.unsubscribe { (res, err) in
+            XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+            XCTAssertNotNil(res, "UNSUBSCRIBE should not have returned nil.")
             redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                print("TEARDOWN \(res)")
+                checkNumsubResponse(res: res, err: err)
             })
+            
+            secondConnection.punsubscribe { (res, err) in
+                XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                XCTAssertNotNil(res, "PUNSUBSCRIBE should not have returned nil.")
+                redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
+                    checkNumsubResponse(res: res, err: err)
+                    dispatchGroup.leave()
+                })
+            }
         }
-        secondConnection.punsubscribe { (res, _) in
-            XCTAssertNotNil(res, "Should not return nil.")
-            redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                print("TEARDOWN \(res)")
-            })
-        }
+        
+        dispatchGroup.wait()
     }
     
     // PUBLISH, SUBSCRIBE, UNSUBSCRIBE
@@ -119,11 +140,9 @@ public class TestPubSubCommands: XCTestCase {
                         XCTAssertEqual(res, 1, "PUBLISH should return 1, not \(res).")
                         
                         // UNSUBSCRIBE channel1
-                        secondConnection.unsubscribe(channels: channel1, callback: { (res, _) in
-                            XCTAssertNotNil(res, "Should not return nil.")
-                            redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                                print("TEST_1 \(res)")
-                            })
+                        secondConnection.unsubscribe(channels: channel1, callback: { (res, err) in
+                            XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                            XCTAssertNotNil(res, "UNSUBSCRIBE should not have returned nil.")
                           
                             // PUBLISH channel1
                             redis.publish(channel: channel1, message: messageA, callback: { (res, err) in
@@ -143,8 +162,9 @@ public class TestPubSubCommands: XCTestCase {
         extendedSetup() {
             
             // SUBSCRIBE channel1, channel2, channel3
-            secondConnection.subscribe(channels: channel1, channel2, channel3, callback: { (res, _) in
-                XCTAssertNotNil(res, "Should not return nil.")
+            secondConnection.subscribe(channels: channel1, channel2, channel3, callback: { (res, err) in
+                XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                XCTAssertNotNil(res, "SUBSCRIBE should not have returned nil.")
               
                 // PUBLISH channel1
                 redis.publish(channel: channel1, message: messageA, callback: { (res, err) in
@@ -159,11 +179,9 @@ public class TestPubSubCommands: XCTestCase {
                         XCTAssertEqual(res, 1, "PUBLISH should return 1, not \(res).")
                         
                         // UNSUBSCRIBE channel2, channel3
-                        secondConnection.unsubscribe(channels: channel2, channel3, callback: { (res, _) in
-                            XCTAssertNotNil(res, "Should not return nil.")
-                            redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                                print("TEST_2 \(res)")
-                            })
+                        secondConnection.unsubscribe(channels: channel2, channel3, callback: { (res, err) in
+                            XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                            XCTAssertNotNil(res, "UNSUBSCRIBE should not have returned nil.")
                             
                             // PUBLISH channel2
                             redis.publish(channel: channel2, message: messageA, callback: { (res, err) in
@@ -180,11 +198,9 @@ public class TestPubSubCommands: XCTestCase {
                             })
                             
                             // UNSUBSCRIBE
-                            secondConnection.unsubscribe(callback: { (res, _) in
-                                XCTAssertNotNil(res, "Should not return nil.")
-                                redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                                    print("TEST_2 \(res)")
-                                })
+                            secondConnection.unsubscribe(callback: { (res, err) in
+                                XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                                XCTAssertNotNil(res, "UNSUBSCRIBE should not have returned nil.")
                                 
                                 // PUBLISH channel1
                                 redis.publish(channel: channel1, message: messageA, callback: { (res, err) in
@@ -205,11 +221,9 @@ public class TestPubSubCommands: XCTestCase {
         extendedSetup() {
             
             // PSUBSCRIBE pattern1, pattern2, pattern3
-            secondConnection.psubscribe(patterns: pattern1, pattern2, pattern3, callback: { (res, _) in
-                XCTAssertNotNil(res, "Should not return nil.")
-                redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                    print("TEST_3 \(res)")
-                })
+            secondConnection.psubscribe(patterns: pattern1, pattern2, pattern3, callback: { (res, err) in
+                XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                XCTAssertNotNil(res, "PSUBSCRIBE should not have returned nil.")
             })
             
             // PUBLISH pattern1
@@ -225,11 +239,9 @@ public class TestPubSubCommands: XCTestCase {
                     XCTAssertEqual(res, 1, "PUBLISH should return 1, not \(res).")
                     
                     // PUBSUBSCRIBE pattern2, pattern3
-                    secondConnection.punsubscribe(patterns: pattern2, pattern3, callback: { (res, _) in
-                        XCTAssertNotNil(res, "Should not return nil.")
-                        redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                            print("TEST_3 \(res)")
-                        })
+                    secondConnection.punsubscribe(patterns: pattern2, pattern3, callback: { (res, err) in
+                        XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                        XCTAssertNotNil(res, "PUNSUBSCRIBE should not have returned nil.")
                         
                         // PUBLISH pattern2
                         redis.publish(channel: pattern2, message: messageA, callback: { (res, err) in
@@ -246,11 +258,9 @@ public class TestPubSubCommands: XCTestCase {
                         })
                         
                         // PUNSUBSCRIBE
-                        secondConnection.punsubscribe(callback: { (res, _) in
-                            XCTAssertNotNil(res, "Should not return nil.")
-                            redis.pubsubNumsub(channels: channel1, channel2, channel3, callback: { (res, err) in
-                                print("TEST_3 \(res)")
-                            })
+                        secondConnection.punsubscribe(callback: { (res, err) in
+                            XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                            XCTAssertNotNil(res, "PUNSUBSCRIBE should not have returned nil.")
                             
                             // PUBLISH pattern1
                             redis.publish(channel: pattern1, message: messageA, callback: { (res, err) in
@@ -277,12 +287,14 @@ public class TestPubSubCommands: XCTestCase {
             })
             
             // SUBSCRIBE channel1
-            secondConnection.subscribe(channels: channel1, channel2, callback: { (res, _) in
-                XCTAssertNotNil(res, "Should not return nil.")
+            secondConnection.subscribe(channels: channel1, channel2, callback: { (res, err) in
+                XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                XCTAssertNotNil(res, "SUBSCRIBE should not have returned nil.")
                 
                 // PSUBSCRIBE pattern2
-                secondConnection.psubscribe(patterns: pattern3, callback: { (res, _) in
-                    XCTAssertNotNil(res, "Should not return nil.")
+                secondConnection.psubscribe(patterns: pattern3, callback: { (res, err) in
+                    XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                    XCTAssertNotNil(res, "PSUBSCRIBE should not have returned nil.")
                     
                     // NUMSUB channel1, channel3
                     redis.pubsubNumsub(channels: channel1, channel3, callback: { (res, err) in
@@ -331,8 +343,9 @@ public class TestPubSubCommands: XCTestCase {
                 XCTAssertEqual(res, 0, "PUBSUB NUMPAT should reutnr 0, not \(res).")
                 
                 // SUBSCRIBE channel1
-                secondConnection.subscribe(channels: channel1, callback: { (res, _) in
-                    XCTAssertNotNil(res, "Should not return nil.")
+                secondConnection.subscribe(channels: channel1, callback: { (res, err) in
+                    XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                    XCTAssertNotNil(res, "SUBSCRIBE should not have returned nil.")
                     
                     // NUMPAT
                     redis.pubsubNumpat(callback: { (res, err) in
@@ -341,14 +354,15 @@ public class TestPubSubCommands: XCTestCase {
                         XCTAssertEqual(res, 0, "PUBSUB NUMPAT should reutnr 0, not \(res).")
                         
                         // PSUBSCRIBE pattern1
-                        secondConnection.psubscribe(patterns: pattern1, callback: { (res, _) in
-                            XCTAssertNotNil(res, "Should not return nil.")
+                        secondConnection.psubscribe(patterns: pattern1, callback: { (res, err) in
+                            XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
+                            XCTAssertNotNil(res, "PSUBSCRIBE should not have returned nil.")
                             
                             // NUMPAT
                             redis.pubsubNumpat(callback: { (res, err) in
                                 XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
                                 XCTAssertNotNil(res, "PUBSUB NUMPAT should not have returned nil.")
-                                XCTAssertEqual(res, 1, "PUBSUB NUMPAT should reutnr 0, not \(res).")
+                                XCTAssertEqual(res, 1, "PUBSUB NUMPAT should return 0, not \(res).")
                             })
                         })
                     })
