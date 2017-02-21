@@ -22,8 +22,17 @@ import SwiftRedis
 public class TestTransactionsPart9: XCTestCase {
     static var allTests: [(String, (TestTransactionsPart9) -> () throws -> Void)] {
         return [
-            ("test_geo", test_geo),
-            ("test_georadius", test_georadius)
+            ("test_geoaddNew", test_geoaddNew),
+            ("test_geoaddExisting", test_geoaddExisting),
+            ("test_geohash", test_geohash),
+            ("test_geopos", test_geopos),
+            ("test_geodistNonExisting", test_geoposNonExisting),
+            ("test_geodistDefault", test_geodistDefault),
+            ("test_geodistKm", test_geodistKm),
+            ("test_geodistMissingMembers", test_geodistMissingMembers),
+            ("test_georadiusWithDist", test_georadiusWithDist),
+            ("test_georadiusWithCoord", test_georadiusWithCoord),
+            ("test_georadiusbymember", test_georadiusbymember)
         ]
     }
     
@@ -70,93 +79,191 @@ public class TestTransactionsPart9: XCTestCase {
         }
     }
     
-    func test_geo() {
+    func test_geoaddNew() {
         setup {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
-            multi.geodist(key: key, member1: member1, member2: member2)
-            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 100, unit: "km")
-            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: "km")
-            multi.geohash(key: key, members: member1, member2)
-            multi.geopos(key: key, members: member1, member2, "NonExisting")
             multi.exec({ (res) in
-                if let responses = self.baseAsserts(response: res, count: 6) {
+                if let responses = self.baseAsserts(response: res, count: 1) {
                     let res0 = responses[0].asInteger
-                    XCTAssertEqual(res0, 2, "GEOADD should return 2, not \(res0).")
-                    
-                    let res1 = responses[1].asString
-                    XCTAssertEqual(res1, RedisString("166274.1516"), "GEODIST \(self.member1) \(self.member2) should return \"166274.1516\", not \(res1).")
-                    
-                    let res2 = responses[2].asArray
-                    XCTAssertEqual(res2?[0].asString, RedisString("Catania"), "GEORADIUS should return \"Catania\", not \(res2).")
-                    
-                    let res3 = responses[3].asArray
-                    let res30 = res3?[0].asString
-                    XCTAssertEqual(res30, RedisString("Palermo"), "GEORADIUS should return \"Palermo\", not \(res30).")
-                    let res31 = res3?[1].asString
-                    XCTAssertEqual(res31, RedisString("Catania"), "GEORADIUS should return \"Catania\", not \(res31).")
-                    
-                    let res4 = responses[4].asArray
-                    let res40 = res4?[0].asString
-                    XCTAssertEqual(res40, RedisString("sqc8b49rny0"), "GEOHASH \(self.key) \(self.member1) \(self.member2) should return \"sqc8b49rny0\", not \(res40).")
-                    let res41 = res4?[1].asString
-                    XCTAssertEqual(res41, RedisString("sqdtr74hyu0"), "GEOHASH \(self.key) \(self.member1) \(self.member2) should return \"sqdtr74hyu0\", not \(res41).")
-                    
-                    let res5 = responses[5].asArray
-                    let res50 = res5?[0].asArray
-                    let res500 = res50?[0].asString
-                    XCTAssertEqual(res500, RedisString("13.36138933897018433"), "GEOPOS should return \"13.36138933897018433\", not \(res500).")
-                    let res501 = res50?[1].asString
-                    XCTAssertEqual(res501, RedisString("38.11555639549629859"), "GEOPOS should return \"38.11555639549629859\", not \(res501).")
-                    let res51 = res5?[1].asArray
-                    let res510 = res51?[0].asString
-                    XCTAssertEqual(res510, RedisString("15.08726745843887329"), "GEOPOS should return \"15.08726745843887329\", not \(res510).")
-                    let res511 = res51?[1].asString
-                    XCTAssertEqual(res511, RedisString("37.50266842333162032"), "GEOPOS should return \"37.50266842333162032\", not \(res511).")
-                    let res52 = res5?[2]
-                    XCTAssertEqual(res52, RedisResponse.Nil, "GEOPOS should return nil, not \(res52).")
+                    XCTAssertEqual(res0, 2, "Should return 2 for the added elements, not \(res0).")
                 }
             })
         }
     }
     
-    func test_georadius() {
+    func test_geoaddExisting() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res1 = responses[1].asInteger
+                    XCTAssertEqual(res1, 0, "Should return 0 because it didn't add a new element, not \(res1).")
+                }
+            })
+        }
+    }
+    
+    func test_geohash() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.geohash(key: key, members: member1, member2)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res = responses[1].asArray
+                    let res0 = res?[0].asString
+                    let hash1 = RedisString("sqc8b49rny0")
+                    XCTAssertEqual(res0, hash1, "\(self.member1) hash should be \(hash1), not \(res0).")
+                    let res1 = res?[1].asString
+                    let hash2 = RedisString("sqdtr74hyu0")
+                    XCTAssertEqual(res1, hash2, "\(self.member2) hash should be \(hash2), not \(res1).")
+                }
+            })
+        }
+    }
+    
+    func test_geopos() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.geopos(key: key, members: member1, member2)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res = responses[1].asArray
+                    let res0 = res?[0].asArray
+                    let res00 = res0?[0].asString
+                    let longitude1 = RedisString("13.36138933897018433")
+                    XCTAssertEqual(res00, longitude1, "\(self.member1) longitude should be \(longitude1), not \(res00).")
+                    let res01 = res0?[1].asString
+                    let latitude1 = RedisString("38.11555639549629859")
+                    XCTAssertEqual(res01, latitude1, "\(self.member1) latitude should be \(latitude1), not \(res01).")
+                    let res1 = res?[1].asArray
+                    let res10 = res1?[0].asString
+                    let longitude2 = RedisString("15.08726745843887329")
+                    XCTAssertEqual(res10, longitude2, "\(self.member2) longitude should be \(longitude2), not \(res10).")
+                    let res11 = res1?[1].asString
+                    let latitude2 = RedisString("37.50266842333162032")
+                    XCTAssertEqual(res11, latitude2, "\(self.member2) latitude should be \(latitude2), not \(res11).")
+                }
+            })
+        }
+    }
+    
+    func test_geoposNonExisting() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.geopos(key: key, members: "NonExisting")
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res = responses[1].asArray
+                    let res0 = res?[0]
+                    XCTAssertEqual(res0, RedisResponse.Nil, "GEOPOS NonExisting should return nil, not \(res0).")
+                }
+            })
+        }
+    }
+    
+    func test_geodistDefault() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.geodist(key: key, member1: member1, member2: member2)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res = responses[1].asString
+                    let dist = RedisString("166274.1516")
+                    XCTAssertEqual(res, dist, "Distance should be \(dist), not \(res).")
+                }
+            })
+        }
+    }
+    
+    func test_geodistKm() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.geodist(key: key, member1: member1, member2: member2, unit: "km")
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res = responses[1].asString
+                    let dist = RedisString("166.2742")
+                    XCTAssertEqual(res, dist, "Distance should be \(dist), not \(res).")
+                }
+            })
+        }
+    }
+    
+    func test_geodistMissingMembers() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.geodist(key: key, member1: "Foo", member2: "Bar")
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res = responses[1]
+                    XCTAssertEqual(res, RedisResponse.Nil, "Should return nil, not \(res).")
+                }
+            })
+        }
+    }
+    
+    func test_georadiusWithDist() {
         setup {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: "km", withDist: true)
-            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: "km", withCoord: true)
             multi.exec({ (res) in
-                if let responses = self.baseAsserts(response: res, count: 3) {
+                if let responses = self.baseAsserts(response: res, count: 2) {
                     let res1 = responses[1].asArray
                     let res10 = res1?[0].asArray
                     let res100 = res10?[0].asString
-                    XCTAssertEqual(res100, RedisString(self.member1), "First GEORADIUS first location should be \(self.member1), not \(res100).")
+                    XCTAssertEqual(res100, RedisString(self.member1), "First location should be \(self.member1), not \(res100).")
                     let res101 = res10?[1].asString
-                    XCTAssertEqual(res101, RedisString("190.4424"), "First GEORADIUS first location distance should be 190.4424, not \(res101).")
+                    let dist1 = RedisString("190.4424")
+                    XCTAssertEqual(res101, dist1, "First location distance should be \(dist1), not \(res101).")
                     let res11 = res1?[1].asArray
                     let res110 = res11?[0].asString
-                    XCTAssertEqual(res110, RedisString(self.member2), "First GEORADIUS second location should be \(self.member2), not \(res110).")
+                    XCTAssertEqual(res110, RedisString(self.member2), "Second location should be \(self.member2), not \(res110).")
                     let res111 = res11?[1].asString
-                    XCTAssertEqual(res111, RedisString("56.4413"), "First GEORADIUS second location distance should be 56.4413, not \(res111).")
-                    
-                    let res2 = responses[2].asArray
-                    let res20 = res2?[0].asArray
-                    let res200 = res20?[0].asString
-                    XCTAssertEqual(res200, RedisString(self.member1), "Second GEORADIUS first location should be \(self.member1), not \(res200).")
-                    let res201 = res20?[1].asArray
-                    let res2010 = res201?[0].asString
-                    XCTAssertEqual(res2010, RedisString("13.36138933897018433"), "Second GEORADIUS first location longitude should be 13.36138933897018433, not \(res2010).")
-                    let res2011 = res201?[1].asString
-                    XCTAssertEqual(res2011, RedisString("38.11555639549629859"), "Second GEORADIUS first location latitude should be 38.11555639549629859, not \(res2011).")
-                    let res21 = res2?[1].asArray
-                    let res210 = res21?[0].asString
-                    XCTAssertEqual(res210, RedisString(self.member2), "Second GEORADIUS second location should be \(self.member2), not \(res210).")
-                    let res211 = res21?[1].asArray
-                    let res2110 = res211?[0].asString
-                    XCTAssertEqual(res2110, RedisString("15.08726745843887329"), "Second GEORADIUS second location longitude should be 15.08726745843887329, not \(res2110).")
-                    let res2111 = res211?[1].asString
-                    XCTAssertEqual(res2111, RedisString("37.50266842333162032"), "Second GEORADIUS second location latitude should be 37.50266842333162032, not \(res2111).")
+                    let dist2 = RedisString("56.4413")
+                    XCTAssertEqual(res111, dist2, "Second location distance should be \(dist2), not \(res111).")
+                }
+            })
+        }
+    }
+    
+    func test_georadiusWithCoord() {
+        setup {
+            let multi = redis.multi()
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: "km", withCoord: true)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    let res1 = responses[1].asArray
+                    let res10 = res1?[0].asArray
+                    let res100 = res10?[0].asString
+                    XCTAssertEqual(res100, RedisString(self.member1), "First location should be \(self.member1), not \(res100).")
+                    let res101 = res10?[1].asArray
+                    let res1010 = res101?[0].asString
+                    let longitude1 = RedisString("13.36138933897018433")
+                    XCTAssertEqual(res1010, longitude1, "First location longitude should be \(longitude1), not \(res1010).")
+                    let res1011 = res101?[1].asString
+                    let latitude1 = RedisString("38.11555639549629859")
+                    XCTAssertEqual(res1011, latitude1, "First location latitude should be \(latitude1), not \(res1011).")
+                    let res11 = res1?[1].asArray
+                    let res110 = res11?[0].asString
+                    XCTAssertEqual(res110, RedisString(self.member2), "Second location should be \(self.member2), not \(res110).")
+                    let res111 = res11?[1].asArray
+                    let res1110 = res111?[0].asString
+                    let longitude2 = RedisString("15.08726745843887329")
+                    XCTAssertEqual(res1110, longitude2, "Second location longitude should be \(longitude2), not \(res1110).")
+                    let res1111 = res111?[1].asString
+                    let latitude2 = RedisString("37.50266842333162032")
+                    XCTAssertEqual(res1111, latitude2, "Second location latitude should be \(latitude2), not \(res1111).")
                 }
             })
         }
@@ -165,7 +272,18 @@ public class TestTransactionsPart9: XCTestCase {
     func test_georadiusbymember() {
         setup {
             let multi = redis.multi()
-            
+            multi.geoadd(key: key, geospatialItems: (13.583333, 37.316667, "Agrigento"))
+            multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
+            multi.georadiusbymember(key: key, member: "Agrigento", radius: 100, unit: "km")
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 3) {
+                    let res2 = responses[2].asArray
+                    let res20 = res2?[0].asString
+                    XCTAssertEqual(res20, RedisString("Agrigento"), "First city should be Agrigento, not \(res20).")
+                    let res21 = res2?[1].asString
+                    XCTAssertEqual(res21, RedisString(self.member1), "Second city should be \(self.member1), not \(res21).")
+                }
+            })
         }
     }
 }
