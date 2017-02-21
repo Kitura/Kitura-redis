@@ -313,7 +313,8 @@ public class Redis {
     ///
     /// - parameter response: The RedisResponse to be parsed.
     /// - parameter callback: The callback function.
-    /// - parameter result: The array constructed from parsing the RedisResponse. Elements will be RedisString,
+    /// - parameter result: The array constructed from parsing the 
+    ///                     RedisResponse. Elements will be RedisString,
     ///                     [RedisResponse], or nil.
     /// - parameter error: Non-nil if an error occurred.
     func redisAnyArrayResponseHandler(response: RedisResponse, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
