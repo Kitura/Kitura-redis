@@ -34,7 +34,10 @@ public class TestBasicCommands: XCTestCase {
             ("test_SetExpireOptions", test_SetExpireOptions),
             ("test_incrDecr", test_incrDecr),
             ("test_incrFloats", test_incrFloats),
-            ("test_empty", test_empty)
+            ("test_empty", test_empty),
+            ("test_scan", test_scan),
+            ("test_scanPattern", test_scanPattern),
+            ("test_scanCount", test_scanCount)
         ]
     }
 
