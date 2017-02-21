@@ -54,7 +54,7 @@ extension Redis {
     /// - parameter res: The following list: ("subscribe", channel just 
     ///                  subscribed to, number of active subscriptions). Only
     ///                  returns the first channel subscribed to.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func subscribe(channels: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         subscribeArrayOfChannels(channels: channels, callback: callback)
     }
@@ -66,7 +66,7 @@ extension Redis {
     /// - parameter res: The following list: ("subscribe", channel just
     ///                  subscribed to, number of active subscriptions). Only
     ///                  returns the first channel subscribed to.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func subscribeArrayOfChannels(channels: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["SUBSCRIBE"]
         for channel in channels {
@@ -84,7 +84,7 @@ extension Redis {
     /// - parameter res: The following list: ("psubscribe", channel just
     ///                  subscribed to, number of active subscriptions). Only
     ///                  returns the first channel subscribed to.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func psubscribe(patterns: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         psubscribeArrayOfPattens(patterns: patterns, callback: callback)
     }
@@ -96,7 +96,7 @@ extension Redis {
     /// - parameter res: The following list: ("psubscribe", channel just
     ///                  subscribed to, number of active subscriptions). Only
     ///                  returns the first channel subscribed to.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func psubscribeArrayOfPattens(patterns: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["PSUBSCRIBE"]
         for pattern in patterns {
@@ -119,7 +119,7 @@ extension Redis {
     ///                  unsubscribed to. NOTE: Will return a different value if
     ///                  there has been a message published in the channel 
     ///                  unsubscribed from.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func unsubscribe(channels: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         unsubscribeArrayOfChannels(channels: channels, callback: callback)
     }
@@ -136,7 +136,7 @@ extension Redis {
     ///                  unsubscribed to. NOTE: Will return a different value if
     ///                  there has been a message published in the channel
     ///                  unsubscribed from.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func unsubscribeArrayOfChannels(channels: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["UNSUBSCRIBE"]
         for channels in channels {
@@ -158,7 +158,7 @@ extension Redis {
     ///                  Only returns the first channel unsubscribed to. NOTE:
     ///                  Will return a different value if there has been a
     ///                  message published in the channel unsubscribed from.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func punsubscribe(patterns: String..., callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         punsubscribeArrayOfPatterns(patterns: patterns, callback: callback)
     }
@@ -174,7 +174,7 @@ extension Redis {
     ///                  Only returns the first channel unsubscribed to. NOTE:
     ///                  Will return a different value if there has been a
     ///                  message published in the channel unsubscribed from.
-    /// - parameter err: Always nil.
+    /// - parameter err: Non-nil if an err occurred.
     public func punsubscribeArrayOfPatterns(patterns: [String], callback: (_ res: [Any?]?, _ err: NSError?) -> Void) {
         var command = ["PUNSUBSCRIBE"]
         for pattern in patterns {
