@@ -470,6 +470,38 @@ extension Redis {
         }
     }
 
+    /// Iterates the set of keys in the currently selected Redis database.
+    ///
+    /// - parameter cursor: Where to begin iterating.
+    /// - parameter match: Glob-style pattern to match elements against.
+    /// - parameter count: Amount of elements to try to iterate.
+    /// - parameter callback: The callback function.
+    /// - parameter newCursor: The new cursor to be used to continue iterating
+    ///                        remaining elements. If 0, all elements have been
+    ///                        iterated.
+    /// - parameter res: The results of the scan.
+    /// - parameter err: The error, if one occured.
+    public func scan(cursor: Int, match: String?=nil, count: Int?=nil, callback: (_ newCursor: RedisString?, _ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        if let match = match, let count = count {
+            issueCommand("SCAN", String(cursor), "MATCH", match, "COUNT", String(count)) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        } else if let match = match {
+            issueCommand("SCAN", String(cursor), "MATCH", match) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        } else if let count = count {
+            issueCommand("SCAN", String(cursor), "COUNT", String(count)) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        } else {
+            issueCommand("SCAN", String(cursor)) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        }
+    }
+
+    
     /// Set a key to hold a value. If key already holds a value, it is overwritten.
     ///
     /// - Parameter key: The key.

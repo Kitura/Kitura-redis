@@ -44,14 +44,13 @@ public class TestBasicCommands: XCTestCase {
     var key4: String { return "test4" }
 
     func localSetup(block: () -> Void) {
-        connectRedis() {(error: NSError?) in
-            if error != nil {
-                XCTFail("Could not connect to Redis")
-                return
-            }
-            redis.del(self.key1, self.key2, self.key3, self.key4) {(deleted: Int?, error: NSError?) in
+        connectRedis() {(err: NSError?) in
+            XCTAssertNil(err, "\(err)")
+
+            redis.flushdb(callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
                 block()
-            }
+            })
         }
     }
 
@@ -227,6 +226,117 @@ public class TestBasicCommands: XCTestCase {
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertEqual(returnedValue!.asString, emptyValue, "Returned value was not '\(emptyValue)'")
                 }
+            }
+        }
+    }
+    
+    func test_scan() {
+        let exp = expectation(description: "Iterate over some elements.")
+        localSetup {
+            let dispatchGroup = DispatchGroup()
+            for _ in 0...3 {
+                dispatchGroup.enter()
+            }
+            redis.set(key1, value: "Sa", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key2, value: "nt", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key3, value: "er", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key4, value: "ia", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            dispatchGroup.wait()
+            
+            redis.scan(cursor: 0, callback: { (newCursor, res, err) in
+                XCTAssertNil(err, "\(err)")
+                XCTAssertNotNil(newCursor)
+                XCTAssertEqual(res?.count, 4)
+                exp.fulfill()
+            })
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
+        }
+    }
+
+    func test_scanPattern() {
+        let exp = expectation(description: "Iterate over elements matching a pattern.")
+        localSetup {
+            let dispatchGroup = DispatchGroup()
+            for _ in 0...3 {
+                dispatchGroup.enter()
+            }
+            redis.set(key1, value: "Sa", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key2, value: "nt", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key3, value: "er", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key4, value: "ia", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            dispatchGroup.wait()
+            
+            redis.scan(cursor: 0, match: "*1", callback: { (newCursor, res, err) in
+                XCTAssertNil(err, "\(err)")
+                XCTAssertNotNil(newCursor)
+                XCTAssertEqual(res?.count, 1)
+                exp.fulfill()
+            })
+            waitForExpectations(timeout: 5) { (err) in
+                XCTAssertNil(err, "\(err)")
+            }
+        }
+    }
+    
+    func test_scanCount() {
+        let exp = expectation(description: "Iterate over a certain number of elements.")
+        localSetup {
+            let dispatchGroup = DispatchGroup()
+            for _ in 0...3 {
+                dispatchGroup.enter()
+            }
+            redis.set(key1, value: "Sa", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key2, value: "nt", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key3, value: "er", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            redis.set(key4, value: "ia", callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                dispatchGroup.leave()
+            })
+            dispatchGroup.wait()
+            
+            redis.scan(cursor: 0, count: 2, callback: { (newCursor, res, err) in
+                XCTAssertNil(err, "\(err)")
+                XCTAssertNotNil(newCursor)
+                XCTAssertEqual(res?.count, 2)
+                exp.fulfill()
+            })
+            waitForExpectations(timeout: 5) { (err) in
+                XCTAssertNil(err, "\(err)")
             }
         }
     }
