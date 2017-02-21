@@ -247,6 +247,18 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
+    
+    /// Returns all keys matching `pattern`.
+    ///
+    /// - parameter pattern: The glob-style pattern to match against.
+    /// - parameter callback: The callback function.
+    /// - parameter res: List of keys matching `pattern`.
+    /// - parameter err: The error, if one occurred.
+    public func keys(pattern: String, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        issueCommand("KEYS", pattern) { (res) in
+            redisStringArrayResponseHandler(res, callback: callback)
+        }
+    }
 
     /// Get the value of a key.
     ///
@@ -448,6 +460,17 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
+    
+    /// Return a random key from the currently selected database.
+    ///
+    /// - parameter callback: The callback function.
+    /// - parameter res: The random key, or nil when the database is empty.
+    /// - parameter err: The error, if one occurred.
+    public func randomkey(callback: (_ res: RedisString?, _ err: NSError?) -> Void) {
+        issueCommand("RANDOMKEY") { (res) in
+            redisStringResponseHandler(res, callback: callback)
+        }
+    }
 
     /// Renames a key. It returns an error if the original and new names are the same,
     /// or when the original key does not exist.
@@ -584,6 +607,36 @@ extension Redis {
     public func strlen(_ key: String, callback: (Int?, NSError?) -> Void) {
         issueCommand("STRLEN", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    /// Alters the last access time of a key(s). A key is ignored if it does not 
+    /// exist.
+    ///
+    /// - parameter key: The key to touch.
+    /// - parameter keys: Additional keys to touch.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The number of keys that were touched.
+    /// - parameter err: The error, if one occurred.
+    public func touch(key: String, keys: String..., callback: (_ res: Int?, _ err: NSError?) -> Void) {
+        touchArrayOfKeys(key: key, keys: keys, callback: callback)
+    }
+    
+    /// Alters the last access time of a key(s). A key is ignored if it does not
+    /// exist.
+    ///
+    /// - parameter key: The key to touch.
+    /// - parameter keys: Additional keys to touch.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The number of keys that were touched.
+    /// - parameter err: The error, if one occurred.
+    public func touchArrayOfKeys(key: String, keys: [String], callback: (_ res: Int?, _ err: NSError?) -> Void) {
+        var command = ["TOUCH", key]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) { (res) in
+            redisIntegerResponseHandler(res, callback: callback)
         }
     }
     
