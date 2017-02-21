@@ -23,16 +23,16 @@ extension Redis {
     //  MARK: Geo API functions
     //
     
-    /// (latitude, longitude, name)
+    /// (longitude, latitude, name)
     public typealias GeospatialItem = (Double, Double, String)
     
-    /// Adds the specified geospatial items (latitude, longitude, name) to the 
+    /// Adds the specified geospatial items (longitude, latitude, name) to the
     /// specified key.
     /// 
     /// - parameter key: The key of the geospatial index to add the geospacial 
     ///                  items to. It will be created if it does not exist.
-    /// - parameter geospatialItems: A geospatial item is (latitude: Double, 
-    ///                              longitude: Double, name: String).
+    /// - parameter geospatialItems: A geospatial item is (longitude: Double,
+    ///                              latitude: Double, name: String).
     /// - parameter callback: The callback function.
     /// - parameter result: The number of elements added to the sorted set, not 
     ///                     including elements already existing for which the
@@ -42,13 +42,13 @@ extension Redis {
         geoaddArrayOfGeospatialItems(key: key, geospatialItems: geospatialItems, callback: callback)
     }
     
-    /// Adds the specified geospatial items (latitude, longitude, name) to the
+    /// Adds the specified geospatial items (longitude, latitude, name) to the
     /// specified key.
     ///
     /// - parameter key: The key of the geospatial index to add the geospacial
     ///                  items to. It will be created if it does not exist.
-    /// - parameter geospatialItems: A geospatial item is (latitude: Double,
-    ///                              longitude: Double, name: String).
+    /// - parameter geospatialItems: A geospatial item is (longitude: Double,
+    ///                              latitude: Double, name: String).
     /// - parameter callback: The callback function.
     /// - parameter result: The number of elements added to the sorted set, not
     ///                     including elements already existing for which the

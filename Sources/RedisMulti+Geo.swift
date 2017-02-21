@@ -19,16 +19,16 @@ import Foundation
 /// Extend RedisMulti by adding the Geo operations
 extension RedisMulti {
     
-    /// (latitude, longitude, name)
+    /// (longitude, latitude, name)
     public typealias GeospatialItem = (Double, Double, String)
     
-    /// Adds the specified geospatial items (latitude, longitude, name) to the
+    /// Adds the specified geospatial items (longitude, latitude, name) to the
     /// specified key.
     ///
     /// - parameter key: The key of the geospatial index to add the geospacial
     ///                  items to. It will be created if it does not exist.
-    /// - parameter geospatialItems: A geospatial item is (latitude: Double,
-    ///                              longitude: Double, name: String).
+    /// - parameter geospatialItems: A geospatial item is (longitude: Double,
+    ///                              latitude: Double, name: String).
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
@@ -36,13 +36,13 @@ extension RedisMulti {
         return geoaddArrayOfGeospatialItems(key: key, geospatialItems: geospatialItems)
     }
     
-    /// Adds the specified geospatial items (latitude, longitude, name) to the
+    /// Adds the specified geospatial items (longitude, latitude, name) to the
     /// specified key.
     ///
     /// - parameter key: The key of the geospatial index to add the geospacial
     ///                  items to. It will be created if it does not exist.
-    /// - parameter geospatialItems: A geospatial item is (latitude: Double,
-    ///                              longitude: Double, name: String).
+    /// - parameter geospatialItems: A geospatial item is (longitude: Double,
+    ///                              latitude: Double, name: String).
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
