@@ -242,18 +242,22 @@ public class TestBasicCommands: XCTestCase {
             }
             redis.set(key1, value: "Sa", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key2, value: "nt", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key3, value: "er", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key4, value: "ia", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             dispatchGroup.wait()
@@ -279,18 +283,22 @@ public class TestBasicCommands: XCTestCase {
             }
             redis.set(key1, value: "Sa", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key2, value: "nt", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key3, value: "er", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key4, value: "ia", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             dispatchGroup.wait()
@@ -316,18 +324,22 @@ public class TestBasicCommands: XCTestCase {
             }
             redis.set(key1, value: "Sa", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key2, value: "nt", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key3, value: "er", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             redis.set(key4, value: "ia", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
                 dispatchGroup.leave()
             })
             dispatchGroup.wait()

@@ -25,7 +25,10 @@ public class TestHashCommands: XCTestCase {
             ("test_hashSetAndGet", test_hashSetAndGet),
             ("test_Incr", test_Incr),
             ("test_bulkCommands", test_bulkCommands),
-            ("test_binarySafeHsetAndHmset", test_binarySafeHsetAndHmset)
+            ("test_binarySafeHsetAndHmset", test_binarySafeHsetAndHmset),
+            ("test_hscan", test_hscan),
+            ("test_hscanPattern", test_hscanPattern),
+            ("test_hscanCount", test_hscanCount)
         ]
     }
 
@@ -36,6 +39,19 @@ public class TestHashCommands: XCTestCase {
     let field3 = "f3"
     let field4 = "f4"
 
+    private func setupTests(callback: () -> Void) {
+        connectRedis() {(error: NSError?) in
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
+            
+            redis.del(self.key1) {(deleted: Int?, error: NSError?) in
+                callback()
+            }
+        }
+    }
+    
     func test_hashSetAndGet() {
         setupTests() {
             let expVal1 = "testing, testing, 1 2 3"
@@ -227,17 +243,60 @@ public class TestHashCommands: XCTestCase {
         }
     }
 
+    func test_hscan() {
+        let exp = expectation(description: "Iterate fields of Hash types and their associated values.")
+        setupTests {
+            redis.hmset(key1, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
+                redis.hscan(key: key1, cursor: 0, callback: { (newCursor, res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNotNil(newCursor)
+                    XCTAssertEqual(res?.count, 4)
+                    exp.fulfill()
+                })
+            })
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
+        }
+    }
+    
+    func test_hscanPattern() {
+        let exp = expectation(description: "Iterate fields of Hash types and their associated values that match a pattern.")
+        setupTests {
+            redis.hmset(key1, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
+                redis.hscan(key: key1, cursor: 0, match: "link*", callback: { (newCursor, res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNotNil(newCursor)
+                    XCTAssertEqual(res?.count, 2)
+                    exp.fulfill()
+                })
+            })
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
+        }
+    }
 
-    private func setupTests(callback: () -> Void) {
-        connectRedis() {(error: NSError?) in
-            if error != nil {
-                XCTFail("Could not connect to Redis")
-                return
-            }
-
-            redis.del(self.key1) {(deleted: Int?, error: NSError?) in
-                callback()
-            }
+    func test_hscanCount() {
+        let exp = expectation(description: "Iterate a certain number of fields of Hash types and their associated values.")
+        setupTests {
+            redis.hmset(key1, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, true)
+                redis.hscan(key: key1, cursor: 0, count: 1, callback: { (newCursor, res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNotNil(newCursor)
+                    XCTAssertNotNil(res)
+                    exp.fulfill()
+                })
+            })
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
         }
     }
 }
