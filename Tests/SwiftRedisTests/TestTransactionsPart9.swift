@@ -26,7 +26,7 @@ public class TestTransactionsPart9: XCTestCase {
             ("test_geoaddExisting", test_geoaddExisting),
             ("test_geohash", test_geohash),
             ("test_geopos", test_geopos),
-            ("test_geodistNonExisting", test_geoposNonExisting),
+            ("test_geoposNonExisting", test_geoposNonExisting),
             ("test_geodistDefault", test_geodistDefault),
             ("test_geodistKm", test_geodistKm),
             ("test_geodistMissingMembers", test_geodistMissingMembers),
@@ -47,13 +47,13 @@ public class TestTransactionsPart9: XCTestCase {
     let member2 = "Catania"
     
     private func setup(callback: () -> Void) {
-        connectRedis() {(error: NSError?) in
-            guard error == nil else {
+        connectRedis() {(err: NSError?) in
+            guard err == nil else {
                 XCTFail("Could not connect to Redis.")
                 return
             }
             redis.del(key, callback: { (res, err) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")  
+                XCTAssertNil(err, "\(err != nil ? err!.localizedDescription : "")")
                 callback()
             })
         }
