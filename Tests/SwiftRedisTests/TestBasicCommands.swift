@@ -75,6 +75,12 @@ public class TestBasicCommands: XCTestCase {
             })
         }
     }
+    
+    func test_bitfield() {
+        localSetup {
+            
+        }
+    }
 
     func test_setAndGet() {
         localSetup() {

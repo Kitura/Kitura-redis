@@ -58,6 +58,69 @@ extension Redis {
         }
     }
     
+    /// Treats a Redis string as a array of bits, and is capable of addressing 
+    /// specific integer fields of varying bit widths and arbitrary non 
+    /// (necessary) aligned offset.
+    /// https://redis.io/commands/bitfield
+    ///
+    /// - parameter key: The key of the string to manipulate.
+    /// - parameter subcommand: `BitfieldSubcommand`s to do on the string.
+    /// - parameter callback: The callback function.
+    /// - parameter res: An array with each entry being the corresponding result 
+    ///                  of the sub command given at the same position. OVERFLOW 
+    ///                  subcommands don't count as generating a reply.
+    /// - parameter err: The error, if one occurred.
+    public func bitfield(key: String, subcommands: BitfieldSubcommand..., callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        bitfieldArrayOfSubcommands(key: key, subcommands: subcommands, callback: callback)
+    }
+    
+    /// Treats a Redis string as a array of bits, and is capable of addressing
+    /// specific integer fields of varying bit widths and arbitrary non
+    /// (necessary) aligned offset.
+    /// https://redis.io/commands/bitfield
+    ///
+    /// - parameter key: The key of the string to manipulate.
+    /// - parameter subcommand: `BitfieldSubcommand`s to do on the string.
+    /// - parameter callback: The callback function.
+    /// - parameter res: An array with each entry being the corresponding result
+    ///                  of the sub command given at the same position. OVERFLOW
+    ///                  subcommands don't count as generating a reply.
+    /// - parameter err: The error, if one occurred.
+    public func bitfieldArrayOfSubcommands(key: String, subcommands: [BitfieldSubcommand], callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        var command = ["BITFIELD", key]
+        for subcommand in subcommands {
+            switch(subcommand) {
+            case .get(let type, let offset):
+                command.append("GET")
+                command.append(String(type))
+                command.append(String(offset))
+            case .set(let type, let offset, let value):
+                command.append("SET")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(value))
+            case .incrby(let type, let offset, let incr):
+                command.append("INCRBY")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(incr))
+            case .overflow(let overflow):
+                command.append("OVERFLOW")
+                switch(overflow) {
+                case .wrap:
+                    command.append("WRAP")
+                case .sat:
+                    command.append("SAT")
+                case .fail:
+                    command.append("FAIL")
+                }
+            }
+        }
+        issueCommandInArray(command) { (res) in
+            redisStringArrayResponseHandler(res, callback: callback)
+        }
+    }
+    
     /// Perform a bitwise AND operation between multiple keys and store the result at the destination key.
     ///
     /// - Parameter destKey: The destination key.
@@ -606,7 +669,7 @@ extension Redis {
     /// at key.
     ///
     /// - parameter key: They key for the list, set, or sorted set.
-    /// - parameter pattern: Pattern used to generate the keys used for sorting.
+    /// - parameter pattern: Pattern used to generate keys used for sorting.
     /// - parameter limit: (offset, count) where `offset` is the  number of
     ///                    elements to skip in the result, and `count` is the
     ///                    number of elements to return starting from `offset`.
@@ -629,7 +692,7 @@ extension Redis {
     /// at key.
     ///
     /// - parameter key: They key for the list, set, or sorted set.
-    /// - parameter pattern: Pattern used to generate the keys used for sorting.
+    /// - parameter pattern: Pattern used to generate keys used for sorting.
     /// - parameter limit: (offset, count) where `offset` is the  number of 
     ///                    elements to skip in the result, and `count` is the 
     ///                    number of elements to return starting from `offset`.
@@ -751,6 +814,26 @@ extension Redis {
     public func type(key: String, callback: (_ res: String?, _ err: NSError?) -> Void) {
         issueCommand("TYPE", key) { (res) in
             redisSimpleStringResponseHandler(response: res, callback: callback)
+        }
+    }
+    
+    public enum BitfieldSubcommand {
+        // (type, offset)
+        case get(String, Int)
+        
+        // (type, offset, value)
+        case set(String, Int, String)
+        
+        // (type, offset, increment)
+        case incrby(String, Int, Int)
+        
+        // (wrap/sat/fail)
+        case overflow(BitfieldOverflow)
+        
+        public enum BitfieldOverflow {
+            case wrap
+            case sat
+            case fail
         }
     }
 }
