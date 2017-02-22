@@ -39,9 +39,9 @@ public class TestBasicCommands: XCTestCase {
             ("test_scan", test_scan),
             ("test_scanPattern", test_scanPattern),
             ("test_scanCount", test_scanCount),
-            ("test_touchNone", test_touchNone),
-            ("test_touchOne", test_touchOne),
-            ("test_touchMulti", test_touchMulti),
+//            ("test_touchNone", test_touchNone),
+//            ("test_touchOne", test_touchOne),
+//            ("test_touchMulti", test_touchMulti),
             ("test_type", test_type),
             ("test_typeBadKey", test_typeBadKey)
         ]
@@ -337,38 +337,38 @@ public class TestBasicCommands: XCTestCase {
         }
     }
     
-    func test_touchNone() {
-        let exp = expectation(description: "Alters the last access time of a key(s).")
-        localSetup {
-            redis.touch(key: key1, callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, 0)
-                exp.fulfill()
-            })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
-        }
-    }
-    
-    func test_touchOne() {
-        let exp = expectation(description: "Alters the last access time of a key(s).")
-        localSetup {
-            redis.set(key1, value: "Hello", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                
-                redis.touch(key: key1, callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
-                    XCTAssertEqual(res, 1)
-                    exp.fulfill()
-                })
-            })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
-        }
-    }
+//    func test_touchNone() {
+//        let exp = expectation(description: "Alters the last access time of a key(s).")
+//        localSetup {
+//            redis.touch(key: key1, callback: { (res, err) in
+//                XCTAssertNil(err, "\(err)")
+//                XCTAssertEqual(res, 0)
+//                exp.fulfill()
+//            })
+//        }
+//        waitForExpectations(timeout: 5) { (err) in
+//            XCTAssertNil(err, "\(err)")
+//        }
+//    }
+//    
+//    func test_touchOne() {
+//        let exp = expectation(description: "Alters the last access time of a key(s).")
+//        localSetup {
+//            redis.set(key1, value: "Hello", callback: { (res, err) in
+//                XCTAssertNil(err, "\(err)")
+//                XCTAssert(res)
+//                
+//                redis.touch(key: key1, callback: { (res, err) in
+//                    XCTAssertNil(err, "\(err)")
+//                    XCTAssertEqual(res, 1)
+//                    exp.fulfill()
+//                })
+//            })
+//        }
+//        waitForExpectations(timeout: 5) { (err) in
+//            XCTAssertNil(err, "\(err)")
+//        }
+//    }
     
     func test_touchMulti() {
         let exp = expectation(description: "Alters the last access time of a key(s).")
