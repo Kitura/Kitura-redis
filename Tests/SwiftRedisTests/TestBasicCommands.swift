@@ -24,7 +24,6 @@ import SwiftRedis
 
 import Foundation
 import XCTest
-import Dispatch
 
 public class TestBasicCommands: XCTestCase {
     static var allTests: [(String, (TestBasicCommands) -> () throws -> Void)] {
@@ -57,11 +56,6 @@ public class TestBasicCommands: XCTestCase {
         connectRedis() {(err: NSError?) in
             XCTAssertNil(err, "\(err)")
 
-//            redis.del(key1, key2, key3, key4, callback: { (res, err) in
-//                XCTAssertNil(err, "\(err)")
-//                block()
-//            })
-            
             redis.flushdb(callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 block()
@@ -286,37 +280,16 @@ public class TestBasicCommands: XCTestCase {
     func test_scan() {
         let exp = expectation(description: "Iterate over some elements.")
         localSetup {
-            let dispatchGroup = DispatchGroup()
-            for _ in 0...3 {
-                dispatchGroup.enter()
-            }
-            redis.set(key1, value: "Sa", callback: { (res, err) in
+            redis.mset(("key1", "val1"), ("key2", "val2"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key2, value: "nt", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key3, value: "er", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key4, value: "ia", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            dispatchGroup.wait()
-            
-            redis.scan(cursor: 0, callback: { (newCursor, res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssertNotNil(newCursor)
-                XCTAssertEqual(res?.count, 4)
-                exp.fulfill()
+                
+                redis.scan(cursor: 0, callback: { (newCursor, res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNotNil(newCursor)
+                    XCTAssertEqual(res?.count, 2)
+                    exp.fulfill()
+                })
             })
         }
         waitForExpectations(timeout: 5) { (err) in
@@ -327,37 +300,16 @@ public class TestBasicCommands: XCTestCase {
     func test_scanPattern() {
         let exp = expectation(description: "Iterate over elements matching a pattern.")
         localSetup {
-            let dispatchGroup = DispatchGroup()
-            for _ in 0...3 {
-                dispatchGroup.enter()
-            }
-            redis.set(key1, value: "Sa", callback: { (res, err) in
+            redis.mset(("key1", "val1"), ("key2", "val2"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key2, value: "nt", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key3, value: "er", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key4, value: "ia", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            dispatchGroup.wait()
             
-            redis.scan(cursor: 0, match: "*1", callback: { (newCursor, res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssertNotNil(newCursor)
-                XCTAssertNotNil(res)
-                exp.fulfill()
+                redis.scan(cursor: 0, match: "*1", callback: { (newCursor, res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNotNil(newCursor)
+                    XCTAssertNotNil(res)
+                    exp.fulfill()
+                })
             })
         }
         waitForExpectations(timeout: 5) { (err) in
@@ -368,37 +320,16 @@ public class TestBasicCommands: XCTestCase {
     func test_scanCount() {
         let exp = expectation(description: "Iterate over a certain number of elements.")
         localSetup {
-            let dispatchGroup = DispatchGroup()
-            for _ in 0...3 {
-                dispatchGroup.enter()
-            }
-            redis.set(key1, value: "Sa", callback: { (res, err) in
+            redis.mset(("key1", "val1"), ("key2", "val2"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key2, value: "nt", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key3, value: "er", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            redis.set(key4, value: "ia", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssert(res)
-                dispatchGroup.leave()
-            })
-            dispatchGroup.wait()
             
-            redis.scan(cursor: 0, count: 2, callback: { (newCursor, res, err) in
-                XCTAssertNil(err, "\(err)")
-                XCTAssertNotNil(newCursor)
-                XCTAssertNotNil(res)
-                exp.fulfill()
+                redis.scan(cursor: 0, count: 2, callback: { (newCursor, res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNotNil(newCursor)
+                    XCTAssertNotNil(res)
+                    exp.fulfill()
+                })
             })
         }
         waitForExpectations(timeout: 5) { (err) in
