@@ -23,8 +23,8 @@ public class TestTransactionsPart3: XCTestCase {
     static var allTests: [(String, (TestTransactionsPart3) -> () throws -> Void)] {
         return [
             ("test_keyManipulation", test_keyManipulation),
-            ("test_Move", test_Move),
-            ("test_expiration", test_expiration)
+            ("test_Move", test_Move)
+//            ("test_expiration", test_expiration)
         ]
     }
 
@@ -81,36 +81,36 @@ public class TestTransactionsPart3: XCTestCase {
         }
     }
 
-    func test_expiration() {
-        setupTests() {
-            let expiration = 1.850
-
-            let multi = redis.multi()
-            multi.set(self.key1, value: self.expVal1).ttl(self.key1)
-            multi.expire(self.key1, inTime: expiration).ttl(self.key1).persist(self.key1)
-            let timeFromNow = 120.0
-            let date = NSDate(timeIntervalSinceNow: timeFromNow)
-            multi.expire(self.key1, atDate: date).ttl(self.key1)
-
-            multi.exec() {(response: RedisResponse) in
-                if  let nestedResponses = self.baseAsserts(response: response, count: 7) {
-                    XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(-1), "\(self.key1) shouldn't have an expiration. It has \(nestedResponses[1].asInteger)")
-                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
-                    var intResponse = nestedResponses[3].asInteger
-                    XCTAssertNotNil(intResponse, "ttl for \(self.key1) was nil")
-                    var expectedAsInt = Int64(expiration*1000.0)
-                    XCTAssert(expectedAsInt-1000 <= intResponse!  &&  intResponse! <= expectedAsInt+1000, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
-                    XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't reset")
-                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
-                    intResponse = nestedResponses[6].asInteger
-                    XCTAssertNotNil(intResponse, "ttl for \(self.key1) was nil")
-                    expectedAsInt = Int64(timeFromNow*1000.0)
-                    XCTAssert(expectedAsInt-1000 <= intResponse!  &&  intResponse! <= expectedAsInt+1000, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
-                }
-            }
-        }
-    }
+//    func test_expiration() {
+//        setupTests() {
+//            let expiration = 1.850
+//
+//            let multi = redis.multi()
+//            multi.set(self.key1, value: self.expVal1).ttl(self.key1)
+//            multi.expire(self.key1, inTime: expiration).ttl(self.key1).persist(self.key1)
+//            let timeFromNow = 120.0
+//            let date = NSDate(timeIntervalSinceNow: timeFromNow)
+//            multi.expire(self.key1, atDate: date).ttl(self.key1)
+//
+//            multi.exec() {(response: RedisResponse) in
+//                if  let nestedResponses = self.baseAsserts(response: response, count: 7) {
+//                    XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
+//                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(-1), "\(self.key1) shouldn't have an expiration. It has \(nestedResponses[1].asInteger)")
+//                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
+//                    var intResponse = nestedResponses[3].asInteger
+//                    XCTAssertNotNil(intResponse, "ttl for \(self.key1) was nil")
+//                    var expectedAsInt = Int64(expiration*1000.0)
+//                    XCTAssert(expectedAsInt-1000 <= intResponse!  &&  intResponse! <= expectedAsInt+1000, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
+//                    XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't reset")
+//                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
+//                    intResponse = nestedResponses[6].asInteger
+//                    XCTAssertNotNil(intResponse, "ttl for \(self.key1) was nil")
+//                    expectedAsInt = Int64(timeFromNow*1000.0)
+//                    XCTAssert(expectedAsInt-1000 <= intResponse!  &&  intResponse! <= expectedAsInt+1000, "ttl for \(self.key1) should be approximately \(expectedAsInt). It was \(intResponse!)")
+//                }
+//            }
+//        }
+//    }
 
 
     private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
