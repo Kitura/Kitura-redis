@@ -607,9 +607,9 @@ extension Redis {
     ///
     /// - parameter key: They key for the list, set, or sorted set.
     /// - parameter pattern: Pattern used to generate the keys used for sorting.
-    /// - parameter limit: (offset, count) where offset is the position in the 
-    ///                    list to start sorting, and count is the number of 
-    ///                    elements to sort.
+    /// - parameter limit: (offset, count) where `offset` is the  number of
+    ///                    elements to skip in the result, and `count` is the
+    ///                    number of elements to return starting from `offset`.
     /// - parameter get: Pattern to use to retrieve an external key based on the
     ///                  elements in the list. Multiple `get`s can be chained to
     ///                  retrieve multiple external keys.
@@ -617,10 +617,61 @@ extension Redis {
     /// - parameter alpha: Sort the list of string values lexicographically.
     /// - parameter store: The key to where the result should be stored.
     /// - parameter callback: The callback function.
-    /// - parameter res: The list of sorted elements.
+    /// - parameter res: The list of sorted elements. If `store` is used, array
+    ///                  contains one element indicating number of values
+    ///                  stored.
     /// - parameter err: The error, if one occurred.
-    public func sort(key: String, pattern: String?=nil, limit: Limit?=nil, get: String?..., desc: Bool?=false, store: String?=nil, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
-        
+    public func sort(key: String, by pattern: String?=nil, limit: Limit?=nil, get: String..., desc: Bool?=false, alpha: Bool?=false, store: String?=nil, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        sortArrayOfGetPatterns(key: key, by: pattern, limit: limit, get: get, desc: desc, alpha: alpha, store: store, callback: callback)
+    }
+    
+    /// Returns or stores the elements contained in the list, set or sorted set
+    /// at key.
+    ///
+    /// - parameter key: They key for the list, set, or sorted set.
+    /// - parameter pattern: Pattern used to generate the keys used for sorting.
+    /// - parameter limit: (offset, count) where `offset` is the  number of 
+    ///                    elements to skip in the result, and `count` is the 
+    ///                    number of elements to return starting from `offset`.
+    /// - parameter get: Pattern to use to retrieve an external key based on the
+    ///                  elements in the list. Multiple `get`s can be chained to
+    ///                  retrieve multiple external keys.
+    /// - parameter desc: Sort the list from large to small.
+    /// - parameter alpha: Sort the list of string values lexicographically.
+    /// - parameter store: The key to where the result should be stored.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The list of sorted elements. If `store` is used, array
+    ///                  contains one element indicating number of values
+    ///                  stored.
+    /// - parameter err: The error, if one occurred.
+    public func sortArrayOfGetPatterns(key: String, by pattern: String?=nil, limit: Limit?=nil, get: [String], desc: Bool?=false, alpha: Bool?=false, store: String?=nil, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        var command = ["SORT", key]
+        if let pattern = pattern {
+            command.append("BY")
+            command.append(pattern)
+        }
+        if let limit = limit {
+            command.append("LIMIT")
+            command.append(String(limit.0))
+            command.append(String(limit.1))
+        }
+        for pattern in get {
+            command.append("GET")
+            command.append(pattern)
+        }
+        if let desc = desc, desc {
+            command.append("DESC")
+        }
+        if let alpha = alpha, alpha {
+            command.append("ALPHA")
+        }
+        if let destination = store {
+            command.append("STORE")
+            command.append(destination)
+        }
+        issueCommandInArray(command) { (res) in
+            redisStringArrayOrIntegerResponseHandler(res, callback: callback)
+        }
     }
     
     /// Returns the length of the string value stored at the key
