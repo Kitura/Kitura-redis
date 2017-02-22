@@ -599,6 +599,30 @@ extension Redis {
         }
     }
     
+    /// (offset, count)
+    public typealias Limit = (Int, Int)
+    
+    /// Returns or stores the elements contained in the list, set or sorted set
+    /// at key.
+    ///
+    /// - parameter key: They key for the list, set, or sorted set.
+    /// - parameter pattern: Pattern used to generate the keys used for sorting.
+    /// - parameter limit: (offset, count) where offset is the position in the 
+    ///                    list to start sorting, and count is the number of 
+    ///                    elements to sort.
+    /// - parameter get: Pattern to use to retrieve an external key based on the
+    ///                  elements in the list. Multiple `get`s can be chained to
+    ///                  retrieve multiple external keys.
+    /// - parameter desc: Sort the list from large to small.
+    /// - parameter alpha: Sort the list of string values lexicographically.
+    /// - parameter store: The key to where the result should be stored.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The list of sorted elements.
+    /// - parameter err: The error, if one occurred.
+    public func sort(key: String, pattern: String?=nil, limit: Limit?=nil, get: String?..., desc: Bool?=false, store: String?=nil, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        
+    }
+    
     /// Returns the length of the string value stored at the key
     ///
     /// - Parameter key: The key.
