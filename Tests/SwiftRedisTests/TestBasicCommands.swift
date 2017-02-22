@@ -32,19 +32,19 @@ public class TestBasicCommands: XCTestCase {
             ("test_setAndGet", test_setAndGet),
             ("test_SetExistOptions", test_SetExistOptions),
             ("test_SetExpireOptions", test_SetExpireOptions),
-            ("test_keys", test_keys),
-            ("test_randomkey", test_randomkey),
+//            ("test_keys", test_keys),
+//            ("test_randomkey", test_randomkey),
             ("test_incrDecr", test_incrDecr),
             ("test_incrFloats", test_incrFloats),
-            ("test_empty", test_empty),
-            ("test_scan", test_scan),
-            ("test_scanPattern", test_scanPattern),
-            ("test_scanCount", test_scanCount),
-            ("test_touchNone", test_touchNone),
-            ("test_touchOne", test_touchOne),
-            ("test_touchMulti", test_touchMulti),
-            ("test_type", test_type),
-            ("test_typeBadKey", test_typeBadKey)
+            ("test_empty", test_empty)
+//            ("test_scan", test_scan),
+//            ("test_scanPattern", test_scanPattern),
+//            ("test_scanCount", test_scanCount),
+//            ("test_touchNone", test_touchNone),
+//            ("test_touchOne", test_touchOne),
+//            ("test_touchMulti", test_touchMulti),
+//            ("test_type", test_type),
+//            ("test_typeBadKey", test_typeBadKey)
         ]
     }
 
