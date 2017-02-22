@@ -42,7 +42,9 @@ public class TestBasicCommands: XCTestCase {
             ("test_scanCount", test_scanCount),
             ("test_touchNone", test_touchNone),
             ("test_touchOne", test_touchOne),
-            ("test_touchMulti", test_touchMulti)
+            ("test_touchMulti", test_touchMulti),
+            ("test_type", test_type),
+            ("test_typeBadKey", test_typeBadKey)
         ]
     }
 
@@ -163,7 +165,7 @@ public class TestBasicCommands: XCTestCase {
         localSetup {
             redis.mset(("one", "1"), ("two", "2"), ("three", "3"), ("four", "4"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 
                 redis.keys(pattern: "*o*", callback: { (res, err) in
                     XCTAssertNil(err, "\(err)")
@@ -182,7 +184,7 @@ public class TestBasicCommands: XCTestCase {
         localSetup {
             redis.mset(("one", "1"), ("two", "2"), ("three", "3"), ("four", "4"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 
                 redis.randomkey(callback: { (res, err) in
                     XCTAssertNil(err, "\(err)")
@@ -285,22 +287,22 @@ public class TestBasicCommands: XCTestCase {
             }
             redis.set(key1, value: "Sa", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key2, value: "nt", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key3, value: "er", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key4, value: "ia", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             dispatchGroup.wait()
@@ -326,22 +328,22 @@ public class TestBasicCommands: XCTestCase {
             }
             redis.set(key1, value: "Sa", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key2, value: "nt", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key3, value: "er", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key4, value: "ia", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             dispatchGroup.wait()
@@ -352,9 +354,9 @@ public class TestBasicCommands: XCTestCase {
                 XCTAssertEqual(res?.count, 1)
                 exp.fulfill()
             })
-            waitForExpectations(timeout: 5) { (err) in
-                XCTAssertNil(err, "\(err)")
-            }
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
         }
     }
     
@@ -367,22 +369,22 @@ public class TestBasicCommands: XCTestCase {
             }
             redis.set(key1, value: "Sa", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key2, value: "nt", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key3, value: "er", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             redis.set(key4, value: "ia", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 dispatchGroup.leave()
             })
             dispatchGroup.wait()
@@ -393,9 +395,9 @@ public class TestBasicCommands: XCTestCase {
                 XCTAssertEqual(res?.count, 2)
                 exp.fulfill()
             })
-            waitForExpectations(timeout: 5) { (err) in
-                XCTAssertNil(err, "\(err)")
-            }
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
         }
     }
     
@@ -407,9 +409,9 @@ public class TestBasicCommands: XCTestCase {
                 XCTAssertEqual(res, 0)
                 exp.fulfill()
             })
-            waitForExpectations(timeout: 5) { (err) in
-                XCTAssertNil(err, "\(err)")
-            }
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
         }
     }
     
@@ -418,7 +420,7 @@ public class TestBasicCommands: XCTestCase {
         localSetup {
             redis.set(key1, value: "Hello", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 
                 redis.touch(key: key1, callback: { (res, err) in
                     XCTAssertNil(err, "\(err)")
@@ -426,9 +428,9 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
-            waitForExpectations(timeout: 5) { (err) in
-                XCTAssertNil(err, "\(err)")
-            }
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
         }
     }
     
@@ -437,11 +439,11 @@ public class TestBasicCommands: XCTestCase {
         localSetup {
             redis.set(key1, value: "Hello", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 
                 redis.set(key2, value: "Hello", callback: { (res, err) in
                     XCTAssertNil(err, "\(err)")
-                    XCTAssertEqual(res, true)
+                    XCTAssert(res)
                 
                     redis.touch(key: key1, keys: key2, callback: { (res, err) in
                         XCTAssertNil(err, "\(err)")
@@ -450,9 +452,42 @@ public class TestBasicCommands: XCTestCase {
                     })
                 })
             })
-            waitForExpectations(timeout: 5) { (err) in
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
+        }
+    }
+    
+    func test_type() {
+        let exp = expectation(description: "Returns the string representation of the type of the value stored at key.")
+        localSetup {
+            redis.set(key1, value: "Hello", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-            }
+                XCTAssert(res)
+                
+                redis.type(key: key1, callback: { (res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertEqual(res, "string")
+                    exp.fulfill()
+                })
+            })
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
+        }
+    }
+    
+    func test_typeBadKey() {
+        let exp = expectation(description: "Return `none` for bad key.")
+        localSetup {
+            redis.type(key: key1, callback: { (res, err) in
+                XCTAssertNil(err, "\(err)")
+                XCTAssertEqual(res, "none")
+                exp.fulfill()
+            })
+        }
+        waitForExpectations(timeout: 5) { (err) in
+            XCTAssertNil(err, "\(err)")
         }
     }
 }

@@ -267,6 +267,19 @@ public class Redis {
             return (false, createUnexpectedResponseError(response))
         }
     }
+    
+    func redisSimpleStringResponseHandler(response: RedisResponse, callback: (String?, NSError?) -> Void) {
+        switch(response) {
+        case .Status(let str):
+            callback(str, nil)
+        case .Nil:
+            callback(nil, nil)
+        case .Error(let error):
+            callback(nil, _: createError("Error: \(error)", code: 1))
+        default:
+            callback(nil, _: createUnexpectedResponseError(response))
+        }
+    }
 
     func redisStringResponseHandler(_ response: RedisResponse, callback: (RedisString?, NSError?) -> Void) {
         switch(response) {

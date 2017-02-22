@@ -248,7 +248,7 @@ public class TestHashCommands: XCTestCase {
         setupTests {
             redis.hmset(key1, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 redis.hscan(key: key1, cursor: 0, callback: { (newCursor, res, err) in
                     XCTAssertNil(err, "\(err)")
                     XCTAssertNotNil(newCursor)
@@ -267,7 +267,7 @@ public class TestHashCommands: XCTestCase {
         setupTests {
             redis.hmset(key1, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 redis.hscan(key: key1, cursor: 0, match: "link*", callback: { (newCursor, res, err) in
                     XCTAssertNil(err, "\(err)")
                     XCTAssertNotNil(newCursor)
@@ -286,7 +286,7 @@ public class TestHashCommands: XCTestCase {
         setupTests {
             redis.hmset(key1, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-                XCTAssertEqual(res, true)
+                XCTAssert(res)
                 redis.hscan(key: key1, cursor: 0, count: 1, callback: { (newCursor, res, err) in
                     XCTAssertNil(err, "\(err)")
                     XCTAssertNotNil(newCursor)

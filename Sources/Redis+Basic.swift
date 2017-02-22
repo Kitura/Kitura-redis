@@ -664,4 +664,18 @@ extension Redis {
             }
         }
     }
+    
+    /// Returns the string representation of the type of the value stored at 
+    /// `key`. The different types that can be returned are: string, list, set,
+    /// zset and hash.
+    ///
+    /// - parameter key: The key to get the type of.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The type of key, or none when key does not exist.
+    /// - parameter err: The error, if one occurred.
+    public func type(key: String, callback: (_ res: String?, _ err: NSError?) -> Void) {
+        issueCommand("TYPE", key) { (res) in
+            redisSimpleStringResponseHandler(response: res, callback: callback)
+        }
+    }
 }
