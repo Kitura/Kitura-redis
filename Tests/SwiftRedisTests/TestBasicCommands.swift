@@ -117,66 +117,70 @@ public class TestBasicCommands: XCTestCase {
     }
     
     func test_bitfieldGet() {
-        let exp = expectation(description: "Return the specified bit field.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
-            
+            let exp = expectation(description: "Return the specified bit field.")
+
             redis.bitfield(key: key1, subcommands: .get("u4", 0), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 0)
                 exp.fulfill()
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldSet() {
-        let exp = expectation(description: "Return the specified bit field.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
-            
+            let exp = expectation(description: "Return the specified bit field.")
+
             redis.bitfield(key: key1, subcommands: .set("i5", "4", 1), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 0)
                 exp.fulfill()
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldIncrby() {
-        let exp = expectation(description: "Increment bitfield and return new value.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
+            let exp = expectation(description: "Increment bitfield and return new value.")
             
             redis.bitfield(key: key1, subcommands: .incrby("i5", "100", 1), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 1)
                 exp.fulfill()
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldOffsetMultiplier() {
-        let exp = expectation(description: "Use # to multiply offset by integer type.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
+            let exp = expectation(description: "Use # to multiply offset by integer type.")
             
             redis.bitfield(key: key1, subcommands: .incrby("u8", "#0", 1), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 1)
                 exp.fulfill()
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldWRAP() {
-        let exp = expectation(description: "On overflows, wraps back to min value, and vise versa.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
-            
+            let exp = expectation(description: "On overflows, wraps back to min value, and vise versa.")
+
             redis.bitfield(key: key1, subcommands: .overflow(.wrap), .incrby("u2", "0", 2), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 2)
@@ -187,42 +191,45 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldSAT() {
-        let exp = expectation(description: "On underflows the value is set to the minimum integer value, and on overflows to the maximum integer value.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
+            let exp = expectation(description: "On underflows the value is set to the minimum integer value, and on overflows to the maximum integer value.")
             
             redis.bitfield(key: key1, subcommands: .overflow(.sat), .incrby("i4", "100", -900), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, -8)
                 exp.fulfill()
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldFAIL() {
-        let exp = expectation(description: "No operation is performed on overflows or underflows.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
+            let exp = expectation(description: "No operation is performed on overflows or underflows.")
             
             redis.bitfield(key: key1, subcommands: .overflow(.fail), .incrby("u2", "102", 5), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0], RedisResponse.Nil)
                 exp.fulfill()
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldMultiSubcommands() {
-        let exp = expectation(description: "Chain multiple subcommands in a BITFIELD command.")
         setup(major: 3, minor: 2, micro: 0) { (setup) in
             guard setup else { return }
+            let exp = expectation(description: "Chain multiple subcommands in a BITFIELD command.")
             
             redis.bitfield(key: key1, subcommands: .overflow(.sat), .set("i2", "1", 3), .incrby("i5", "100", 1), .get("u4", 0), callback: { (res, err) in
                 XCTAssertNil(err)
@@ -231,8 +238,9 @@ public class TestBasicCommands: XCTestCase {
                 XCTAssertEqual(res?[2]?.asInteger, 2)
                 exp.fulfill()
             })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
-        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
 
     func test_setAndGet() {
@@ -332,8 +340,9 @@ public class TestBasicCommands: XCTestCase {
     }
 
     func test_keys() {
-        let exp = expectation(description: "Return all keys matching `pattern`.")
         localSetup {
+            let exp = expectation(description: "Return all keys matching `pattern`.")
+
             redis.mset((key1, "1"), (key2, "2"), (key3, "3"), (key4, "4"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
@@ -344,15 +353,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_randomkey() {
-        let exp = expectation(description: "Return a random key from the currently selected database.")
         localSetup {
+            let exp = expectation(description: "Return a random key from the currently selected database.")
+
             redis.mset((key1, "1"), (key2, "2"), (key3, "3"), (key4, "4"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
@@ -363,9 +372,8 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
@@ -450,8 +458,9 @@ public class TestBasicCommands: XCTestCase {
     }
     
     func test_scan() {
-        let exp = expectation(description: "Iterate over some elements.")
         localSetup {
+            let exp = expectation(description: "Iterate over some elements.")
+
             redis.mset((key1, "val1"), (key2, "val2"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
@@ -463,15 +472,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
 
     func test_scanPattern() {
-        let exp = expectation(description: "Iterate over elements matching a pattern.")
         localSetup {
+            let exp = expectation(description: "Iterate over elements matching a pattern.")
+
             redis.mset((key1, "val1"), (key2, "val2"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
@@ -483,15 +492,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_scanCount() {
-        let exp = expectation(description: "Iterate over a certain number of elements.")
         localSetup {
+            let exp = expectation(description: "Iterate over a certain number of elements.")
+
             redis.mset((key1, "val1"), (key2, "val2"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
@@ -503,15 +512,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sort() {
-        let exp = expectation(description: "Return sorted list at `key`.")
         localSetup {
+            let exp = expectation(description: "Return sorted list at `key`.")
+
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -527,15 +536,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortDesc() {
-        let exp = expectation(description: "Return list at `key` sorted in descending order.")
         localSetup {
+            let exp = expectation(description: "Return list at `key` sorted in descending order.")
+
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -551,15 +560,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortAlpha() {
-        let exp = expectation(description: "Return lexicograpically sorted list at `key`.")
         localSetup {
+            let exp = expectation(description: "Return lexicograpically sorted list at `key`.")
+
             let val1 = "red"
             let val2 = "blue"
             let val3 = "green"
@@ -575,15 +584,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortLimit() {
-        let exp = expectation(description: "Return sorted list with `offset` and `count`.")
         localSetup {
+            let exp = expectation(description: "Return sorted list with `offset` and `count`.")
+            
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -601,15 +610,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortMultiModifiers() {
-        let exp = expectation(description: "SORT with many modifiers.")
         localSetup {
+            let exp = expectation(description: "SORT with many modifiers.")
+
             let val1 = "red"
             let val2 = "blue"
             let val3 = "green"
@@ -625,15 +634,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortBy() {
-        let exp = expectation(description: "Sort by external keys.")
         localSetup {
+            let exp = expectation(description: "Sort by external keys.")
+
             let val1 = "1"
             let val2 = "2"
             let val3 = "3"
@@ -654,15 +663,15 @@ public class TestBasicCommands: XCTestCase {
                     })
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortByNoSort() {
-        let exp = expectation(description: "Give bad key to return unsorted list.")
         localSetup {
+            let exp = expectation(description: "Give bad key to return unsorted list.")
+
             let val1 = "345"
             let val2 = "8"
             let val3 = "90"
@@ -678,15 +687,15 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortGet() {
-        let exp = expectation(description: "Sort by external keys and retrieve external keys.")
         localSetup {
+            let exp = expectation(description: "Sort by external keys and retrieve external keys.")
+
             let val1 = "1"
             let val2 = "2"
             let val3 = "3"
@@ -710,15 +719,15 @@ public class TestBasicCommands: XCTestCase {
                     })
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortGetMulti() {
-        let exp = expectation(description: "Sort by external keys and retrieve multiple external keys.")
         localSetup {
+            let exp = expectation(description: "Sort by external keys and retrieve multiple external keys.")
+
             let val1 = "1"
             let val2 = "2"
             let val3 = "3"
@@ -745,15 +754,15 @@ public class TestBasicCommands: XCTestCase {
                     })
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortStore() {
-        let exp = expectation(description: "Sort list and store at `store key`.")
         localSetup {
+            let exp = expectation(description: "Sort list and store at `store key`.")
+
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -779,15 +788,15 @@ public class TestBasicCommands: XCTestCase {
                     })
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_sortByGetHashes() {
-        let exp = expectation(description: "Sort list and use BY and GET options against hash fields.")
         localSetup {
+            let exp = expectation(description: "Sort list and use BY and GET options against hash fields.")
+
             let val1 = "1"
             let val2 = "2"
             let val3 = "3"
@@ -842,82 +851,70 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             }
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err)
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_touchNone() {
-        redis.info() { (info: RedisInfo?, _) in
-            guard let info = info, info.server.checkVersionCompatible(major: 3, minor: 2, micro: 1) else {
-                return
-            }
+        setup(major: 3, minor: 2, micro: 1) { (setup) in
+            guard setup else { return }
             let exp = expectation(description: "Return 0 for bad key.")
-            localSetup {
-                redis.touch(key: key1, callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
-                    XCTAssertEqual(res, 0)
-                    exp.fulfill()
-                })
-            }
-            waitForExpectations(timeout: 5) { (err) in
+            
+            redis.touch(key: key1, callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-            }
+                XCTAssertEqual(res, 0)
+                exp.fulfill()
+            })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_touchOne() {
-        redis.info() { (info: RedisInfo?, _) in
-            guard let info = info, info.server.checkVersionCompatible(major: 3, minor: 2, micro: 1) else {
-                return
-            }
+        setup(major: 3, minor: 2, micro: 1) { (setup) in
+            guard setup else { return }
             let exp = expectation(description: "Alters the last access time of a key(s).")
-            localSetup {
-                redis.set(key1, value: "Hello", callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
-                    XCTAssert(res)
-                    
-                    redis.touch(key: key1, callback: { (res, err) in
-                        XCTAssertNil(err, "\(err)")
-                        XCTAssertEqual(res, 1)
-                        exp.fulfill()
-                    })
-                })
-            }
-            waitForExpectations(timeout: 5) { (err) in
+            
+            redis.set(key1, value: "Hello", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-            }
+                XCTAssert(res)
+                
+                redis.touch(key: key1, callback: { (res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertEqual(res, 1)
+                    exp.fulfill()
+                })
+            })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_touchMulti() {
-        redis.info() { (info: RedisInfo?, _) in
-            guard let info = info, info.server.checkVersionCompatible(major: 3, minor: 2, micro: 1) else {
-                return
-            }
+        setup(major: 3, minor: 2, micro: 1) { (setup) in
+            guard setup else { return }
             let exp = expectation(description: "Alters the last access time of a key(s).")
-            localSetup {
-                redis.mset((key1, "val2"), (key2, "val2"), callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
-                    XCTAssert(res)
-                    
-                    redis.touch(key: key1, keys: key2, callback: { (res, err) in
-                        XCTAssertNil(err, "\(err)")
-                        XCTAssertEqual(res, 2)
-                        exp.fulfill()
-                    })
-                })
-            }
-            waitForExpectations(timeout: 5) { (err) in
+            
+            redis.mset((key1, "val2"), (key2, "val2"), callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
-            }
+                XCTAssert(res)
+                
+                redis.touch(key: key1, keys: key2, callback: { (res, err) in
+                    XCTAssertNil(err, "\(err)")
+                    XCTAssertEqual(res, 2)
+                    exp.fulfill()
+                })
+            })
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_type() {
-        let exp = expectation(description: "Returns the string representation of the type of the value stored at key.")
         localSetup {
+            let exp = expectation(description: "Returns the string representation of the type of the value stored at key.")
+
             redis.set(key1, value: "Hello", callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssert(res)
@@ -928,23 +925,22 @@ public class TestBasicCommands: XCTestCase {
                     exp.fulfill()
                 })
             })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
     
     func test_typeBadKey() {
-        let exp = expectation(description: "Return `none` for bad key.")
         localSetup {
+            let exp = expectation(description: "Return `none` for bad key.")
+
             redis.type(key: key1, callback: { (res, err) in
                 XCTAssertNil(err, "\(err)")
                 XCTAssertEqual(res, "none")
                 exp.fulfill()
             })
-        }
-        waitForExpectations(timeout: 5) { (err) in
-            XCTAssertNil(err, "\(err)")
+            
+            waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
         }
     }
 }
