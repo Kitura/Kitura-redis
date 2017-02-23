@@ -294,6 +294,23 @@ public class Redis {
         }
     }
 
+    func redisArrayResponseHandler(_ response: RedisResponse, callback: ([RedisResponse?]?, NSError?) -> Void) {
+        var error: NSError? = nil
+        var result: [RedisResponse?]?
+        
+        switch(response) {
+        case .Array(let responses):
+            result = responses
+        case .Nil:
+            result = nil
+        case .Error(let err):
+            error = self.createError("Error: \(err)", code: 1)
+        default:
+            error = self.createUnexpectedResponseError(response)
+        }
+        callback(error == nil ? result : nil, _: error)
+    }
+    
     func redisStringArrayResponseHandler(_ response: RedisResponse, callback: ([RedisString?]?, NSError?) -> Void) {
         var error: NSError? = nil
         var result: [RedisString?]?

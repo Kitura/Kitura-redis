@@ -70,7 +70,7 @@ extension Redis {
     ///                  of the sub command given at the same position. OVERFLOW 
     ///                  subcommands don't count as generating a reply.
     /// - parameter err: The error, if one occurred.
-    public func bitfield(key: String, subcommands: BitfieldSubcommand..., callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+    public func bitfield(key: String, subcommands: BitfieldSubcommand..., callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
         bitfieldArrayOfSubcommands(key: key, subcommands: subcommands, callback: callback)
     }
     
@@ -86,7 +86,7 @@ extension Redis {
     ///                  of the sub command given at the same position. OVERFLOW
     ///                  subcommands don't count as generating a reply.
     /// - parameter err: The error, if one occurred.
-    public func bitfieldArrayOfSubcommands(key: String, subcommands: [BitfieldSubcommand], callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+    public func bitfieldArrayOfSubcommands(key: String, subcommands: [BitfieldSubcommand], callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
         var command = ["BITFIELD", key]
         for subcommand in subcommands {
             switch(subcommand) {
@@ -117,7 +117,7 @@ extension Redis {
             }
         }
         issueCommandInArray(command) { (res) in
-            redisStringArrayResponseHandler(res, callback: callback)
+            redisArrayResponseHandler(res, callback: callback)
         }
     }
     
@@ -822,10 +822,10 @@ extension Redis {
         case get(String, Int)
         
         // (type, offset, value)
-        case set(String, Int, String)
+        case set(String, String, Int)
         
         // (type, offset, increment)
-        case incrby(String, Int, Int)
+        case incrby(String, String, Int)
         
         // (wrap/sat/fail)
         case overflow(BitfieldOverflow)
