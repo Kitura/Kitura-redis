@@ -74,75 +74,109 @@ public class TestBasicCommands: XCTestCase {
     var key4: String { return "test4" }
 
     func localSetup(block: () -> Void) {
-        connectRedis() {(err: NSError?) in
-            XCTAssertNil(err, "\(err)")
+        connectRedis() {(err) in
+            XCTAssertNil(err)
 
             redis.flushdb(callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
+                XCTAssert(res)
                 block()
             })
         }
     }
     
+    func setup(major: Int, minor: Int, micro: Int, callback: (Bool) -> Void) {
+        connectRedis() {(err) in
+            XCTAssertNil(err)
+            
+            checkVersionCompatible(major: major, minor: minor, micro: micro) { (compatible) in
+                guard compatible else {
+                    callback(false)
+                    return
+                }
+                
+                redis.flushdb(callback: { (res, err) in
+                    XCTAssertNil(err)
+                    XCTAssert(res)
+                    callback(true)
+                })
+            }
+        }
+    }
+    
+    func checkVersionCompatible(major: Int, minor: Int, micro: Int, callback: (Bool) -> Void) {
+        redis.info { (info: RedisInfo?, err) in
+            XCTAssertNil(err)
+            XCTAssertNotNil(info)
+            if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
+                callback(true)
+            } else {
+                callback(false)
+            }
+        }
+    }
+    
     func test_bitfieldGet() {
         let exp = expectation(description: "Return the specified bit field.")
-        localSetup {
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .get("u4", 0), callback: { (res, err) in
-                XCTAssertNil(nil)
+                XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 0)
                 exp.fulfill()
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldSet() {
-        let exp = expectation(description: "Set the specified bit field and return its old value.")
-        localSetup {
+        let exp = expectation(description: "Return the specified bit field.")
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .set("i5", "4", 1), callback: { (res, err) in
-                XCTAssertNil(nil)
+                XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 0)
                 exp.fulfill()
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldIncrby() {
         let exp = expectation(description: "Increment bitfield and return new value.")
-        localSetup {
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .incrby("i5", "100", 1), callback: { (res, err) in
-                XCTAssertNil(nil)
+                XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 1)
                 exp.fulfill()
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldOffsetMultiplier() {
         let exp = expectation(description: "Use # to multiply offset by integer type.")
-        localSetup {
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .incrby("u8", "#0", 1), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 1)
                 exp.fulfill()
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldWRAP() {
         let exp = expectation(description: "On overflows, wraps back to min value, and vise versa.")
-        localSetup {
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .overflow(.wrap), .incrby("u2", "0", 2), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 2)
@@ -150,47 +184,46 @@ public class TestBasicCommands: XCTestCase {
                 redis.bitfield(key: key1, subcommands: .overflow(.wrap), .incrby("u2", "0", 2), callback: { (res, err) in
                     XCTAssertNil(err)
                     XCTAssertEqual(res?[0]?.asInteger, 0)
-                    
                     exp.fulfill()
                 })
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldSAT() {
         let exp = expectation(description: "On underflows the value is set to the minimum integer value, and on overflows to the maximum integer value.")
-        localSetup {
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .overflow(.sat), .incrby("i4", "100", -900), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, -8)
                 exp.fulfill()
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldFAIL() {
         let exp = expectation(description: "No operation is performed on overflows or underflows.")
-        localSetup {
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .overflow(.fail), .incrby("u2", "102", 5), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0], RedisResponse.Nil)
                 exp.fulfill()
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
     
     func test_bitfieldMultiSubcommands() {
         let exp = expectation(description: "Chain multiple subcommands in a BITFIELD command.")
-        localSetup {
+        setup(major: 3, minor: 2, micro: 0) { (setup) in
+            guard setup else { return }
+            
             redis.bitfield(key: key1, subcommands: .overflow(.sat), .set("i2", "1", 3), .incrby("i5", "100", 1), .get("u4", 0), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssertEqual(res?[0]?.asInteger, 0)
@@ -199,9 +232,7 @@ public class TestBasicCommands: XCTestCase {
                 exp.fulfill()
             })
         }
-        waitForExpectations(timeout: 5, handler: { (err) in
-            XCTAssertNil(err)
-        })
+        waitForExpectations(timeout: 1, handler: { (err) in XCTAssertNil(err) })
     }
 
     func test_setAndGet() {
