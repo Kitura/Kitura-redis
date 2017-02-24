@@ -18,7 +18,7 @@ import Foundation
 import XCTest
 import SwiftRedis
 
-// Tests the Geo transaction operations
+// Test GEO transaction operations
 public class TestTransactionsPart9: XCTestCase {
     static var allTests: [(String, (TestTransactionsPart9) -> () throws -> Void)] {
         return [
@@ -36,6 +36,8 @@ public class TestTransactionsPart9: XCTestCase {
         ]
     }
     
+    var exp: XCTestExpectation?
+    
     let key = "Sicily"
     
     let longitude1 = 13.361389
@@ -45,6 +47,22 @@ public class TestTransactionsPart9: XCTestCase {
     let longitude2 = 15.087269
     let latitude2 = 37.502669
     let member2 = "Catania"
+    
+    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
+        connectRedis() {(err) in
+            guard err == nil else {
+                XCTFail()
+                return
+            }
+            redis.info { (info: RedisInfo?, _) in
+                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
+                    redis.flushdb(callback: { (_, _) in
+                        callback()
+                    })
+                }
+            }
+        }
+    }
     
     private func setup(callback: () -> Void) {
         connectRedis() {(err: NSError?) in
@@ -63,7 +81,7 @@ public class TestTransactionsPart9: XCTestCase {
         switch(response) {
         case .Array(let responses):
             XCTAssertEqual(responses.count, count, "Number of nested responses wasn't \(count), was \(responses.count)")
-            for  nestedResponse in responses {
+            for nestedResponse in responses {
                 switch(nestedResponse) {
                 case .Error:
                     XCTFail("Nested transaction response was a \(nestedResponse)")
@@ -186,7 +204,7 @@ public class TestTransactionsPart9: XCTestCase {
         setup {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
-            multi.geodist(key: key, member1: member1, member2: member2, unit: "km")
+            multi.geodist(key: key, member1: member1, member2: member2, unit: .km)
             multi.exec({ (res) in
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     let res = responses[1].asString
@@ -215,7 +233,7 @@ public class TestTransactionsPart9: XCTestCase {
         setup {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
-            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: "km", withDist: true)
+            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withDist: true)
             multi.exec({ (res) in
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     let res1 = responses[1].asArray
@@ -240,7 +258,7 @@ public class TestTransactionsPart9: XCTestCase {
         setup {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
-            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: "km", withCoord: true)
+            multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withCoord: true)
             multi.exec({ (res) in
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     let res1 = responses[1].asArray
@@ -274,7 +292,7 @@ public class TestTransactionsPart9: XCTestCase {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (13.583333, 37.316667, "Agrigento"))
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
-            multi.georadiusbymember(key: key, member: "Agrigento", radius: 100, unit: "km")
+            multi.georadiusbymember(key: key, member: "Agrigento", radius: 100, unit: .km)
             multi.exec({ (res) in
                 if let responses = self.baseAsserts(response: res, count: 3) {
                     let res2 = responses[2].asArray

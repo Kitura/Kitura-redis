@@ -18,19 +18,19 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-public class TestGeoRadius: XCTestCase {
-    static var allTests: [(String, (TestGeoRadius) -> () throws -> Void)] {
+public class TestGEORADIUSBYMEMBER: XCTestCase {
+    static var allTests: [(String, (TestGEORADIUSBYMEMBER) -> () throws -> Void)] {
         return [
-            ("test_georadiusM", test_georadiusM),
-            ("test_georadiusKM", test_georadiusKM),
-            ("test_georadiusMI", test_georadiusMI),
-            ("test_georadiusFT", test_georadiusFT),
-            ("test_georadiusWITHCOORD", test_georadiusWITHCOORD),
-            ("test_georadiusWITHDIST", test_georadiusWITHDIST),
-            ("test_georadiusWITHHASH", test_georadiusWITHHASH),
-            ("test_georadiusASC", test_georadiusASC),
-            ("test_georadiusDESC", test_georadiusDESC),
-            ("test_georadiusMultiCommands", test_georadiusMultiCommands)
+            ("test_georadiusbymemberM", test_georadiusbymemberM),
+            ("test_georadiusbymemberKM", test_georadiusbymemberKM),
+            ("test_georadiusbymemberMI", test_georadiusbymemberMI),
+            ("test_georadiusbymemberFT", test_georadiusbymemberFT),
+            ("test_georadiusbymemberWITHCOORD", test_georadiusbymemberWITHCOORD),
+            ("test_georadiusbymemberWITHDIST", test_georadiusbymemberWITHDIST),
+            ("test_georadiusbymemberWITHHASH", test_georadiusbymemberWITHHASH),
+            ("test_georadiusbymemberASC", test_georadiusbymemberASC),
+            ("test_georadiusbymemberDESC", test_georadiusbymemberDESC),
+            ("test_georadiusbymemberMultiCommands", test_georadiusbymemberMultiCommands)
         ]
     }
     
@@ -62,7 +62,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusM() {
+    func test_georadiusbymemberM() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, measured in meters.")
             
@@ -70,7 +70,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 1)
                 
-                redis.georadius(key: key, longitude: longitude1, latitude: latitude1, radius: 1, unit: .m, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 1, unit: .m, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asString
                     XCTAssertEqual(res0, RedisString(member1))
@@ -81,7 +81,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusKM() {
+    func test_georadiusbymemberKM() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, measured in kilometers.")
             
@@ -89,7 +89,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 1)
                 
-                redis.georadius(key: key, longitude: longitude1, latitude: latitude1, radius: 1, unit: .km, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 1, unit: .km, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asString
                     XCTAssertEqual(res0, RedisString(member1))
@@ -100,7 +100,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusMI() {
+    func test_georadiusbymemberMI() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, measured in miles.")
             
@@ -108,7 +108,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 1)
                 
-                redis.georadius(key: key, longitude: longitude1, latitude: latitude1, radius: 1, unit: .mi, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 1, unit: .mi, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asString
                     XCTAssertEqual(res0, RedisString(member1))
@@ -118,7 +118,7 @@ public class TestGeoRadius: XCTestCase {
             waitForExpectations(timeout: 1, handler: { (_) in })
         }    }
     
-    func test_georadiusFT() {
+    func test_georadiusbymemberFT() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, measured in feet.")
             
@@ -126,7 +126,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 1)
                 
-                redis.georadius(key: key, longitude: longitude1, latitude: latitude1, radius: 1, unit: .ft, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 1, unit: .ft, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asString
                     XCTAssertEqual(res0, RedisString(member1))
@@ -137,7 +137,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusWITHCOORD() {
+    func test_georadiusbymemberWITHCOORD() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, with their coordinates.")
             
@@ -145,7 +145,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 1)
                 
-                redis.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withCoord: true, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 200, unit: .km, withCoord: true, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asArray
                     let res00 = res0?[0].asString
@@ -162,7 +162,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusWITHDIST() {
+    func test_georadiusbymemberWITHDIST() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, and their distance from the center of the area.")
             
@@ -170,13 +170,13 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 1)
                 
-                redis.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withDist: true, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 200, unit: .km, withDist: true, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asArray
                     let res00 = res0?[0].asString
                     XCTAssertEqual(res00, RedisString(member1))
                     let res01 = res0?[1].asString
-                    XCTAssertEqual(res01, RedisString("190.4424"))
+                    XCTAssertEqual(res01, RedisString("0.0000"))
                     exp?.fulfill()
                 })
             })
@@ -184,7 +184,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusWITHHASH() {
+    func test_georadiusbymemberWITHHASH() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the raw geohash-encoded sorted set score of the item.")
             
@@ -192,7 +192,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 1)
                 
-                redis.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withHash: true, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 200, unit: .km, withHash: true, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asArray
                     let res00 = res0?[0].asString
@@ -206,7 +206,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusASC() {
+    func test_georadiusbymemberASC() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, sorted nearest to farthest from center.")
             
@@ -214,7 +214,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 2)
                 
-                redis.georadius(key: key, longitude: longitude1, latitude: latitude1, radius: 200, unit: .km, ascending: true, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 200, unit: .km, ascending: true, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asString
                     XCTAssertEqual(res0, RedisString(member1))
@@ -225,7 +225,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusDESC() {
+    func test_georadiusbymemberDESC() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area, sorted farthest to nearest from center.")
             
@@ -233,7 +233,7 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 2)
                 
-                redis.georadius(key: key, longitude: longitude1, latitude: latitude1, radius: 200, unit: .km, ascending: false, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 200, unit: .km, ascending: false, callback: { (res, err) in
                     XCTAssertNil(err)
                     let res0 = res?[0]?.asString
                     XCTAssertEqual(res0, RedisString(member2))
@@ -244,7 +244,7 @@ public class TestGeoRadius: XCTestCase {
         }
     }
     
-    func test_georadiusMultiCommands() {
+    func test_georadiusbymemberMultiCommands() {
         setup(major: 3, minor: 2, micro: 0) {
             exp = expectation(description: "Return the members within the borders of the area.")
             
@@ -252,25 +252,25 @@ public class TestGeoRadius: XCTestCase {
                 XCTAssertNil(err)
                 XCTAssertEqual(res, 2)
                 
-                redis.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withCoord: true, withDist: true, withHash: true, count: 1, ascending: true, callback: { (res, err) in
+                redis.georadiusbymember(key: key, member: member1, radius: 200, unit: .km, withCoord: true, withDist: true, withHash: true, count: 1, ascending: true, callback: { (res, err) in
                     XCTAssertNil(err)
                     
                     let res0 = res?[0]?.asArray
                     let res00 = res0?[0].asString
-                    XCTAssertEqual(res00, RedisString(member2))
+                    XCTAssertEqual(res00, RedisString(member1))
                     
                     let res01 = res0?[1].asString
-                    XCTAssertEqual(res01, RedisString("56.4413"))
+                    XCTAssertEqual(res01, RedisString("0.0000"))
                     
                     let res02 = res0?[2].asInteger
-                    XCTAssertEqual(res02, 3479447370796909)
+                    XCTAssertEqual(res02, 3479099956230698)
                     
                     let res03 = res0?[3].asArray
                     let res030 = res03?[0].asString
-                    XCTAssertEqual(res030?.asString, "15.08726745843887329")
+                    XCTAssertEqual(res030?.asString, "13.36138933897018433")
                     
                     let res031 = res03?[1].asString
-                    XCTAssertEqual(res031?.asString, "37.50266842333162032")
+                    XCTAssertEqual(res031?.asString, "38.11555639549629859")
                     
                     exp?.fulfill()
                 })
