@@ -98,7 +98,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geoaddNew() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.exec({ (res) in
@@ -111,7 +111,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geoaddExisting() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
@@ -125,7 +125,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geohash() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.geohash(key: key, members: member1, member2)
@@ -144,7 +144,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geopos() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.geopos(key: key, members: member1, member2)
@@ -171,7 +171,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geoposNonExisting() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.geopos(key: key, members: "NonExisting")
@@ -186,7 +186,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geodistDefault() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.geodist(key: key, member1: member1, member2: member2)
@@ -201,7 +201,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geodistKm() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.geodist(key: key, member1: member1, member2: member2, unit: .km)
@@ -216,7 +216,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_geodistMissingMembers() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.geodist(key: key, member1: "Foo", member2: "Bar")
@@ -230,7 +230,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_georadiusWithDist() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withDist: true)
@@ -255,7 +255,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_georadiusWithCoord() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.georadius(key: key, longitude: 15, latitude: 37, radius: 200, unit: .km, withCoord: true)
@@ -288,7 +288,7 @@ public class TestTransactionsPart9: XCTestCase {
     }
     
     func test_georadiusbymember() {
-        setup {
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (13.583333, 37.316667, "Agrigento"))
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
