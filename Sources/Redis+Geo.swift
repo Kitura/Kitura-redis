@@ -26,6 +26,11 @@ extension Redis {
     /// (longitude, latitude, name)
     public typealias GeospatialItem = (Double, Double, String)
     
+    /// Unit of distance used in various GEO commands
+    public enum GeoDistanceUnit: String {
+        case m, km, mi, ft
+    }
+    
     /// Adds the specified geospatial items (longitude, latitude, name) to the
     /// specified key.
     /// 
@@ -116,7 +121,7 @@ extension Redis {
     ///                     existing elements are reported as NULL elements of 
     ///                     the array.
     /// - parameter error: Non-nil if error occurred.
-    public func geopos(key: String, members: String..., callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+    public func geopos(key: String, members: String..., callback: (_ result: [RedisResponse?]?, _ error: NSError?) -> Void) {
         geoposArrayOfMembers(key: key, members: members, callback: callback)
     }
 
@@ -132,13 +137,13 @@ extension Redis {
     ///                     existing elements are reported as NULL elements of
     ///                     the array.
     /// - parameter error: Non-nil if error occurred.
-    public func geoposArrayOfMembers(key: String, members: [String], callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
+    public func geoposArrayOfMembers(key: String, members: [String], callback: (_ result: [RedisResponse?]?, _ error: NSError?) -> Void) {
         var command = ["GEOPOS", key]
         for member in members {
             command.append(member)
         }
         issueCommandInArray(command) { (response) in
-            redisAnyArrayResponseHandler(response: response, callback: callback)
+            redisArrayResponseHandler(response: response, callback: callback)
         }
     }
 
@@ -158,10 +163,19 @@ extension Redis {
     ///                     the specified unit, or NULL if one or both the
     ///                     elements are missing.
     /// - parameter error: Non-nil if error occurred.
-    public func geodist(key: String, member1: String, member2: String, unit: String?=nil, callback: (_ result: RedisString?, _ error: NSError?) -> Void) {
+    public func geodist(key: String, member1: String, member2: String, unit: GeoDistanceUnit?=nil, callback: (_ result: RedisString?, _ error: NSError?) -> Void) {
         var command = ["GEODIST", key, member1, member2]
         if let unit = unit {
-            command.append(unit)
+            switch unit {
+            case .m:
+                command.append(GeoDistanceUnit.m.rawValue)
+            case .km:
+                command.append(GeoDistanceUnit.km.rawValue)
+            case .mi:
+                command.append(GeoDistanceUnit.mi.rawValue)
+            case .ft:
+                command.append(GeoDistanceUnit.ft.rawValue)
+            }
         }
         issueCommandInArray(command) { (response) in
             redisStringResponseHandler(response, callback: callback)
@@ -208,8 +222,18 @@ extension Redis {
     ///                     included, returns an array of sub-arrays, where each 
     ///                     represents an item with its extra data.
     /// - parameter error: Non-nil if error occurred.
-    public func georadius(key: String, longitude: Double, latitude: Double, radius: Double, unit: String, withCoord: Bool?=nil, withDist: Bool?=nil, withHash: Bool?=nil, count: Int?=nil, ascending: Bool?=nil, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
-        var command = ["GEORADIUS", key, String(longitude), String(latitude), String(radius), unit]
+    public func georadius(key: String, longitude: Double, latitude: Double, radius: Double, unit: GeoDistanceUnit, withCoord: Bool?=nil, withDist: Bool?=nil, withHash: Bool?=nil, count: Int?=nil, ascending: Bool?=nil, callback: (_ result: [RedisResponse?]?, _ error: NSError?) -> Void) {
+        var command = ["GEORADIUS", key, String(longitude), String(latitude), String(radius)]
+        switch unit {
+        case .m:
+            command.append(GeoDistanceUnit.m.rawValue)
+        case .km:
+            command.append(GeoDistanceUnit.km.rawValue)
+        case .mi:
+            command.append(GeoDistanceUnit.mi.rawValue)
+        case .ft:
+            command.append(GeoDistanceUnit.ft.rawValue)
+        }
         if let withCoord = withCoord, withCoord {
             command.append("WITHCOORD")
         }
@@ -220,6 +244,7 @@ extension Redis {
             command.append("WITHHASH")
         }
         if let count = count {
+            command.append("COUNT")
             command.append(String(count))
         }
         if let ascending = ascending {
@@ -230,7 +255,7 @@ extension Redis {
             }
         }
         issueCommandInArray(command) { (response) in
-            redisAnyArrayResponseHandler(response: response, callback: callback)
+            redisArrayResponseHandler(response: response, callback: callback)
         }
     }
     
@@ -272,8 +297,18 @@ extension Redis {
     ///                     included, returns an array of sub-arrays, where each
     ///                     represents an item with its extra data.
     /// - parameter error: Non-nil if error occurred.
-    public func georadiusbymember(key: String, member: String, radius: Double, unit: String, withCoord: Bool?=nil, withDist: Bool?=nil, withHash: Bool?=nil, count: Int?=nil, ascending: Bool?=nil, callback: (_ result: [Any?]?, _ error: NSError?) -> Void) {
-        var command = ["GEORADIUSBYMEMBER", key, member, String(radius), unit]
+    public func georadiusbymember(key: String, member: String, radius: Double, unit: GeoDistanceUnit, withCoord: Bool?=nil, withDist: Bool?=nil, withHash: Bool?=nil, count: Int?=nil, ascending: Bool?=nil, callback: (_ result: [RedisResponse?]?, _ error: NSError?) -> Void) {
+        var command = ["GEORADIUSBYMEMBER", key, member, String(radius)]
+        switch unit {
+        case .m:
+            command.append(GeoDistanceUnit.m.rawValue)
+        case .km:
+            command.append(GeoDistanceUnit.km.rawValue)
+        case .mi:
+            command.append(GeoDistanceUnit.mi.rawValue)
+        case .ft:
+            command.append(GeoDistanceUnit.ft.rawValue)
+        }
         if let withCoord = withCoord, withCoord {
             command.append("WITHCOORD")
         }
@@ -284,6 +319,7 @@ extension Redis {
             command.append("WITHHASH")
         }
         if let count = count {
+            command.append("COUNT")
             command.append(String(count))
         }
         if let ascending = ascending {
@@ -294,7 +330,7 @@ extension Redis {
             }
         }
         issueCommandInArray(command) { (response) in
-            redisAnyArrayResponseHandler(response: response, callback: callback)
+            redisArrayResponseHandler(response: response, callback: callback)
         }
     }
 }

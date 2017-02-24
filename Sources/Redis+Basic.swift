@@ -58,6 +58,25 @@ extension Redis {
         }
     }
     
+    /// Used in BITFIELD
+    public enum BitfieldSubcommand {
+        // (type, offset)
+        case get(String, Int)
+        
+        // (type, offset, value)
+        case set(String, String, Int)
+        
+        // (type, offset, increment)
+        case incrby(String, String, Int)
+        
+        // (wrap/sat/fail)
+        case overflow(BitfieldOverflow)
+        
+        public enum BitfieldOverflow: String {
+            case WRAP, SAT, FAIL
+        }
+    }
+    
     /// Treats a Redis string as a array of bits, and is capable of addressing 
     /// specific integer fields of varying bit widths and arbitrary non 
     /// (necessary) aligned offset.
@@ -107,17 +126,17 @@ extension Redis {
             case .overflow(let overflow):
                 command.append("OVERFLOW")
                 switch(overflow) {
-                case .wrap:
-                    command.append("WRAP")
-                case .sat:
-                    command.append("SAT")
-                case .fail:
-                    command.append("FAIL")
+                case .WRAP:
+                    command.append(BitfieldSubcommand.BitfieldOverflow.WRAP.rawValue)
+                case .SAT:
+                    command.append(BitfieldSubcommand.BitfieldOverflow.SAT.rawValue)
+                case .FAIL:
+                    command.append(BitfieldSubcommand.BitfieldOverflow.FAIL.rawValue)
                 }
             }
         }
         issueCommandInArray(command) { (res) in
-            redisArrayResponseHandler(res, callback: callback)
+            redisArrayResponseHandler(response: res, callback: callback)
         }
     }
     
@@ -814,26 +833,6 @@ extension Redis {
     public func type(key: String, callback: (_ res: String?, _ err: NSError?) -> Void) {
         issueCommand("TYPE", key) { (res) in
             redisSimpleStringResponseHandler(response: res, callback: callback)
-        }
-    }
-    
-    public enum BitfieldSubcommand {
-        // (type, offset)
-        case get(String, Int)
-        
-        // (type, offset, value)
-        case set(String, String, Int)
-        
-        // (type, offset, increment)
-        case incrby(String, String, Int)
-        
-        // (wrap/sat/fail)
-        case overflow(BitfieldOverflow)
-        
-        public enum BitfieldOverflow {
-            case wrap
-            case sat
-            case fail
         }
     }
 }
