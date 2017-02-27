@@ -256,7 +256,7 @@ extension Redis {
     
     /// Iterates fields of Hash types and their associated values.
     ///
-    /// - Parameter key: The key.
+    /// - Parameter key: The key of the hash.
     /// - parameter cursor: Where to begin iterating.
     /// - parameter match: Glob-style pattern to match elements against.
     /// - parameter count: Amount of elements to try to iterate.

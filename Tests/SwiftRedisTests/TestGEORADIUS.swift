@@ -49,7 +49,7 @@ public class TestGEORADIUS: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail()
+                XCTFail("\(err)")
                 return
             }
             redis.info { (info: RedisInfo?, _) in
@@ -116,7 +116,8 @@ public class TestGEORADIUS: XCTestCase {
                 })
             })
             waitForExpectations(timeout: 1, handler: { (_) in })
-        }    }
+        }
+    }
     
     func test_georadiusFT() {
         setup(major: 3, minor: 2, micro: 0) {

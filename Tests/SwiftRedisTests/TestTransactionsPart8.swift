@@ -19,8 +19,8 @@ import XCTest
 import SwiftRedis
 
 // Test GEO transaction operations
-public class TestTransactionsPart9: XCTestCase {
-    static var allTests: [(String, (TestTransactionsPart9) -> () throws -> Void)] {
+public class TestTransactionsPart8: XCTestCase {
+    static var allTests: [(String, (TestTransactionsPart8) -> () throws -> Void)] {
         return [
             ("test_geoadd", test_geoadd),
             ("test_geohash", test_geohash),
@@ -46,7 +46,7 @@ public class TestTransactionsPart9: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail()
+                XCTFail("\(err)")
                 return
             }
             redis.info { (info: RedisInfo?, _) in
@@ -92,8 +92,8 @@ public class TestTransactionsPart9: XCTestCase {
                     self.exp?.fulfill()
                 }
             })
+            waitForExpectations(timeout: 1) { (_) in }
         }
-        waitForExpectations(timeout: 1) { (_) in }
     }
     
     func test_geohash() {

@@ -50,7 +50,7 @@ public class TestGeoCommands: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail()
+                XCTFail("\(err)")
                 return
             }
             redis.info { (info: RedisInfo?, _) in

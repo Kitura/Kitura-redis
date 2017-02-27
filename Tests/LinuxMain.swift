@@ -44,5 +44,5 @@ XCTMain([
 	testCase(TestTransactionsPart5.allTests),
 	testCase(TestTransactionsPart6.allTests),
 	testCase(TestTransactionsPart7.allTests),
-	testCase(TestTransactionsPart9.allTests)
+	testCase(TestTransactionsPart8.allTests)
 ])

@@ -83,7 +83,7 @@ extension Redis {
     /// https://redis.io/commands/bitfield
     ///
     /// - parameter key: The key of the string to manipulate.
-    /// - parameter subcommand: `BitfieldSubcommand`s to do on the string.
+    /// - parameter subcommands: `BitfieldSubcommand`s to do on the string.
     /// - parameter callback: The callback function.
     /// - parameter res: An array with each entry being the corresponding result 
     ///                  of the sub command given at the same position. OVERFLOW 
@@ -99,7 +99,7 @@ extension Redis {
     /// https://redis.io/commands/bitfield
     ///
     /// - parameter key: The key of the string to manipulate.
-    /// - parameter subcommand: `BitfieldSubcommand`s to do on the string.
+    /// - parameter subcommands: `BitfieldSubcommand`s to do on the string.
     /// - parameter callback: The callback function.
     /// - parameter res: An array with each entry being the corresponding result
     ///                  of the sub command given at the same position. OVERFLOW
@@ -681,6 +681,7 @@ extension Redis {
         }
     }
     
+    /// A parameter of the SORT command
     /// (offset, count)
     public typealias Limit = (Int, Int)
     
