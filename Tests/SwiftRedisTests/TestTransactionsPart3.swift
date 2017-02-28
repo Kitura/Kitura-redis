@@ -24,7 +24,7 @@ public class TestTransactionsPart3: XCTestCase {
         return [
             ("test_keys", test_keys),
             ("test_randomkey", test_randomkey),
-            ("test_scan", test_scan),
+//            ("test_scan", test_scan),
             ("test_sort", test_sort),
             ("test_keyManipulation", test_keyManipulation),
             ("test_Move", test_Move),
