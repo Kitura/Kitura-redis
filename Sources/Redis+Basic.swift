@@ -35,6 +35,10 @@ extension Redis {
         }
     }
     
+    public func append(key: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("APPEND", key, value))
+    }
+    
     /// Count the number of set bits (population counting) in a string.    ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Int will contain the number of bits
@@ -58,8 +62,19 @@ extension Redis {
         }
     }
     
+    public func bitcount(key: String, start: Int?=nil, end: Int?=nil) throws -> Int {
+        var command = ["BITCOUNT", key]
+        if let start = start {
+            command.append(String(start))
+        }
+        if let end = end {
+            command.append(String(end))
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
     /// Used in BITFIELD
-    public enum BitfieldSubcommand {
+    public enum bitfieldSubcommand {
         // (type, offset)
         case get(String, Int)
         
@@ -70,9 +85,9 @@ extension Redis {
         case incrby(String, String, Int)
         
         // (wrap/sat/fail)
-        case overflow(BitfieldOverflow)
+        case overflow(bitfieldOverflow)
         
-        public enum BitfieldOverflow: String {
+        public enum bitfieldOverflow: String {
             case WRAP, SAT, FAIL
         }
     }
@@ -89,7 +104,7 @@ extension Redis {
     ///                  of the sub command given at the same position. OVERFLOW 
     ///                  subcommands don't count as generating a reply.
     /// - parameter err: The error, if one occurred.
-    public func bitfield(key: String, subcommands: BitfieldSubcommand..., callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
+    public func bitfield(key: String, subcommands: bitfieldSubcommand..., callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
         bitfieldArrayOfSubcommands(key: key, subcommands: subcommands, callback: callback)
     }
     
@@ -105,7 +120,7 @@ extension Redis {
     ///                  of the sub command given at the same position. OVERFLOW
     ///                  subcommands don't count as generating a reply.
     /// - parameter err: The error, if one occurred.
-    public func bitfieldArrayOfSubcommands(key: String, subcommands: [BitfieldSubcommand], callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
+    public func bitfieldArrayOfSubcommands(key: String, subcommands: [bitfieldSubcommand], callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
         var command = ["BITFIELD", key]
         for subcommand in subcommands {
             switch(subcommand) {
@@ -127,17 +142,51 @@ extension Redis {
                 command.append("OVERFLOW")
                 switch(overflow) {
                 case .WRAP:
-                    command.append(BitfieldSubcommand.BitfieldOverflow.WRAP.rawValue)
+                    command.append(bitfieldSubcommand.bitfieldOverflow.WRAP.rawValue)
                 case .SAT:
-                    command.append(BitfieldSubcommand.BitfieldOverflow.SAT.rawValue)
+                    command.append(bitfieldSubcommand.bitfieldOverflow.SAT.rawValue)
                 case .FAIL:
-                    command.append(BitfieldSubcommand.BitfieldOverflow.FAIL.rawValue)
+                    command.append(bitfieldSubcommand.bitfieldOverflow.FAIL.rawValue)
                 }
             }
         }
         issueCommandInArray(command) { (res) in
-            redisArrayResponseHandler(response: res, callback: callback)
+            redisArrayResponseHandler(res, callback: callback)
         }
+    }
+    
+    public func bitfield(key: String, subcommands: bitfieldSubcommand...) throws -> [RedisResponse] {
+        return try bitfield(key: key, subcommands: subcommands)
+    }
+    
+    public func bitfield(key: String, subcommands: [bitfieldSubcommand]) throws -> [RedisResponse] {
+        var command = ["BITFIELD", key]
+        for subcommand in subcommands {
+            switch(subcommand) {
+            case .get(let type, let offset):
+                command.append("GET")
+                command.append(String(type))
+                command.append(String(offset))
+            case .set(let type, let offset, let value):
+                command.append("SET")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(value))
+            case .incrby(let type, let offset, let incr):
+                command.append("INCRBY")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(incr))
+            case .overflow(let overflow):
+                command.append("OVERFLOW")
+                switch(overflow) {
+                case .WRAP: command.append(bitfieldSubcommand.bitfieldOverflow.WRAP.rawValue)
+                case .SAT: command.append(bitfieldSubcommand.bitfieldOverflow.SAT.rawValue)
+                case .FAIL: command.append(bitfieldSubcommand.bitfieldOverflow.FAIL.rawValue)
+                }
+            }
+        }
+        return try redisArrayResponseHandler(issueCommand(command))
     }
     
     /// Perform a bitwise AND operation between multiple keys and store the result at the destination key.
@@ -200,6 +249,19 @@ extension Redis {
         }
     }
     
+    /// Operations used in BITOP
+    public enum bitopOperation: String {
+        case AND, NOT, OR, XOR
+    }
+    
+    public func bitop(operation: bitopOperation, destkey: String, key: String, keys: String...) throws -> Int {
+        var command = ["BITOP", operation.rawValue, destkey, key]
+        for key in keys {
+            command.append(key)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
     /// Return the position of the first bit set to 1 or 0 in a string
     ///
     /// - Parameter key: The key.
@@ -241,6 +303,26 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
+    
+    /// Interval used in GITPOS
+    public enum gitposInterval {
+        case start(Int)
+        case startend(Int, Int)
+    }
+    
+    public func gitpos(key: String, bit: Bool, interval: gitposInterval?) throws -> Int {
+        var command = ["BITPOS", key, bit ? "1" : "0"]
+        if let interval = interval {
+            switch interval {
+            case .start(let start):
+                command.append(String(start))
+            case .startend(let start, let end):
+                command.append(String(start))
+                command.append(String(end))
+            }
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
 
     /// Decrements the integer number stored at the key by a value.
     /// If the key does not exist, it is set to 0 before performing the operation.
@@ -255,6 +337,10 @@ extension Redis {
         issueCommand("DECRBY", key, String(by)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func decr(key: String, by: Int) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("DECRBY", key, String(by)))
     }
     
     /// Removes the specified keys. A key is ignored if it does not exist
@@ -289,6 +375,14 @@ extension Redis {
         }
     }
     
+    public func del(key: String, keys: String...) throws -> Int {
+        var command = ["DEL", key]
+        for key in keys {
+            command.append(key)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
     /// Check if one or more keys exist
     ///
     /// - Parameter keys: A list of keys.
@@ -304,6 +398,14 @@ extension Redis {
         }
     }
     
+    public func exists(key: String, keys: String...) throws -> Int {
+        var command = ["EXISTS", key]
+        for key in keys {
+            command.append(key)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
     /// Set a timeout on a key. After the timeout has expired, the key will automatically be deleted.
     /// A key with an associated timeout is often said to be volatile in Redis terminology.
     ///
@@ -315,6 +417,10 @@ extension Redis {
         issueCommand("PEXPIRE", key, String(Int(inTime * 1000.0))) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func expire(key: String, inTime: TimeInterval) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("PEXPIRE", key, String(Int(inTime * 1000.0))))
     }
     
     /// Set a timeout on a key. After the timeout has expired, the key will automatically be deleted.
@@ -330,6 +436,10 @@ extension Redis {
         }
     }
     
+    public func expire(key: String, atDate: NSDate) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("PEXPIREAT", key, String(Int(atDate.timeIntervalSince1970 * 1000.0))))
+    }
+    
     /// Returns all keys matching `pattern`.
     ///
     /// - parameter pattern: The glob-style pattern to match against.
@@ -340,6 +450,10 @@ extension Redis {
         issueCommand("KEYS", pattern) { (res) in
             redisStringArrayResponseHandler(res, callback: callback)
         }
+    }
+    
+    public func keys(pattern: String) throws -> [RedisString] {
+        return try redisStringArrayResponseHandler(issueCommand("KEYS", pattern))
     }
 
     /// Get the value of a key.
@@ -354,6 +468,10 @@ extension Redis {
         }
     }
     
+    public func get(key: String) throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("GET", key))
+    }
+    
     /// Returns the bit at an offset in the string value stored at the key.
     ///
     /// - Parameter key: The key.
@@ -364,6 +482,10 @@ extension Redis {
         issueCommand("GETBIT", key, String(offset)) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func getbit(key: String, offset: Int) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("GETBIT", key, String(offset)))
     }
 
     /// Returns a substring of the string value stored at the key, determined by the offsets start and end.
@@ -378,6 +500,10 @@ extension Redis {
         issueCommand("GETRANGE", key, String(start), String(end)) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func getrange(key: String, start: Int, end: Int) throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("GETRANGE", key, String(start), String(end)))
     }
     
     /// Atomically sets a key to a value and returns the old value stored at the key.
@@ -402,6 +528,10 @@ extension Redis {
         issueCommand(RedisString("GETSET"), RedisString(key), value) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func getset(key: String, value: String) throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("GETSET", key, value))
     }
     
     /// Increments the number stored at the key by a value. If the key does not exist,
@@ -436,6 +566,14 @@ extension Redis {
         }
     }
     
+    public func incr(key: String, by: Int) throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("INCRBY", key, String(by)))
+    }
+    
+    public func incr(key: String, byFloat: Float) throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("INCRBYFLOAT", key, String(byFloat)))
+    }
+    
     /// Returns the value of all the specified keys.
     ///
     /// - Parameter keys: The list of keys.
@@ -453,6 +591,14 @@ extension Redis {
         }
     }
     
+    public func mget(key: String, keys: String...) throws -> [RedisString] {
+        var command = ["MGET", key]
+        for key in keys {
+            command.append(key)
+        }
+        return try redisStringArrayResponseHandler(issueCommand(command))
+    }
+    
     /// Move a key from the currently selected database to the specified destination database.
     /// When the key already exists in the destination database, or it does not exist in the
     /// source database, nothing is done.
@@ -465,6 +611,10 @@ extension Redis {
         issueCommand("MOVE", key, String(toDB)) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func move(key: String, db: Int) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("MOVE", key, String(db)))
     }
     
     /// Sets a set key value pairs in the database
@@ -530,6 +680,24 @@ extension Redis {
             }
         }
     }
+    
+    public func mset(pair: (String, String), pairs: (String, String)..., exists: Bool=true) throws -> Bool {
+        return try msetArrayOfKeyValues(pair: pair, pairs: pairs, exists: exists)
+    }
+    
+    public func msetArrayOfKeyValues(pair: (String, String), pairs: [(String, String)], exists: Bool=true) throws -> Bool {
+        var command = [exists ? "MSET" : "MSETNX", pair.0, pair.1]
+        for (key, value) in pairs {
+            command.append(key)
+            command.append(value)
+        }
+        let res = try issueCommand(command)
+        if exists {
+            return try redisOkResponseHandler(res, nilOk: false)
+        } else {
+            return try redisBoolResponseHandler(res)
+        }
+    }
 
     /// Remove the existing timeout on a key, turning the key from volatile (a key with an expiration)
     /// to persistent (a key that will never expire as no timeout is associated with it)
@@ -543,6 +711,10 @@ extension Redis {
         }
     }
     
+    public func persist(key: String) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("PERSIST", key))
+    }
+    
     /// Return a random key from the currently selected database.
     ///
     /// - parameter callback: The callback function.
@@ -552,6 +724,10 @@ extension Redis {
         issueCommand("RANDOMKEY") { (res) in
             redisStringResponseHandler(res, callback: callback)
         }
+    }
+    
+    public func randomkey() throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("RANDOMKEY"))
     }
 
     /// Renames a key. It returns an error if the original and new names are the same,
@@ -572,6 +748,14 @@ extension Redis {
             issueCommand("RENAMENX", key, newKey) {(response: RedisResponse) in
                 self.redisBoolResponseHandler(response, callback: callback)
             }
+        }
+    }
+    
+    public func rename(key: String, newkey: String, exists: Bool=true) throws -> Bool {
+        if exists {
+            return try redisOkResponseHandler(issueCommand("RENAME", key, newkey), nilOk: false)
+        } else {
+            return try redisBoolResponseHandler(issueCommand("RENAMENX", key, newkey))
         }
     }
 
@@ -606,6 +790,24 @@ extension Redis {
         }
     }
 
+    public func scan(cursor: Int, match: String?=nil, count: Int?=nil) throws -> (RedisString, [RedisString]) {
+        var command = ["SCAN", String(cursor)]
+        if let match = match, let count = count {
+            command.append("MATCH")
+            command.append(match)
+            command.append("COUNT")
+            command.append(String(count))
+        }
+        if let match = match, count == nil {
+            command.append("MATCH")
+            command.append(match)
+        }
+        if let count = count, match == nil {
+            command.append("COUNT")
+            command.append(String(count))
+        }
+        return try redisScanResponseHandler(issueCommand(command))
+    }
     
     /// Set a key to hold a value. If key already holds a value, it is overwritten.
     ///
@@ -654,6 +856,18 @@ extension Redis {
             callback(ok, _: error)
         }
     }
+    
+    public func set(key: String, value: String, expiresIn: TimeInterval?=nil, exists: Bool?=nil) throws -> Bool {
+        var command = ["SET", key, value]
+        if let expiresIn = expiresIn {
+            command.append("PX")
+            command.append(String(Int(expiresIn * 1000)))
+        }
+        if let exists = exists {
+            command.append(exists ? "XX" : "NX")
+        }
+        return try redisOkResponseHandler(issueCommand(command))
+    }
 
     /// Sets the bit value at an offset in the string value stored at the key.
     ///
@@ -668,6 +882,10 @@ extension Redis {
         }
     }
     
+    public func setbit(key: String, offset: Int, value: Bool) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("SETBIT", key, String(offset), value ? "1" : "0"))
+    }
+    
     /// Overwrites part of the string stored at key, starting at the specified offset, for the entire length of value
     ///
     /// - Parameter key: The key.
@@ -679,6 +897,10 @@ extension Redis {
         issueCommand("SETRANGE", key, String(offset), value) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func setrange(key: String, offset: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("SETRANGE", key, String(offset), value))
     }
     
     /// A parameter of the SORT command
@@ -757,6 +979,38 @@ extension Redis {
         }
     }
     
+    public func sort(key: String, pattern: String?=nil, limit: (Int, Int)?=nil, get: String..., desc: Bool?=false, alpha: Bool?=false, store: String?=nil) throws -> [RedisString] {
+        return try sortArrayOfGetPatterns(key: key, pattern: pattern, limit: limit, get: get, desc: desc, alpha: alpha, store: store)
+    }
+    
+    public func sortArrayOfGetPatterns(key: String, pattern: String?=nil, limit: (Int, Int)?=nil, get: [String], desc: Bool?=false, alpha: Bool?=false, store: String?=nil) throws -> [RedisString] {
+        var command = ["SORT", key]
+        if let pattern = pattern {
+            command.append("BY")
+            command.append(pattern)
+        }
+        if let (offset, count) = limit {
+            command.append("LIMIT")
+            command.append(String(offset))
+            command.append(String(count))
+        }
+        for pattern in get {
+            command.append("GET")
+            command.append(pattern)
+        }
+        if let desc = desc, desc {
+            command.append("DESC")
+        }
+        if let alpha = alpha, alpha {
+            command.append("ALPHA")
+        }
+        if let destination = store {
+            command.append("STORE")
+            command.append(destination)
+        }
+        return try redisStringArrayResponseHandler(issueCommand(command))
+    }
+    
     /// Returns the length of the string value stored at the key
     ///
     /// - Parameter key: The key.
@@ -766,6 +1020,10 @@ extension Redis {
         issueCommand("STRLEN", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func strlen(key: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("STRLEN", key))
     }
     
     /// Alters the last access time of a key(s). A key is ignored if it does not 
@@ -798,6 +1056,18 @@ extension Redis {
         }
     }
     
+    public func touch(key: String, keys: String...) throws -> Int {
+        return try touch(key: key, keys: keys)
+    }
+    
+    public func touch(key: String, keys: [String]) throws -> Int {
+        var command = ["TOUCH", key]
+        for key in keys {
+            command.append(key)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
     /// Get the remaining time to live of a key that has an expiration period set.
     ///
     /// - Parameter key: The key.
@@ -823,6 +1093,22 @@ extension Redis {
         }
     }
     
+    public func ttl(key: String) throws -> TimeInterval {
+        let res = try issueCommand("PTTL", key)
+        switch res {
+        case .IntegerValue(let num):
+            if num >= 0 {
+                return TimeInterval(Double(num)/1000)
+            } else {
+                return TimeInterval(num)
+            }
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
+        }
+    }
+    
     /// Returns the string representation of the type of the value stored at 
     /// `key`. The different types that can be returned are: string, list, set,
     /// zset and hash.
@@ -833,7 +1119,11 @@ extension Redis {
     /// - parameter err: The error, if one occurred.
     public func type(key: String, callback: (_ res: String?, _ err: NSError?) -> Void) {
         issueCommand("TYPE", key) { (res) in
-            redisSimpleStringResponseHandler(response: res, callback: callback)
+            redisSimpleStringResponseHandler(res, callback: callback)
         }
+    }
+    
+    public func type(key: String) throws -> String {
+        return try redisStatusResponseHandler(issueCommand("TYPE", key))
     }
 }

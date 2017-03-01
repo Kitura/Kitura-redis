@@ -45,6 +45,15 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
     }
 }
 
+func connectRedis(auth: Bool=true) throws {
+    if !redis.connected {
+        let pw = read(fileName: "password.txt")
+        let host = read(fileName: "host.txt")
+        try redis.connect(host: host, port: 6379)
+        if auth { try redis.auth(pw: pw) }
+    }
+}
+
 func read(fileName: String) -> String {
         // Read in a configuration file into an NSData
     do {
@@ -72,3 +81,13 @@ func read(fileName: String) -> String {
 
 // Dummy class for test framework
 class CommonUtils { }
+
+func createError(_ errorMessage: String, code: Int) -> NSError {
+    #if os(Linux)
+        let userInfo: [String: Any]
+    #else
+        let userInfo: [String: String]
+    #endif
+    userInfo = [NSLocalizedDescriptionKey: errorMessage]
+    return NSError(domain: "RedisDomain", code: code, userInfo: userInfo)
+}

@@ -71,6 +71,14 @@ public class TestBasicCommands: XCTestCase {
             }
         }
     }
+    
+    private func setup(major: Int, minor: Int, micro: Int) throws -> Bool {
+        try connectRedis()
+        guard try redis.info().server.checkVersionCompatible(major: major, minor: minor, micro: micro) else {
+            return false
+        }
+        return try redis.flushdb()
+    }
         
     func test_setAndGet() {
         setup(major: 1, minor: 0, micro: 0) {
