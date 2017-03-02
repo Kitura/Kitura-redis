@@ -44,6 +44,15 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
+    
+    public func blpop(key: String, keys: String..., timeout: TimeInterval) throws -> [RedisString?] {
+        var command = ["BLPOP", key]
+        for key in keys {
+            command.append(key)
+        }
+        command.append(String(Int(timeout)))
+        return try redisStringArrayResponseHandler(issueCommand(command))
+    }
 
     /// Retrieve an element from the end of one of many lists, potentially blocking until
     /// one of the lists has an element
@@ -66,6 +75,15 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
+    
+    public func brpop(key: String, keys: String..., timeout: TimeInterval) throws -> [RedisString?] {
+        var command = ["BRPOP", key]
+        for key in keys {
+            command.append(key)
+        }
+        command.append(String(Int(timeout)))
+        return try redisStringArrayResponseHandler(issueCommand(command))
+    }
 
     /// Remove and return the last value of a list and push it onto another list,
     /// blocking until there is an element to pop
@@ -81,6 +99,10 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
+    
+    public func brpoplpush(source: String, destination: String, timeout: TimeInterval) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("BRPOPLPUSH", source, destination, String(Int(timeout))))
+    }
 
     /// Retrieve an element from a list by index
     ///
@@ -93,6 +115,10 @@ extension Redis {
         issueCommand("LINDEX", key, String(index)) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func lindex(key: String, index: Int) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("LINDEX", key, String(index)))
     }
 
     /// Insert a value into a list before or after a pivot
@@ -126,6 +152,14 @@ extension Redis {
         }
     }
 
+    public func linsert(key: String, before: Bool, pivot: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LINSERT", key, (before ? "BEFORE" : "AFTER"), pivot, value))
+    }
+    
+    public func linsert(key: String, before: Bool, pivot: RedisString, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("LINSERT"), RedisString(key), RedisString(before ? "BEFORE" : "AFTER"), pivot, value))
+    }
+    
     /// Get the length of a list
     ///
     /// - Parameter key: The key.
@@ -135,6 +169,10 @@ extension Redis {
         issueCommand("LLEN", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func llen(key: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LLEN", key))
     }
 
     /// Pop a value from a list
@@ -146,6 +184,10 @@ extension Redis {
         issueCommand("LPOP", key) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func lpop(key: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("LPOP", key))
     }
 
     /// Push a set of values on to a list
@@ -205,6 +247,30 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
+    
+    public func lpush(key: String, value: String, values: String...) throws -> Int {
+        return try lpush(key: key, value: value, values: values)
+    }
+    
+    public func lpush(key: String, value: String, values: [String]) throws -> Int {
+        var command = ["LPUSH", key, value]
+        for value in values {
+            command.append(value)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
+    public func lpush(key: String, value: RedisString, values: RedisString...) throws -> Int {
+        return try lpush(key: key, value: value, values: values)
+    }
+    
+    public func lpush(key: String, value: RedisString, values: [RedisString]) throws -> Int {
+        var command = [RedisString("LPUSH"), RedisString(key), value]
+        for value in values {
+            command.append(value)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
 
     /// Push a value on to a list, only if the list exists
     ///
@@ -231,6 +297,14 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
+    
+    public func lpushx(key: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LPUSHX", key, value))
+    }
+    
+    public func lpushx(key: String, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("LPUSHX"), RedisString(key), value))
+    }
 
     /// Retrieve a group of elements from a list as specified by a range
     ///
@@ -244,6 +318,10 @@ extension Redis {
         issueCommand("LRANGE", key, String(start), String(end)) {(response: RedisResponse) in
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func lrange(key: String, start: Int, stop: Int) throws -> [RedisString] {
+        return try redisStringArrayResponseHandler(issueCommand("LRANGE", key, String(start), String(stop)))
     }
 
     /// Remove a number of elements that match the supplied value from the list
@@ -272,6 +350,14 @@ extension Redis {
         issueCommand(RedisString("LREM"), RedisString(key), RedisString(count), value) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func lrem(key: String, count: Int, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LREM", key, String(count), value))
+    }
+    
+    public func lrem(key: String, count: Int, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("LREM"), RedisString(key), RedisString(count), value))
     }
 
     /// Set a value in a list to a new value
@@ -303,6 +389,14 @@ extension Redis {
             callback(ok, _: error)
         }
     }
+    
+    public func lset(key: String, index: Int, value: String) throws -> Bool {
+        return try redisOkResponseHandler(issueCommand("LSET", key, String(index), value))
+    }
+    
+    public func lset(key: String, index: Int, value: RedisString) throws -> Bool {
+        return try redisOkResponseHandler(issueCommand(RedisString("LSET"), RedisString(key), RedisString(index), value))
+    }
 
     /// Trim a list to a new size
     ///
@@ -318,6 +412,10 @@ extension Redis {
             callback(ok, _: error)
         }
     }
+    
+    public func ltrim(key: String, start: Int, stop: Int) throws -> Bool {
+        return try redisOkResponseHandler(issueCommand("LTRIM", key, String(start), String(stop)))
+    }
 
     /// Remove and return the last value of a list
     ///
@@ -329,6 +427,10 @@ extension Redis {
         issueCommand("RPOP", key) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func rpop(key: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("RPOP", key))
     }
 
     /// Remove and return the last value of a list and push it onto the front of another list
@@ -342,6 +444,10 @@ extension Redis {
         issueCommand("RPOPLPUSH", source, destination) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func rpoplpush(source: String, destination: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("RPOPLPUSH", source, destination))
     }
 
     /// Append a set of values to end of a list
@@ -396,6 +502,30 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
+    
+    public func rpush(key: String, value: String, values: String...) throws -> Int {
+        return try rpush(key: key, value: value, values: values)
+    }
+    
+    public func rpush(key: String, value: String, values: [String]) throws -> Int {
+        var command = ["RPUSH", key, value]
+        for value in values {
+            command.append(value)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
+    public func rpush(key: String, value: RedisString, values: RedisString...) throws -> Int {
+        return try rpush(key: key, value: value, values: values)
+    }
+    
+    public func rpush(key: String, value: RedisString, values: [RedisString]) throws -> Int {
+        var command = [RedisString("RPUSH"), RedisString(key), value]
+        for value in values {
+            command.append(value)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
 
     /// Append a value to a list, only if the list exists
     ///
@@ -421,5 +551,13 @@ extension Redis {
         issueCommand(RedisString("RPUSHX"), RedisString(key), value) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func rpushx(key: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("RPUSHX", key, value))
+    }
+    
+    public func rpushx(key: String, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("RPUSHX"), RedisString(key), value))
     }
 }

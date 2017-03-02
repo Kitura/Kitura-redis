@@ -18,7 +18,7 @@ import SwiftRedis
 
 #if os(Linux)
     import Glibc
-    import Dispatch
+//    import Dispatch
 #else
     import Darwin
 #endif
@@ -30,17 +30,17 @@ public class TestSORT: XCTestCase {
     
     static var allTests: [(String, (TestSORT) -> () throws -> Void)] {
         return [
-            ("test_sort", test_sort),
-            ("test_sortDesc", test_sortDesc),
-            ("test_sortAlpha", test_sortAlpha),
-            ("test_sortLimit", test_sortLimit),
-            ("test_sortMultiModifiers", test_sortMultiModifiers),
-            ("test_sortBy", test_sortBy),
-            ("test_sortByNoSort", test_sortByNoSort),
-            ("test_sortGet", test_sortGet),
-            ("test_sortGetMulti", test_sortGetMulti),
-            ("test_sortStore", test_sortStore),
-            ("test_sortByGetHashes", test_sortByGetHashes),
+//            ("test_sort", test_sort),
+//            ("test_sortDesc", test_sortDesc),
+//            ("test_sortAlpha", test_sortAlpha),
+//            ("test_sortLimit", test_sortLimit),
+//            ("test_sortMultiModifiers", test_sortMultiModifiers),
+//            ("test_sortBy", test_sortBy),
+//            ("test_sortByNoSort", test_sortByNoSort),
+//            ("test_sortGet", test_sortGet),
+//            ("test_sortGetMulti", test_sortGetMulti),
+//            ("test_sortStore", test_sortStore),
+//            ("test_sortByGetHashes", test_sortByGetHashes),
         ]
     }
     
@@ -66,6 +66,12 @@ public class TestSORT: XCTestCase {
         }
     }
     
+    private func setup(major: Int, minor: Int, micro: Int) throws -> Bool {
+        try connectRedis()
+        guard try redis.info().server.checkVersionCompatible(major: major, minor: minor, micro: micro) else { return false }
+        return try redis.flushdb()
+    }
+    
     func test_sort() {
         setup(major: 1, minor: 0, micro: 0) {
             exp = expectation(description: "Return sorted list at `key`.")
@@ -87,6 +93,14 @@ public class TestSORT: XCTestCase {
             }
             waitForExpectations(timeout: 1, handler: { (_) in })
         }
+    }
+    
+    func test_Sort() throws {
+        guard try setup(major: 1, minor: 0, micro: 0) else { return }
+        
+//        let val1 = "1"
+//        let val2 = "2"
+        
     }
     
     func test_sortDesc() {

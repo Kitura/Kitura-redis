@@ -29,226 +29,122 @@ import XCTest
 public class TestListsPart1: XCTestCase {
     static var allTests: [(String, (TestListsPart1) -> () throws -> Void)] {
         return [
-            ("test_lpushAndLpop", test_lpushAndLpop),
-            ("test_binaryLpushAndLpop", test_binaryLpushAndLpop),
-            ("test_rpushAndRpop", test_rpushAndRpop),
-            ("test_binaryRpushAndRpop", test_binaryRpushAndRpop),
-            ("test_lrangeAndLrem", test_lrangeAndLrem)
+            ("test_lpush_lpop", test_lpush_lpop),
+            ("test_binary_lpush_lpop", test_binary_lpush_lpop),
+            ("test_rpush_rpop", test_rpush_rpop),
+            ("test_binary_rpush_rpop", test_binary_rpush_rpop),
+            ("test_lrange_lrem", test_lrange_lrem)
         ]
     }
 
-    var key1: String { return "test1" }
-    var key2: String { return "test2" }
-    var key3: String { return "test3" }
+    let key1 = "key1"
+    let key2 = "key2"
+    let key3 = "key3"
+    let val1 = "val1"
+    let val2 = "val2"
+    let val3 = "val3"
+    let bval1 = RedisString("bval1")
+    let bval2 = RedisString("bval2")
+    let bval3 = RedisString("bval3")
 
-    func localSetup(block: () -> Void) {
-        connectRedis() {(error: NSError?) in
-            if error != nil {
-                XCTFail("Could not connect to Redis")
-                return
-            }
-
-            redis.del(self.key1, self.key2, self.key3) {(deleted: Int?, error: NSError?) in
-                block()
-            }
-        }
+    private func setup(major: Int, minor: Int, micro: Int) throws -> Bool {
+        try connectRedis()
+        guard try redis.info().server.checkVersionCompatible(major: major, minor: minor, micro: micro) else { return false }
+        return try redis.flushdb()
     }
-
-    func test_lpushAndLpop() {
-        localSetup() {
-            let value1 = "testing 1 2 3"
-            let value2 = "over the hill and through the woods"
-            let value3 = "to grandmothers house we go"
-
-            redis.lpush(self.key1, values: value1, value2) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNotNil(numberSet, "Result of lpush was nil, without an error")
-                XCTAssertEqual(numberSet!, 2, "Failed to lpush \(self.key1)")
-
-                redis.lpop(self.key1) {(popedValue: RedisString?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(popedValue, "Result of lpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(popedValue) for \(self.key1) instead of \(value2)")
-
-                    redis.lpushx(self.key1, value: value3) {(numberSet: Int?, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
-                        XCTAssertEqual(numberSet!, 2, "Failed to lpushx \(self.key1)")
-
-                        redis.lpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNil(popedValue, "Result of lpop was not nil, but \(self.key3) does not exist")
-
-                            redis.lpushx(self.key3, value: value3) {(numberSet: Int?, error: NSError?) in
-                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
-                                XCTAssertEqual(numberSet!, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    
+    func test_lpush_lpop() throws {
+        guard try setup(major: 2, minor: 2, micro: 0) else { return }
+        
+        XCTAssertEqual(try redis.lpush(key: key1, value: val1, values: val2), 2)
+        
+        let res = try redis.lpop(key: key1)
+        XCTAssertNotNil(res)
+        XCTAssertEqual(res?.asString, val2)
+        
+        XCTAssertEqual(try redis.lpushx(key: key1, value: val3), 2)
+        
+        XCTAssertNil(try redis.lpop(key: key3))
+        
+        XCTAssertEqual(try redis.lpushx(key: key3, value: val3), 0)
     }
-
-    func test_binaryLpushAndLpop() {
-        localSetup() {
-            let binaryValue1 = RedisString("testing 1 2 3")
-            let binaryValue2 = RedisString("over the hill and through the woods")
-            let binaryValue3 = RedisString("to grandmothers house we go")
-
-            redis.lpush(self.key2, values: binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNotNil(numberSet, "Result of lpush was nil, without an error")
-                XCTAssertEqual(numberSet!, 2, "Failed to lpush \(self.key2)")
-
-                redis.lpop(self.key2) {(popedValue: RedisString?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(popedValue, "Result of lpop was nil, but \(self.key2) should exist")
-                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(popedValue) for \(self.key2) instead of \(binaryValue1)")
-
-                    redis.lpushx(self.key2, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
-                        XCTAssertEqual(numberSet!, 2, "Failed to lpushx to \(self.key2) returned \(numberSet!)")
-
-                        redis.lpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNil(popedValue, "Result of lpop was not nil, but \(self.key3) does not exist")
-
-                            redis.lpushx(self.key3, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
-                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                XCTAssertNotNil(numberSet, "Result of lpushx was nil, without an error")
-                                XCTAssertEqual(numberSet!, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    
+    func test_binary_lpush_lpop() throws {
+        guard try setup(major: 2, minor: 2, micro: 0) else { return }
+        
+        XCTAssertEqual(try redis.lpush(key: key2, value: bval2, values: bval1), 2)
+        
+        let res = try redis.lpop(key: key2)
+        XCTAssertNotNil(res)
+        XCTAssertEqual(res, bval1)
+        
+        XCTAssertEqual(try redis.lpushx(key: key2, value: bval3), 2)
+        
+        XCTAssertNil(try redis.lpop(key: key3))
+        
+        XCTAssertEqual(try redis.lpushx(key: key3, value: bval3), 0)
     }
+    
+    func test_rpush_rpop() throws {
+        guard try setup(major: 2, minor: 2, micro: 0) else { return }
+        
+        XCTAssertEqual(try redis.rpush(key: key1, value: val1, values: val2), 2)
+        
+        let res = try redis.rpop(key: key1)
+        XCTAssertNotNil(res)
+        XCTAssertEqual(res?.asString, val2)
+        
+        XCTAssertEqual(try redis.rpushx(key: key1, value: val3), 2)
+        
+        XCTAssertNil(try redis.rpop(key: key3))
 
-    func test_rpushAndRpop() {
-        localSetup() {
-            let value1 = "testing 1 2 3"
-            let value2 = "over the hill and through the woods"
-            let value3 = "to grandmothers house we go"
-
-            redis.rpush(self.key1, values: value1, value2) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNotNil(numberSet, "Result of rpush was nil, without an error")
-                XCTAssertEqual(numberSet!, 2, "Failed to rpush \(self.key1)")
-
-                redis.rpop(self.key1) {(popedValue: RedisString?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(popedValue, "Result of rpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(popedValue) for \(self.key1) instead of \(value2)")
-
-                    redis.rpushx(self.key1, value: value3) {(numberSet: Int?, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
-                        XCTAssertEqual(numberSet!, 2, "Failed to rpushx \(self.key1)")
-
-                        redis.rpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNil(popedValue, "Result of rpop was not nil, but \(self.key3) does not exist")
-
-                            redis.rpushx(self.key3, value: value3) {(numberSet: Int?, error: NSError?) in
-                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
-                                XCTAssertEqual(numberSet!, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        XCTAssertEqual(try redis.rpushx(key: key3, value: val3), 0)
     }
-
-    func test_binaryRpushAndRpop() {
-        localSetup() {
-            let binaryValue1 = RedisString("testing 1 2 3")
-            let binaryValue2 = RedisString("over the hill and through the woods")
-            let binaryValue3 = RedisString("to grandmothers house we go")
-
-            redis.rpush(self.key2, values: binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNotNil(numberSet, "Result of rpush was nil, without an error")
-                XCTAssertEqual(numberSet!, 2, "Failed to rpush \(self.key2)")
-
-                redis.rpop(self.key2) {(popedValue: RedisString?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(popedValue, "Result of rpop was nil, but \(self.key2) should exist")
-                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(popedValue) for \(self.key2) instead of \(binaryValue1)")
-
-                    redis.rpushx(self.key2, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
-                        XCTAssertEqual(numberSet!, 2, "Failed to rpushx to \(self.key2) returned \(numberSet!)")
-
-                        redis.rpop(self.key3) {(popedValue: RedisString?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNil(popedValue, "Result of rpop was not nil, but \(self.key3) does not exist")
-
-                            redis.rpushx(self.key3, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
-                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                XCTAssertNotNil(numberSet, "Result of rpushx was nil, without an error")
-                                XCTAssertEqual(numberSet!, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(numberSet!)")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    
+    func test_binary_rpush_rpop() throws {
+        guard try setup(major: 2, minor: 2, micro: 0) else { return }
+        
+        XCTAssertEqual(try redis.rpush(key: key2, value: bval2, values: bval1), 2)
+        
+        let res = try redis.rpop(key: key2)
+        XCTAssertNotNil(res)
+        XCTAssertEqual(res, bval1)
+        
+        XCTAssertEqual(try redis.rpushx(key: key2, value: bval3), 2)
+        
+        XCTAssertNil(try redis.rpop(key: key3))
+        
+        XCTAssertEqual(try redis.rpushx(key: key3, value: bval3), 0)
     }
-
-    func test_lrangeAndLrem() {
-        localSetup() {
-            let value1 = "testing 1 2 3"
-            let value2 = "over the hill and through the woods"
-            let value3 = "to grandmothers house we go"
-            let value4 = "singing away we go"
-            let binaryValue1 = RedisString("testing 1 2 3")
-            let binaryValue2 = RedisString("over the hill and through the woods")
-            let binaryValue3 = RedisString("to grandmothers house we go")
-            let binaryValue4 = RedisString("singing away we go")
-
-            redis.lpush(self.key1, values: value1, value2, value3, value4) {(numberSet: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-
-                redis.lrange(self.key1, start: 1, end: 2) {(returnedValues: [RedisString?]?, error: NSError?) in
-                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
-                    XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
-                    XCTAssertEqual(returnedValues![0], RedisString(value3), "Returned value #1 was \(returnedValues![0]) should have been \(value3)")
-                    XCTAssertEqual(returnedValues![1], RedisString(value2), "Returned value #2 was \(returnedValues![1]) should have been \(value2)")
-
-                    redis.lrem(self.key1, count: 3, value: value3) {(removedValues: Int?, error: NSError?) in
-                        XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNotNil(removedValues, "Result of lrem was nil, without an error")
-                        XCTAssertEqual(removedValues!, 1, "Number of values removed by lrem was \(removedValues!) should have been 1")
-
-                        redis.lpush(self.key2, values: binaryValue4, binaryValue3, binaryValue2, binaryValue1) {(numberSet: Int?, error: NSError?) in
-                            XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-
-                            redis.lrange(self.key2, start: 1, end: 2) {(returnedValues: [RedisString?]?, error: NSError?) in
-                                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
-                                XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
-                                XCTAssertEqual(returnedValues![0], binaryValue2, "Returned value #1 was \(returnedValues![0]) should have been \(binaryValue2)")
-                                XCTAssertEqual(returnedValues![1], binaryValue3, "Returned value #2 was \(returnedValues![1]) should have been \(binaryValue3)")
-
-                                redis.lrem(self.key1, count: 3, value: binaryValue2) {(removedValues: Int?, error: NSError?) in
-                                    XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                                    XCTAssertNotNil(removedValues, "Result of lrem was nil, without an error")
-                                    XCTAssertEqual(removedValues!, 1, "Number of values removed by lrem was \(removedValues!) should have been 1")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    
+    func test_lrange_lrem() throws {
+        guard try setup(major: 1, minor: 0, micro: 0) else { return }
+        
+        let val1 = "testing 1 2 3"
+        let val2 = "over the hill and through the woods"
+        let val3 = "to grandmothers house we go"
+        let val4 = "singing away we go"
+        let bval1 = RedisString("testing 1 2 3")
+        let bval2 = RedisString("over the hill and through the woods")
+        let bval3 = RedisString("to grandmothers house we go")
+        let bval4 = RedisString("singing away we go")
+        
+        XCTAssertEqual(try redis.lpush(key: key1, value: val1, values: val2, val3, val4), 4)
+        
+        var res = try redis.lrange(key: key1, start: 1, stop: 2)
+        XCTAssertEqual(res.count, 2)
+        XCTAssertEqual(res[0].asString, val3)
+        XCTAssertEqual(res[1].asString, val2)
+        
+        XCTAssertEqual(try redis.lrem(key: key1, count: 3, value: val3), 1)
+        
+        XCTAssertEqual(try redis.lpush(key: key2, value: bval4, values: bval3, bval2, bval1), 4)
+        
+        res = try redis.lrange(key: key2, start: 1, stop: 2)
+        XCTAssertEqual(res.count, 2)
+        XCTAssertEqual(res[0], bval2)
+        XCTAssertEqual(res[1], bval3)
+        
+        XCTAssertEqual(try redis.lrem(key: key1, count: 3, value: bval2), 1)
     }
-
 }

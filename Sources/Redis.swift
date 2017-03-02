@@ -233,6 +233,10 @@ public class Redis {
     public func issueCommand(_ stringArgs: RedisString..., callback: (RedisResponse) -> Void) {
         issueCommandInArray(stringArgs, callback: callback)
     }
+    
+    public func issueCommand(_ args: RedisString...) throws -> RedisResponse {
+        return try issueCommand(args)
+    }
 
     /// Issue a Redis command
     ///
@@ -250,6 +254,16 @@ public class Redis {
         }
 
         respHandle.issueCommand(stringArgs, callback: callback)
+    }
+    
+    public func issueCommand(_ arr: [RedisString]) throws -> RedisResponse {
+        guard let respHandle = respHandle, respHandle.status == .connected else {
+            throw createError("Not connected to Redis server.", code: 1)
+        }
+        if arr.count < 1 {
+            throw createError("Empty command.", code: 1)
+        }
+        return try respHandle.issueCommand(args: arr)
     }
 
     //
@@ -303,19 +317,6 @@ public class Redis {
         switch res {
         case .IntegerValue(let num):
             return Int(num)
-        case .Error(let err):
-            throw createError(err, code: 1)
-        default:
-            throw createUnexpectedResponseError(res)
-        }
-    }
-    
-    func redisIntegerResponseHandler(_ res: RedisResponse) throws -> Int? {
-        switch res {
-        case .IntegerValue(let num):
-            return Int(num)
-        case .Nil:
-            return nil
         case .Error(let err):
             throw createError(err, code: 1)
         default:

@@ -118,6 +118,30 @@ internal class RedisResp {
             callback(RedisResponse.Error("Error sending command to Redis server. Unknown error."))
         }
     }
+    
+    internal func issueCommand(args: [RedisString]) throws -> RedisResponse {
+        guard let socket = socket else {
+            throw createError("Socket was nil.", code: 1)
+        }
+        
+        var buf = Data()
+        buf.append(RedisResp.asterisk)
+        add(args.count, to: &buf)
+        buf.append(RedisResp.crLf)
+        
+        for arg in args {
+            addAsBulkString(arg.asData, to: &buf)
+        }
+        
+        do {
+            try socket.write(from: buf)
+            return try readAndParseResponse()
+        } catch let err as Socket.Error {
+            throw createError("Error sending command to Redis Server: \(err).", code: 1)
+        } catch {
+            throw createError("Unknown error sending command to Redis Server.", code: 1)
+        }
+    }
 
     // Mark: Parsing Functions
 

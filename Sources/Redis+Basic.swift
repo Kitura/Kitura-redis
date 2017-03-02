@@ -139,12 +139,9 @@ extension Redis {
             case .overflow(let overflow):
                 command.append("OVERFLOW")
                 switch(overflow) {
-                case .WRAP:
-                    command.append(bitfieldSubcommand.bitfieldOverflow.WRAP.rawValue)
-                case .SAT:
-                    command.append(bitfieldSubcommand.bitfieldOverflow.SAT.rawValue)
-                case .FAIL:
-                    command.append(bitfieldSubcommand.bitfieldOverflow.FAIL.rawValue)
+                case .WRAP: command.append(bitfieldSubcommand.bitfieldOverflow.WRAP.rawValue)
+                case .SAT: command.append(bitfieldSubcommand.bitfieldOverflow.SAT.rawValue)
+                case .FAIL: command.append(bitfieldSubcommand.bitfieldOverflow.FAIL.rawValue)
                 }
             }
         }
@@ -381,6 +378,14 @@ extension Redis {
         return try redisIntegerResponseHandler(issueCommand(command))
     }
     
+    public func del(key: RedisString, keys: RedisString...) throws -> Int {
+        var command = [RedisString("DEL"), key]
+        for key in keys {
+            command.append(key)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
+    
     /// Check if one or more keys exist
     ///
     /// - Parameter keys: A list of keys.
@@ -514,6 +519,10 @@ extension Redis {
     
     public func getset(key: String, value: String) throws -> RedisString? {
         return try redisStringResponseHandler(issueCommand("GETSET", key, value))
+    }
+    
+    public func getset(key: String, value: RedisString) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand(RedisString("GETSET"), RedisString(key), value))
     }
     
     /// Increments the number stored at the key by a value. If the key does not exist,
@@ -680,13 +689,31 @@ extension Redis {
     }
     
     public func mset(pair: (String, String), pairs: (String, String)..., exists: Bool=true) throws -> Bool {
-        return try msetArrayOfKeyValues(pair: pair, pairs: pairs, exists: exists)
+        return try msetArrayOfPairs(pair: pair, pairs: pairs)
     }
     
-    public func msetArrayOfKeyValues(pair: (String, String), pairs: [(String, String)], exists: Bool=true) throws -> Bool {
+    public func msetArrayOfPairs(pair: (String, String), pairs: [(String, String)], exists: Bool=true) throws -> Bool {
         var command = [exists ? "MSET" : "MSETNX", pair.0, pair.1]
         for (key, value) in pairs {
             command.append(key)
+            command.append(value)
+        }
+        let res = try issueCommand(command)
+        if exists {
+            return try redisOkResponseHandler(res, nilOk: false)
+        } else {
+            return try redisBoolResponseHandler(res)
+        }
+    }
+    
+    public func mset(pair: (String, RedisString), pairs: (String, RedisString)..., exists: Bool=true) throws -> Bool {
+        return try msetArrayOfPairs(pair: pair, pairs: pairs)
+    }
+    
+    public func msetArrayOfPairs(pair: (String, RedisString), pairs: [(String, RedisString)], exists: Bool=true) throws -> Bool {
+        var command = [exists ? RedisString("MSET") : RedisString("MSETNX"), RedisString(pair.0), pair.1]
+        for (key, value) in pairs {
+            command.append(RedisString(key))
             command.append(value)
         }
         let res = try issueCommand(command)
@@ -863,6 +890,18 @@ extension Redis {
         }
         if let exists = exists {
             command.append(exists ? "XX" : "NX")
+        }
+        return try redisOkResponseHandler(issueCommand(command))
+    }
+    
+    public func set(key: String, value: RedisString, exists: Bool?=nil, expiresIn: TimeInterval?=nil) throws -> Bool {
+        var command = [RedisString("SET"), RedisString(key), value]
+        if let expiresIn = expiresIn {
+            command.append(RedisString("PX"))
+            command.append(RedisString(Int(expiresIn * 1000)))
+        }
+        if let exists = exists {
+            command.append(exists ? RedisString("XX") : RedisString("NX"))
         }
         return try redisOkResponseHandler(issueCommand(command))
     }
