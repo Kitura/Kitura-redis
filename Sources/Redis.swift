@@ -309,6 +309,19 @@ public class Redis {
             throw createUnexpectedResponseError(res)
         }
     }
+    
+    func redisIntegerResponseHandler(_ res: RedisResponse) throws -> Int? {
+        switch res {
+        case .IntegerValue(let num):
+            return Int(num)
+        case .Nil:
+            return nil
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
+        }
+    }
 
     func redisOkResponseHandler(_ response: RedisResponse, nilOk: Bool=true) -> (Bool, NSError?) {
         switch(response) {
@@ -389,6 +402,19 @@ public class Redis {
             throw createUnexpectedResponseError(res)
         }
     }
+    
+    func redisStringResponseHandler(_ res: RedisResponse) throws -> RedisString? {
+        switch res {
+        case .StringValue(let str):
+            return str
+        case .Nil:
+            return nil
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
+        }
+    }
 
     func redisArrayResponseHandler(_ response: RedisResponse, callback: ([RedisResponse?]?, NSError?) -> Void) {
         var error: NSError? = nil
@@ -407,7 +433,7 @@ public class Redis {
         callback(error == nil ? result : nil, _: error)
     }
     
-    func redisArrayResponseHandler(_ res: RedisResponse) throws -> [RedisResponse] {
+    func redisArrayResponseHandler(_ res: RedisResponse) throws -> [RedisResponse?] {
         switch res {
         case .Array(let arr):
             return arr
@@ -417,7 +443,7 @@ public class Redis {
             throw createUnexpectedResponseError(res)
         }
     }
-    
+        
     func redisStringArrayResponseHandler(_ response: RedisResponse, callback: ([RedisString?]?, NSError?) -> Void) {
         var error: NSError? = nil
         var result: [RedisString?]?
@@ -484,6 +510,30 @@ public class Redis {
                 switch elem {
                 case .StringValue(let str):
                     result.append(str)
+                default:
+                    throw createUnexpectedResponseError(res)
+                }
+            }
+            return result
+        case .IntegerValue(let num):
+            return [RedisString(String(num))]
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
+        }
+    }
+    
+    func redisStringArrayResponseHandler(_ res: RedisResponse) throws -> [RedisString?] {
+        switch res {
+        case .Array(let arr):
+            var result = [RedisString?]()
+            for elem in arr {
+                switch elem {
+                case .StringValue(let str):
+                    result.append(str)
+                case .Nil:
+                    result.append(nil)
                 default:
                     throw createUnexpectedResponseError(res)
                 }

@@ -62,12 +62,10 @@ extension Redis {
         }
     }
     
-    public func bitcount(key: String, start: Int?=nil, end: Int?=nil) throws -> Int {
+    public func bitcount(key: String, interval: (Int, Int)?=nil) throws -> Int {
         var command = ["BITCOUNT", key]
-        if let start = start {
+        if let (start, end) = interval {
             command.append(String(start))
-        }
-        if let end = end {
             command.append(String(end))
         }
         return try redisIntegerResponseHandler(issueCommand(command))
@@ -155,11 +153,11 @@ extension Redis {
         }
     }
     
-    public func bitfield(key: String, subcommands: bitfieldSubcommand...) throws -> [RedisResponse] {
+    public func bitfield(key: String, subcommands: bitfieldSubcommand...) throws -> [RedisResponse?] {
         return try bitfield(key: key, subcommands: subcommands)
     }
     
-    public func bitfield(key: String, subcommands: [bitfieldSubcommand]) throws -> [RedisResponse] {
+    public func bitfield(key: String, subcommands: [bitfieldSubcommand]) throws -> [RedisResponse?] {
         var command = ["BITFIELD", key]
         for subcommand in subcommands {
             switch(subcommand) {
@@ -339,7 +337,7 @@ extension Redis {
         }
     }
     
-    public func decr(key: String, by: Int) throws -> Int {
+    public func decr(key: String, by: Int=1) throws -> Int {
         return try redisIntegerResponseHandler(issueCommand("DECRBY", key, String(by)))
     }
     
@@ -439,22 +437,6 @@ extension Redis {
     public func expire(key: String, atDate: NSDate) throws -> Bool {
         return try redisBoolResponseHandler(issueCommand("PEXPIREAT", key, String(Int(atDate.timeIntervalSince1970 * 1000.0))))
     }
-    
-    /// Returns all keys matching `pattern`.
-    ///
-    /// - parameter pattern: The glob-style pattern to match against.
-    /// - parameter callback: The callback function.
-    /// - parameter res: List of keys matching `pattern`.
-    /// - parameter err: The error, if one occurred.
-    public func keys(pattern: String, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
-        issueCommand("KEYS", pattern) { (res) in
-            redisStringArrayResponseHandler(res, callback: callback)
-        }
-    }
-    
-    public func keys(pattern: String) throws -> [RedisString] {
-        return try redisStringArrayResponseHandler(issueCommand("KEYS", pattern))
-    }
 
     /// Get the value of a key.
     ///
@@ -468,7 +450,7 @@ extension Redis {
         }
     }
     
-    public func get(key: String) throws -> RedisString {
+    public func get(key: String) throws -> RedisString? {
         return try redisStringResponseHandler(issueCommand("GET", key))
     }
     
@@ -530,7 +512,7 @@ extension Redis {
         }
     }
     
-    public func getset(key: String, value: String) throws -> RedisString {
+    public func getset(key: String, value: String) throws -> RedisString? {
         return try redisStringResponseHandler(issueCommand("GETSET", key, value))
     }
     
@@ -566,12 +548,28 @@ extension Redis {
         }
     }
     
-    public func incr(key: String, by: Int) throws -> RedisString {
-        return try redisStringResponseHandler(issueCommand("INCRBY", key, String(by)))
+    public func incr(key: String, by: Int=1) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("INCRBY", key, String(by)))
     }
     
     public func incr(key: String, byFloat: Float) throws -> RedisString {
         return try redisStringResponseHandler(issueCommand("INCRBYFLOAT", key, String(byFloat)))
+    }
+    
+    /// Returns all keys matching `pattern`.
+    ///
+    /// - parameter pattern: The glob-style pattern to match against.
+    /// - parameter callback: The callback function.
+    /// - parameter res: List of keys matching `pattern`.
+    /// - parameter err: The error, if one occurred.
+    public func keys(pattern: String, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        issueCommand("KEYS", pattern) { (res) in
+            redisStringArrayResponseHandler(res, callback: callback)
+        }
+    }
+    
+    public func keys(pattern: String) throws -> [RedisString] {
+        return try redisStringArrayResponseHandler(issueCommand("KEYS", pattern))
     }
     
     /// Returns the value of all the specified keys.
@@ -591,7 +589,7 @@ extension Redis {
         }
     }
     
-    public func mget(key: String, keys: String...) throws -> [RedisString] {
+    public func mget(key: String, keys: String...) throws -> [RedisString?] {
         var command = ["MGET", key]
         for key in keys {
             command.append(key)
@@ -726,7 +724,7 @@ extension Redis {
         }
     }
     
-    public func randomkey() throws -> RedisString {
+    public func randomkey() throws -> RedisString? {
         return try redisStringResponseHandler(issueCommand("RANDOMKEY"))
     }
 
