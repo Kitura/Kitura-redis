@@ -22,12 +22,20 @@ import XCTest
 public class TestTransactionsPart3: XCTestCase {
     static var allTests: [(String, (TestTransactionsPart3) -> () throws -> Void)] {
         return [
+            ("test_keys", test_keys),
+            ("test_randomkey", test_randomkey),
+            ("test_scan", test_scan),
+            ("test_sort", test_sort),
             ("test_keyManipulation", test_keyManipulation),
             ("test_Move", test_Move),
-            ("test_expiration", test_expiration)
+            ("test_expiration", test_expiration),
+            ("test_touch", test_touch),
+            ("test_type", test_type)
         ]
     }
 
+    var exp: XCTestExpectation?
+    
     let key1 = "test1"
     let key2 = "test2"
     let key3 = "test3"
@@ -39,7 +47,182 @@ public class TestTransactionsPart3: XCTestCase {
     let expVal3 = "we go"
     let expVal4 = "Testing"
     let expVal5 = "testing 1 2 3"
+    
+    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
+        connectRedis() {(err) in
+            guard err == nil else {
+                XCTFail("\(err)")
+                return
+            }
+            redis.info { (info: RedisInfo?, _) in
+                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
+                    redis.flushdb(callback: { (_, _) in
+                        callback()
+                    })
+                }
+            }
+        }
+    }
 
+    private func setupTests(callback: () -> Void) {
+        connectRedis() {(error: NSError?) in
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
+            
+            redis.del(self.key1, self.key2, self.key3, self.key4) {(deleted: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                
+                callback()
+            }
+        }
+    }
+    
+    private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
+        switch(response) {
+        case .Array(let responses):
+            XCTAssertEqual(responses.count, count, "Number of nested responses wasn't \(count), was \(responses.count)")
+            for  nestedResponse in responses {
+                switch(nestedResponse) {
+                case .Error:
+                    XCTFail("Nested transaction response was a \(nestedResponse)")
+                    return nil
+                default:
+                    break
+                }
+            }
+            return responses
+        default:
+            XCTFail("EXEC response wasn't an Array response. Was \(response)")
+            return nil
+        }
+    }
+    
+    func test_keys() {
+        setup(major: 1, minor: 0, micro: 0) { 
+            exp = expectation(description: "Returns all keys matching `pattern`.")
+            
+            let multi = redis.multi()
+            multi.mset((key1, "1"), (key2, "2"), (key3, "3"), (key4, "4"))
+            multi.keys(pattern: "*1")
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    XCTAssertEqual(responses[0].asStatus, "OK")
+                    XCTAssertEqual((responses[1].asArray)?[0].asString, RedisString(self.key1))
+                    self.exp?.fulfill()
+                }
+                
+            })
+            waitForExpectations(timeout: 1, handler: { (_) in })
+        }
+    }
+    
+    func test_randomkey() {
+        setup(major: 1, minor: 0, micro: 0) { 
+            exp = expectation(description: "Return a random key from the currently selected database.")
+            
+            let multi = redis.multi()
+            multi.mset((key1, "1"))
+            multi.randomkey()
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    XCTAssertEqual(responses[0].asStatus, "OK")
+                    XCTAssertEqual(responses[1].asString, RedisString(self.key1))
+                    self.exp?.fulfill()
+                }
+            })
+            waitForExpectations(timeout: 1, handler: { (_) in })
+        }
+    }
+    
+    func test_scan() {
+        setup(major: 2, minor: 8, micro: 0) { 
+            exp = expectation(description: "Iterate the set of keys in the currently selected Redis database.")
+            
+            let multi = redis.multi()
+            multi.mset((key1, "val1"), (key2, "val2"))
+            multi.scan(cursor: 0, match: "*1", count: 1)
+            multi.scan(cursor: 0, match: "*1")
+            multi.scan(cursor: 0, count: 1)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 4) {
+                    XCTAssertEqual(responses[0].asStatus, "OK")
+                    XCTAssertNotNil(responses[1])
+                    XCTAssertNotNil(responses[2])
+                    XCTAssertNotNil(responses[3])
+                    self.exp?.fulfill()
+                }
+            })
+            waitForExpectations(timeout: 1, handler: { (_) in })
+        }
+    }
+
+    func test_sort() {
+        setup(major: 1, minor: 0, micro: 0) { 
+            exp = expectation(description: "Returns or stores the elements contained in the list, set or sorted set at key.")
+            
+            let val1 = "1"
+            let val2 = "2"
+            let val3 = "3"
+            let w1 = "1"
+            let w2 = "2"
+            let w3 = "3"
+            let obj1 = "1"
+            let obj2 = "2"
+            let obj3 = "3"
+            
+            let multi = redis.multi()
+            multi.lpush(key1, values: val1, val2, val3)
+            multi.mset(("weight_1", w1), ("weight_2", w2), ("weight_3", w3), ("object_1", obj1), ("object_2", obj2), ("object_3", obj3))
+            multi.sort(key: key1, by: "weight_*")
+            multi.sort(key: key1, limit: (0, 1))
+            multi.sort(key: key1, get: "object_*")
+            multi.sort(key: key1, desc: true)
+            multi.sort(key: key1, alpha: true)
+            multi.sort(key: key1, store: key2)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 8) {
+                    
+                    // lpush
+                    XCTAssertEqual(responses[0].asInteger, 3)
+                    
+                    // mset
+                    XCTAssertEqual(responses[1].asStatus, "OK")
+                    
+                    // sort by
+                    XCTAssertEqual((responses[2].asArray)?[0].asString, RedisString(val1))
+                    XCTAssertEqual((responses[2].asArray)?[1].asString, RedisString(val2))
+                    XCTAssertEqual((responses[2].asArray)?[2].asString, RedisString(val3))
+                    
+                    // sort limit
+                    XCTAssertEqual((responses[3].asArray)?[0].asString, RedisString(val1))
+                    
+                    // sort get
+                    XCTAssertEqual((responses[4].asArray)?[0].asString, RedisString(obj1))
+                    XCTAssertEqual((responses[4].asArray)?[1].asString, RedisString(obj2))
+                    XCTAssertEqual((responses[4].asArray)?[2].asString, RedisString(obj3))
+                    
+                    // sort desc
+                    XCTAssertEqual((responses[5].asArray)?[0].asString, RedisString(val3))
+                    XCTAssertEqual((responses[5].asArray)?[1].asString, RedisString(val2))
+                    XCTAssertEqual((responses[5].asArray)?[2].asString, RedisString(val1))
+                    
+                    // sort alpha
+                    XCTAssertEqual((responses[6].asArray)?[0].asString, RedisString(val1))
+                    XCTAssertEqual((responses[6].asArray)?[1].asString, RedisString(val2))
+                    XCTAssertEqual((responses[6].asArray)?[2].asString, RedisString(val3))
+
+                    // sort store
+                    XCTAssertEqual(responses[7].asInteger, 3)
+                    
+                    self.exp?.fulfill()
+                }
+            })
+            waitForExpectations(timeout: 1, handler: { (_) in })
+        }
+    }
+    
     func test_keyManipulation() {
         setupTests() {
             let multi = redis.multi()
@@ -111,40 +294,40 @@ public class TestTransactionsPart3: XCTestCase {
             }
         }
     }
-
-
-    private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
-        switch(response) {
-        case .Array(let responses):
-            XCTAssertEqual(responses.count, count, "Number of nested responses wasn't \(count), was \(responses.count)")
-            for  nestedResponse in responses {
-                switch(nestedResponse) {
-                case .Error:
-                    XCTFail("Nested transaction response was a \(nestedResponse)")
-                    return nil
-                default:
-                    break
+    
+    func test_touch() {
+        setup(major: 3, minor: 2, micro: 1) { 
+            exp = expectation(description: "Alters the last access time of a `key`(s). A key is ignored if it does not exist.")
+            
+            let multi = redis.multi()
+            multi.set(key1, value: "1")
+            multi.touch(key: key1)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    XCTAssertEqual(responses[0].asStatus, "OK")
+                    XCTAssertEqual(responses[1].asInteger, 1)
+                    self.exp?.fulfill()
                 }
-            }
-            return responses
-        default:
-            XCTFail("EXEC response wasn't an Array response. Was \(response)")
-            return nil
+            })
+            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
-
-    private func setupTests(callback: () -> Void) {
-        connectRedis() {(error: NSError?) in
-            if error != nil {
-                XCTFail("Could not connect to Redis")
-                return
-            }
-
-            redis.del(self.key1, self.key2, self.key3, self.key4) {(deleted: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-
-                callback()
-            }
+    
+    func test_type() {
+        setup(major: 1, minor: 0, micro: 0) {
+            exp = expectation(description: "Returns the string representation of the type of the value stored at `key`. The different types that can be returned are: string, list, set, zset and hash.")
+            
+            let multi = redis.multi()
+            multi.set(key1, value: "1")
+            multi.type(key: key1)
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 2) {
+                    XCTAssertEqual(responses[0].asStatus, "OK")
+                    XCTAssertEqual(responses[1].asStatus, "string")
+                    self.exp?.fulfill()
+                }
+            })
+            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
 }

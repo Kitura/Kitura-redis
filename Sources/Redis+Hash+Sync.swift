@@ -22,7 +22,7 @@ extension Redis {
     //
     //  MARK: Hash API functions
     //
-    
+
     /// Removes the specified fields from the hash stored at a key. Specified fields that do not
     /// exist within this hash are ignored. If key does not exist, it is treated as an empty hash
     /// and this command returns 0.
@@ -32,16 +32,14 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the number of fields that
     ///             were removed from the hash, not including specified but non existing fields.
     ///             NSError will be non-nil if an error occurred.
-    public func hdel(_ key: String, fields: String..., callback: (Int?, NSError?) -> Void) {
-        var command = ["HDEL", key]
+    public func hdel(key: String, field: String, fields: String...) throws -> Int {
+        var command = ["HDEL", key, field]
         for field in fields {
             command.append(field)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+        return try redisIntegerResponseHandler(issueCommand(command))
     }
-    
+
     /// Determine if the specified field exists in the hash stored at a key
     ///
     /// - Parameter key: The key.
@@ -49,10 +47,8 @@ extension Redis {
     /// - Parameter callback: The callback function, Bool will contain true if the hash exists
     ///                      and contains the specified field.
     ///                      NSError will be non-nil if an error occurred.
-    public func hexists(_ key: String, field: String, callback: (Bool, NSError?) -> Void) {
-        issueCommand("HEXISTS", key, field) {(response: RedisResponse) in
-            self.redisBoolResponseHandler(response, callback: callback)
-        }
+    public func hexists(key: String, field: String) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("HEXISTS", key, field))
     }
     
     /// Get the value associated with a field in the hash stored at a key.
@@ -62,12 +58,10 @@ extension Redis {
     /// - Parameter callback: The callback function returning the value associated with the field,
     ///                      or nil when field is not present in the hash or key does not exist.
     ///                      NSError will be non-nil if an error occurred.
-    public func hget(_ key: String, field: String, callback: (RedisString?, NSError?) -> Void) {
-        issueCommand("HGET", key, field) {(response: RedisResponse) in
-            self.redisStringResponseHandler(response, callback: callback)
-        }
+    public func hget(key: String, field: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("HGET", key, field))
     }
-    
+
     /// Get all fields and values of the hash stored at a key.
     ///
     /// - Parameter key: The key.
@@ -75,33 +69,30 @@ extension Redis {
     ///                      the field names and their associated values that are stored in the
     ///                      hash, it is empty if key does not exist.
     ///                      NSError will be non-nil if an error occurred.
-    public func hgetall(_ key: String, callback: ([String: RedisString], NSError?) -> Void) {
-        issueCommand("HGETALL", key) {(response: RedisResponse) in
-            var values = [String: RedisString]()
-            var error: NSError? = nil
-            
-            switch(response) {
-            case .Array(let responses):
-                for idx in stride(from: 0, to: responses.count-1, by: 2) {
-                    switch(responses[idx]) {
-                    case .StringValue(let field):
-                        switch(responses[idx+1]) {
-                        case .StringValue(let value):
-                            values[field.asString] = value
-                        default:
-                            error = self.createUnexpectedResponseError(response)
-                        }
+    public func hgetall(key: String) throws -> [String: RedisString] {
+        let res = try issueCommand("HGETALL", key)
+        var vals = [String: RedisString]()
+        switch(res) {
+        case .Array(let responses):
+            for i in stride(from: 0, to: responses.count-1, by: 2) {
+                switch(responses[i]) {
+                case .StringValue(let field):
+                    switch(responses[i+1]) {
+                    case .StringValue(let value):
+                        vals[field.asString] = value
                     default:
-                        error = self.createUnexpectedResponseError(response)
+                        throw createUnexpectedResponseError(res)
                     }
+                default:
+                    throw createUnexpectedResponseError(res)
                 }
-            case .Error(let err):
-                error = self.createError("Error: \(err)", code: 1)
-            default:
-                error = self.createUnexpectedResponseError(response)
             }
-            callback(values, _: error)
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
         }
+        return vals
     }
     
     /// Increments the number stored in a field in the hash stored at a key by a value
@@ -112,12 +103,10 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the value of
     ///                      the field after it was incremented.
     ///                      NSError will be non-nil if an error occurred.
-    public func hincr(_ key: String, field: String, by: Int, callback: (Int?, NSError?) -> Void) {
-        issueCommand("HINCRBY", key, field, String(by)) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func hincrby(key: String, field: String, increment: Int) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("HINCRBY", key, field, String(increment)))
     }
-    
+
     /// Increments the number stored in a field in the hash stored at a key by floating point value
     ///
     /// - Parameter key: The key.
@@ -126,39 +115,35 @@ extension Redis {
     /// - Parameter callback: The callback function, the `RedisString` will contain the value of
     ///                      the field after it was incremented.
     ///                      NSError will be non-nil if an error occurred.
-    public func hincr(_ key: String, field: String, byFloat: Float, callback: (RedisString?, NSError?) -> Void) {
-        issueCommand("HINCRBYFLOAT", key, field, String(byFloat)) {(response: RedisResponse) in
-            self.redisStringResponseHandler(response, callback: callback)
-        }
+    public func hincrbyfloat(key: String, field: String, increment: Float) throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("HINCRBYFLOAT", key, field, String(increment)))
     }
+    
     /// Get all of the field names in the hash stored at a key
     ///
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Array<String> will contain
     ///                      the list of the fields names in the hash.
     ///                      NSError will be non-nil if an error occurred.
-    public func hkeys(_ key: String, callback: ([String]?, NSError?) -> Void) {
-        issueCommand("HKEYS", key) {(response: RedisResponse) in
-            var error: NSError? = nil
-            var strings = [String]()
-            
-            switch(response) {
-            case .Array(let responses):
-                for innerResponse in responses {
-                    switch(innerResponse) {
-                    case .StringValue(let str):
-                        strings.append(str.asString)
-                    default:
-                        error = self.createUnexpectedResponseError(response)
-                    }
+    public func hkeys(key: String) throws -> [String] {
+        let res = try issueCommand("HKEYS", key)
+        var strings = [String]()
+        switch(res) {
+        case .Array(let responses):
+            for innerResponse in responses {
+                switch(innerResponse) {
+                case .StringValue(let str):
+                    strings.append(str.asString)
+                default:
+                    throw createUnexpectedResponseError(res)
                 }
-            case .Error(let err):
-                error = self.createError("Error: \(err)", code: 1)
-            default:
-                error = self.createUnexpectedResponseError(response)
             }
-            callback(error == nil ? strings : nil, _: error)
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
         }
+        return strings
     }
     
     /// Get the number of fields contained in the hash stored at a key
@@ -167,12 +152,10 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the number
     ///                      of fields in the hash, or 0 when the key does not exist.
     ///                      NSError will be non-nil if an error occurred.
-    public func hlen(_ key: String, callback: (Int?, NSError?) -> Void) {
-        issueCommand("HLEN", key) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func hlen(key: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("HLEN", key))
     }
-    
+
     /// Get the values associated with the specified fields in the hash stored at a key.
     ///
     /// - Parameter key: The key.
@@ -180,16 +163,14 @@ extension Redis {
     /// - Parameter callback: The callback function, the Array<RedisString> will contain the list
     ///                      of values associated with the given fields, in the order the field
     ///                      names were specified. NSError will be non-nil if an error occurred.
-    public func hmget(_ key: String, fields: String..., callback: ([RedisString?]?, NSError?) -> Void) {
-        var command = ["HMGET", key]
+    public func hmget(key: String, field: String, fields: String...) throws -> [RedisString?] {
+        var command = ["HMGET", key, field]
         for field in fields {
             command.append(field)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisStringArrayResponseHandler(response, callback: callback)
-        }
+        return try redisStringArrayResponseHandler(issueCommand(command))
     }
-    
+
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If the key does not exist,
     /// a new key holding a hash is created.
@@ -198,10 +179,10 @@ extension Redis {
     /// - Parameter fieldValuePairs: The list of field name value tuples to set.
     /// - Parameter callback: The callback function, the Bool will contain true if the
     ///                      fields were set. NSError will be non-nil if an error occurred.
-    public func hmset(_ key: String, fieldValuePairs: (String, String)..., callback: (Bool, NSError?) -> Void) {
-        hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
+    public func hmset(key: String, fieldValuePair: (String, String), fieldValuePairs: (String, String)...) throws -> Bool {
+        return try hmset(key: key, fieldValuePair: fieldValuePair, fieldValuePairs: fieldValuePairs)
     }
-    
+
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
     /// a new key holding a hash is created.
@@ -210,16 +191,13 @@ extension Redis {
     /// - Parameter fieldValuePairs: The array of field name value tuples to set.
     /// - Parameter callback: The callback function, the Bool will contain true if the
     ///                      fields were set. NSError will be non-nil if an error occurred.
-    public func hmsetArrayOfKeyValues(_ key: String, fieldValuePairs: [(String, String)], callback: (Bool, NSError?) -> Void) {
-        var command = ["HMSET", key]
+    public func hmset(key: String, fieldValuePair: (String, String), fieldValuePairs: [(String, String)]) throws -> Bool {
+        var command = ["HMSET", key, fieldValuePair.0, fieldValuePair.1]
         for (field, value) in fieldValuePairs {
             command.append(field)
             command.append(value)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
-            callback(ok, _: error)
-        }
+        return try redisOkResponseHandler(issueCommand(command), nilOk: false)
     }
     
     /// Sets the specified fields to their respective values in the hash stored at key.
@@ -230,10 +208,10 @@ extension Redis {
     /// - Parameter fieldValuePairs: The list of field name value tuples to set. With values as `RedisString`s.
     /// - Parameter callback: The callback function, the Bool will contain true if the
     ///                      fields were set. NSError will be non-nil if an error occurred.
-    public func hmset(_ key: String, fieldValuePairs: (String, RedisString)..., callback: (Bool, NSError?) -> Void) {
-        hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
+    public func hmset(key: String, fieldValuePair: (String, RedisString), fieldValuePairs: (String, RedisString)...) throws -> Bool {
+        return try hmset(key: key, fieldValuePair: fieldValuePair, fieldValuePairs: fieldValuePairs)
     }
-    
+
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
     /// a new key holding a hash is created.
@@ -242,16 +220,13 @@ extension Redis {
     /// - Parameter fieldValuePairs: The array of field name value tuples to set. With values as `RedisString`s.
     /// - Parameter callback: The callback function, the Bool will contain true if the
     ///                      fields were set. NSError will be non-nil if an error occurred.
-    public func hmsetArrayOfKeyValues(_ key: String, fieldValuePairs: [(String, RedisString)], callback: (Bool, NSError?) -> Void) {
-        var command = [RedisString("HMSET"), RedisString(key)]
+    public func hmset(key: String, fieldValuePair: (String, RedisString), fieldValuePairs: [(String, RedisString)]) throws -> Bool {
+        var command = [RedisString("HMSET"), RedisString(key), RedisString(fieldValuePair.0), fieldValuePair.1]
         for (field, value) in fieldValuePairs {
             command.append(RedisString(field))
             command.append(value)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
-            callback(ok, _: error)
-        }
+        return try redisOkResponseHandler(issueCommand(command), nilOk: false)
     }
     
     /// Iterates fields of Hash types and their associated values.
@@ -266,27 +241,25 @@ extension Redis {
     ///                        iterated.
     /// - parameter res: The results of the scan.
     /// - parameter err: The error, if one occured.
-    public func hscan(key: String, cursor: Int, match: String?=nil, count: Int?=nil,
-                      callback: (_ newCursor: RedisString?, _ res: [RedisString?]?, _ err: NSError?) -> Void) {
+    public func hscan(key: String, cursor: Int, match: String?=nil, count: Int?=nil) throws -> (RedisString, [RedisString]) {
+        var command = ["HSCAN", key, String(cursor)]
         if let match = match, let count = count {
-            issueCommand("HSCAN", key, String(cursor), "MATCH", match, "COUNT", String(count)) {(response: RedisResponse) in
-                self.redisScanResponseHandler(response, callback: callback)
-            }
-        } else if let match = match {
-            issueCommand("HSCAN", key, String(cursor), "MATCH", match) {(response: RedisResponse) in
-                self.redisScanResponseHandler(response, callback: callback)
-            }
-        } else if let count = count {
-            issueCommand("HSCAN", key, String(cursor), "COUNT", String(count)) {(response: RedisResponse) in
-                self.redisScanResponseHandler(response, callback: callback)
-            }
-        } else {
-            issueCommand("HSCAN", key, String(cursor)) {(response: RedisResponse) in
-                self.redisScanResponseHandler(response, callback: callback)
-            }
+            command.append("MATCH")
+            command.append(match)
+            command.append("COUNT")
+            command.append(String(count))
         }
+        if let match = match, count == nil {
+            command.append("MATCH")
+            command.append(match)
+        }
+        if let count = count, match == nil {
+            command.append("COUNT")
+            command.append(String(count))
+        }
+        return try redisScanResponseHandler(issueCommand(command))
     }
-    
+
     /// Sets the specified field in a hash stored at a key to a value. This command overwrites
     /// an existing field in the hash. If key does not exist, a new key holding a hash is created.
     ///
@@ -296,12 +269,10 @@ extension Redis {
     /// - Parameter exists: If true, will set the value only if the field exists.
     /// - Parameter callback: The callback function, the Bool will contain true if the
     ///                      field was set. NSError will be non-nil if an error occurred.
-    public func hset(_ key: String, field: String, value: String, exists: Bool=true, callback: (Bool, NSError?) -> Void) {
-        issueCommand(exists ? "HSET" : "HSETNX", key, field, value) {(response: RedisResponse) in
-            self.redisBoolResponseHandler(response, callback: callback)
-        }
+    public func hset(key: String, field: String, value: String, exists: Bool=true) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand(exists ? "HSET" : "HSETNX", key, field, value))
     }
-    
+
     /// Sets the specified field in a hash stored at a key to a value. This command overwrites
     /// an existing field in the hash. If key does not exist, a new key holding a hash is created.
     ///
@@ -311,10 +282,8 @@ extension Redis {
     /// - Parameter exists: If true, will set the value only if the field exists
     /// - Parameter callback: The callback function, the Bool will contain true if the
     ///                      field was set. NSError will be non-nil if an error occurred.
-    public func hset(_ key: String, field: String, value: RedisString, exists: Bool=true, callback: (Bool, NSError?) -> Void) {
-        issueCommand(RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), value) {(response: RedisResponse) in
-            self.redisBoolResponseHandler(response, callback: callback)
-        }
+    public func hset(key: String, field: String, value: RedisString, exists: Bool=true) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand(RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), value))
     }
     
     /// Get the string length of the value in a field in a hash stored at a key.
@@ -325,10 +294,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the string length
     ///                      of the value in the specified field.
     ///                      NSError will be non-nil if an error occurred.
-    public func hstrlen(_ key: String, field: String, callback: (Int?, NSError?) -> Void) {
-        issueCommand("HSTRLEN", key, field) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func hstrlen(key: String, field: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("HSTRLEN", key, field))
     }
     
     /// Get all of the values in the hash stored at a key.
@@ -337,9 +304,7 @@ extension Redis {
     /// - Parameter callback: The callback function, the Array<RedisString> will contain the
     ///                      list of values in the hash.
     ///                      NSError will be non-nil if an error occurred.
-    public func hvals(_ key: String, callback: ([RedisString?]?, NSError?) -> Void) {
-        issueCommand("HVALS", key) {(response: RedisResponse) in
-            self.redisStringArrayResponseHandler(response, callback: callback)
-        }
+    public func hvals(key: String) throws -> [RedisString] {
+        return try redisStringArrayResponseHandler(issueCommand("HVALS", key))
     }
 }

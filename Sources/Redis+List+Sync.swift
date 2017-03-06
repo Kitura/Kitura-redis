@@ -33,16 +33,13 @@ extension Redis {
     ///                      is the key of the list that had an element and the second
     ///                      entry is the value of that element.
     ///                      NSError will be non-nil if an error occurred.
-    public func blpop(_ keys: String..., timeout: TimeInterval, callback: ([RedisString?]?, NSError?) -> Void) {
-        
-        var command = ["BLPOP"]
+    public func blpop(key: String, keys: String..., timeout: TimeInterval) throws -> [RedisString?] {
+        var command = ["BLPOP", key]
         for key in keys {
             command.append(key)
         }
         command.append(String(Int(timeout)))
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisStringArrayResponseHandler(response, callback: callback)
-        }
+        return try redisStringArrayResponseHandler(issueCommand(command))
     }
     
     /// Retrieve an element from the end of one of many lists, potentially blocking until
@@ -55,16 +52,13 @@ extension Redis {
     ///                      is the key of the list that had an element and the second
     ///                      entry is the value of that element.
     ///                      NSError will be non-nil if an error occurred.
-    public func brpop(_ keys: String..., timeout: TimeInterval, callback: ([RedisString?]?, NSError?) -> Void) {
-        
-        var command = ["BRPOP"]
+    public func brpop(key: String, keys: String..., timeout: TimeInterval) throws -> [RedisString?] {
+        var command = ["BRPOP", key]
         for key in keys {
             command.append(key)
         }
         command.append(String(Int(timeout)))
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisStringArrayResponseHandler(response, callback: callback)
-        }
+        return try redisStringArrayResponseHandler(issueCommand(command))
     }
     
     /// Remove and return the last value of a list and push it onto another list,
@@ -76,10 +70,8 @@ extension Redis {
     /// - Parameter callback: The callback function, when a time out didn't occur, the
     ///                      `RedisString` will contain the value of the element that
     ///                      was poped. NSError will be non-nil if an error occurred.
-    public func brpoplpush(_ source: String, destination: String, timeout: TimeInterval, callback: (RedisString?, NSError?) -> Void) {
-        issueCommand("BRPOPLPUSH", source, destination, String(Int(timeout))) {(response: RedisResponse) in
-            self.redisStringResponseHandler(response, callback: callback)
-        }
+    public func brpoplpush(source: String, destination: String, timeout: TimeInterval) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("BRPOPLPUSH", source, destination, String(Int(timeout))))
     }
     
     /// Retrieve an element from a list by index
@@ -89,10 +81,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the `RedisString` will contain the
     ///                      value of the element at the index.
     ///                      NSError will be non-nil if an error occurred.
-    public func lindex(_ key: String, index: Int, callback: (RedisString?, NSError?) -> Void) {
-        issueCommand("LINDEX", key, String(index)) {(response: RedisResponse) in
-            self.redisStringResponseHandler(response, callback: callback)
-        }
+    public func lindex(key: String, index: Int) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("LINDEX", key, String(index)))
     }
     
     /// Insert a value into a list before or after a pivot
@@ -104,10 +94,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the length of
     ///                      the list after the insert or -1 if the pivot wasn't found.
     ///                      NSError will be non-nil if an error occurred.
-    public func linsert(_ key: String, before: Bool, pivot: String, value: String, callback: (Int?, NSError?) -> Void) {
-        issueCommand("LINSERT", key, (before ? "BEFORE" : "AFTER"), pivot, value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func linsert(key: String, before: Bool, pivot: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LINSERT", key, (before ? "BEFORE" : "AFTER"), pivot, value))
     }
     
     /// Insert a value into a list before or after a pivot
@@ -120,10 +108,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the length of
     ///                      the list after the insert or -1 if the pivot wasn't found.
     ///                      NSError will be non-nil if an error occurred.
-    public func linsert(_ key: String, before: Bool, pivot: RedisString, value: RedisString, callback: (Int?, NSError?) -> Void) {
-        issueCommand(RedisString("LINSERT"), RedisString(key), RedisString(before ? "BEFORE" : "AFTER"), pivot, value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func linsert(key: String, before: Bool, pivot: RedisString, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("LINSERT"), RedisString(key), RedisString(before ? "BEFORE" : "AFTER"), pivot, value))
     }
     
     /// Get the length of a list
@@ -131,10 +117,8 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the Int will contain the length of
     ///                      the list. NSError will be non-nil if an error occurred.
-    public func llen(_ key: String, callback: (Int?, NSError?) -> Void) {
-        issueCommand("LLEN", key) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func llen(key: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LLEN", key))
     }
     
     /// Pop a value from a list
@@ -142,10 +126,8 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Parameter callback: The callback function, the RedisString will contain the value
     ///                      poped from the list. NSError will be non-nil if an error occurred.
-    public func lpop(_ key: String, callback: (RedisString?, NSError?) -> Void) {
-        issueCommand("LPOP", key) {(response: RedisResponse) in
-            self.redisStringResponseHandler(response, callback: callback)
-        }
+    public func lpop(key: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("LPOP", key))
     }
     
     /// Push a set of values on to a list
@@ -155,8 +137,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func lpush(_ key: String, values: String..., callback: (Int?, NSError?) -> Void) {
-        lpushArrayOfValues(key, values: values, callback: callback)
+    public func lpush(key: String, value: String, values: String...) throws -> Int {
+        return try lpush(key: key, value: value, values: values)
     }
     
     /// Push a set of values on to a list
@@ -166,14 +148,12 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func lpushArrayOfValues(_ key: String, values: [String], callback: (Int?, NSError?) -> Void) {
-        var command = ["LPUSH", key]
+    public func lpush(key: String, value: String, values: [String]) throws -> Int {
+        var command = ["LPUSH", key, value]
         for value in values {
             command.append(value)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+        return try redisIntegerResponseHandler(issueCommand(command))
     }
     
     /// Push a set of values on to a list
@@ -184,8 +164,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func lpush(_ key: String, values: RedisString..., callback: (Int?, NSError?) -> Void) {
-        lpushArrayOfValues(key, values: values, callback: callback)
+    public func lpush(key: String, value: RedisString, values: RedisString...) throws -> Int {
+        return try lpush(key: key, value: value, values: values)
     }
     
     /// Push a set of values on to a list
@@ -196,14 +176,12 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func lpushArrayOfValues(_ key: String, values: [RedisString], callback: (Int?, NSError?) -> Void) {
-        var command = [RedisString("LPUSH"), RedisString(key)]
+    public func lpush(key: String, value: RedisString, values: [RedisString]) throws -> Int {
+        var command = [RedisString("LPUSH"), RedisString(key), value]
         for value in values {
             command.append(value)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+        return try redisIntegerResponseHandler(issueCommand(command))
     }
     
     /// Push a value on to a list, only if the list exists
@@ -213,10 +191,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func lpushx(_ key: String, value: String, callback: (Int?, NSError?) -> Void) {
-        issueCommand("LPUSHX", key, value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func lpushx(key: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LPUSHX", key, value))
     }
     
     /// Push a value on to a list, only if the list exists
@@ -226,10 +202,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func lpushx(_ key: String, value: RedisString, callback: (Int?, NSError?) -> Void) {
-        issueCommand(RedisString("LPUSHX"), RedisString(key), value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func lpushx(key: String, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("LPUSHX"), RedisString(key), value))
     }
     
     /// Retrieve a group of elements from a list as specified by a range
@@ -240,10 +214,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Array<RedisString> will contain the
     ///                      group of elements retrieved.
     ///                      NSError will be non-nil if an error occurred.
-    public func lrange(_ key: String, start: Int, end: Int, callback: ([RedisString?]?, NSError?) -> Void) {
-        issueCommand("LRANGE", key, String(start), String(end)) {(response: RedisResponse) in
-            self.redisStringArrayResponseHandler(response, callback: callback)
-        }
+    public func lrange(key: String, start: Int, stop: Int) throws -> [RedisString] {
+        return try redisStringArrayResponseHandler(issueCommand("LRANGE", key, String(start), String(stop)))
     }
     
     /// Remove a number of elements that match the supplied value from the list
@@ -254,10 +226,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      number of elements that were removed.
     ///                      NSError will be non-nil if an error occurred.
-    public func lrem(_ key: String, count: Int, value: String, callback: (Int?, NSError?) -> Void) {
-        issueCommand("LREM", key, String(count), value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func lrem(key: String, count: Int, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("LREM", key, String(count), value))
     }
     
     /// Remove a number of elements that match the supplied value from the list
@@ -268,10 +238,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      number of elements that were removed.
     ///                      NSError will be non-nil if an error occurred.
-    public func lrem(_ key: String, count: Int, value: RedisString, callback: (Int?, NSError?) -> Void) {
-        issueCommand(RedisString("LREM"), RedisString(key), RedisString(count), value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func lrem(key: String, count: Int, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("LREM"), RedisString(key), RedisString(count), value))
     }
     
     /// Set a value in a list to a new value
@@ -282,11 +250,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Bool will contain true
     ///                      if the list element was updated.
     ///                      NSError will be non-nil if an error occurred.
-    public func lset(_ key: String, index: Int, value: String, callback: (Bool, NSError?) -> Void) {
-        issueCommand("LSET", key, String(index), value) {(response: RedisResponse) in
-            let (ok, error) = self.redisOkResponseHandler(response)
-            callback(ok, _: error)
-        }
+    public func lset(key: String, index: Int, value: String) throws -> Bool {
+        return try redisOkResponseHandler(issueCommand("LSET", key, String(index), value))
     }
     
     /// Set a value in a list to a new value
@@ -297,11 +262,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Bool will contain true
     ///                      if the list element was updated.
     ///                      NSError will be non-nil if an error occurred.
-    public func lset(_ key: String, index: Int, value: RedisString, callback: (Bool, NSError?) -> Void) {
-        issueCommand(RedisString("LSET"), RedisString(key), RedisString(index), value) {(response: RedisResponse) in
-            let (ok, error) = self.redisOkResponseHandler(response)
-            callback(ok, _: error)
-        }
+    public func lset(key: String, index: Int, value: RedisString) throws -> Bool {
+        return try redisOkResponseHandler(issueCommand(RedisString("LSET"), RedisString(key), RedisString(index), value))
     }
     
     /// Trim a list to a new size
@@ -312,11 +274,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Bool will contain true
     ///                      if the list was trimmed.
     ///                      NSError will be non-nil if an error occurred.
-    public func ltrim(_ key: String, start: Int, end: Int, callback: (Bool, NSError?) -> Void) {
-        issueCommand("LTRIM", key, String(start), String(end)) {(response: RedisResponse) in
-            let (ok, error) = self.redisOkResponseHandler(response)
-            callback(ok, _: error)
-        }
+    public func ltrim(key: String, start: Int, stop: Int) throws -> Bool {
+        return try redisOkResponseHandler(issueCommand("LTRIM", key, String(start), String(stop)))
     }
     
     /// Remove and return the last value of a list
@@ -325,10 +284,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the RedisString will contain the
     ///                      value poped from the list.
     ///                      NSError will be non-nil if an error occurred.
-    public func rpop(_ key: String, callback: (RedisString?, NSError?) -> Void) {
-        issueCommand("RPOP", key) {(response: RedisResponse) in
-            self.redisStringResponseHandler(response, callback: callback)
-        }
+    public func rpop(key: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("RPOP", key))
     }
     
     /// Remove and return the last value of a list and push it onto the front of another list
@@ -338,10 +295,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the RedisString will contain the
     ///                      value poped from the source list.
     ///                      NSError will be non-nil if an error occurred.
-    public func rpoplpush(_ source: String, destination: String, callback: (RedisString?, NSError?) -> Void) {
-        issueCommand("RPOPLPUSH", source, destination) {(response: RedisResponse) in
-            self.redisStringResponseHandler(response, callback: callback)
-        }
+    public func rpoplpush(source: String, destination: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("RPOPLPUSH", source, destination))
     }
     
     /// Append a set of values to end of a list
@@ -351,8 +306,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func rpush(_ key: String, values: String..., callback: (Int?, NSError?) -> Void) {
-        rpushArrayOfValues(key, values: values, callback: callback)
+    public func rpush(key: String, value: String, values: String...) throws -> Int {
+        return try rpush(key: key, value: value, values: values)
     }
     
     /// Append a set of values to a list
@@ -362,14 +317,12 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func rpushArrayOfValues(_ key: String, values: [String], callback: (Int?, NSError?) -> Void) {
-        var command = ["RPUSH", key]
+    public func rpush(key: String, value: String, values: [String]) throws -> Int {
+        var command = ["RPUSH", key, value]
         for value in values {
             command.append(value)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+        return try redisIntegerResponseHandler(issueCommand(command))
     }
     
     /// Append a set of values to a list
@@ -379,22 +332,20 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func rpush(_ key: String, values: RedisString..., callback: (Int?, NSError?) -> Void) {
-        rpushArrayOfValues(key, values: values, callback: callback)
+    public func rpush(key: String, value: RedisString, values: RedisString...) throws -> Int {
+        return try rpush(key: key, value: value, values: values)
     }
     
     /// Append a set of values to a list
     ///
     /// - Parameter key: The key.
     /// - Parameter values: An array of `RedisString` values to be pushed on to the list
-    public func rpushArrayOfValues(_ key: String, values: [RedisString], callback: (Int?, NSError?) -> Void) {
-        var command = [RedisString("RPUSH"), RedisString(key)]
+    public func rpush(key: String, value: RedisString, values: [RedisString]) throws -> Int {
+        var command = [RedisString("RPUSH"), RedisString(key), value]
         for value in values {
             command.append(value)
         }
-        issueCommandInArray(command) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+        return try redisIntegerResponseHandler(issueCommand(command))
     }
     
     /// Append a value to a list, only if the list exists
@@ -404,10 +355,8 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func rpushx(_ key: String, value: String, callback: (Int?, NSError?) -> Void) {
-        issueCommand("RPUSHX", key, value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func rpushx(key: String, value: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("RPUSHX", key, value))
     }
     
     /// Append a value to a list, only if the list exists
@@ -417,9 +366,7 @@ extension Redis {
     /// - Parameter callback: The callback function, the Int will contain the
     ///                      length of the list after push.
     ///                      NSError will be non-nil if an error occurred.
-    public func rpushx(_ key: String, value: RedisString, callback: (Int?, NSError?) -> Void) {
-        issueCommand(RedisString("RPUSHX"), RedisString(key), value) {(response: RedisResponse) in
-            self.redisIntegerResponseHandler(response, callback: callback)
-        }
+    public func rpushx(key: String, value: RedisString) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand(RedisString("RPUSHX"), RedisString(key), value))
     }
 }

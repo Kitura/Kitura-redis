@@ -71,6 +71,30 @@ internal class RedisResp {
             callback(RedisResponse.Error("Error sending command to Redis server. Unknown error"))
         }
     }
+    
+    internal func issueCommand(args: [String]) throws -> RedisResponse {
+        guard let socket = socket else {
+            throw createError("Socket was nil.", code: 1)
+        }
+        
+        var buf = Data()
+        buf.append(RedisResp.asterisk)
+        add(args.count, to: &buf)
+        buf.append(RedisResp.crLf)
+        
+        for arg in args {
+            addAsBulkString(RedisString(arg).asData, to: &buf)
+        }
+        
+        do {
+            try socket.write(from: buf)
+            return try readAndParseResponse()
+        } catch let err as Socket.Error {
+            throw createError("Error sending command to Redis Server: \(err).", code: 1)
+        } catch {
+            throw createError("Unknown error sending command to Redis Server.", code: 1)
+        }
+    }
 
     internal func issueCommand(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
@@ -94,6 +118,30 @@ internal class RedisResp {
             callback(RedisResponse.Error("Error sending command to Redis server. Unknown error."))
         }
     }
+    
+    internal func issueCommand(args: [RedisString]) throws -> RedisResponse {
+        guard let socket = socket else {
+            throw createError("Socket was nil.", code: 1)
+        }
+        
+        var buf = Data()
+        buf.append(RedisResp.asterisk)
+        add(args.count, to: &buf)
+        buf.append(RedisResp.crLf)
+        
+        for arg in args {
+            addAsBulkString(arg.asData, to: &buf)
+        }
+        
+        do {
+            try socket.write(from: buf)
+            return try readAndParseResponse()
+        } catch let err as Socket.Error {
+            throw createError("Error sending command to Redis Server: \(err).", code: 1)
+        } catch {
+            throw createError("Unknown error sending command to Redis Server.", code: 1)
+        }
+    }
 
     // Mark: Parsing Functions
 
@@ -111,6 +159,22 @@ internal class RedisResp {
             callback(RedisResponse.Error("Error reading from the Redis server. Error=\(error.description)"))
         } catch {
             callback(RedisResponse.Error("Error reading from the Redis server. Unknown error"))
+        }
+    }
+    
+    private func readAndParseResponse() throws -> RedisResponse {
+        var buf = Data()
+        var res = RedisResponse.Nil
+        
+        do {
+            (res, _) = try parseByPrefix(&buf, from: 0)
+            return res
+        } catch let err as Socket.Error {
+            throw createError("Error reading from Redis server: \(err).", code: 1)
+        } catch let err as RedisRespError {
+            throw createError("Error reading from Redis erver: \(err).", code: 1)
+        } catch {
+            throw createError("Unknown error reading from Redis server.", code: 1)
         }
     }
 
@@ -297,4 +361,14 @@ fileprivate struct RedisRespError: Error {
                 return "A simple string or error message wasn't UTF-8 encoded"
         }
     }
+}
+
+func createError(_ errorMessage: String, code: Int) -> NSError {
+    #if os(Linux)
+        let userInfo: [String: Any]
+    #else
+        let userInfo: [String: String]
+    #endif
+    userInfo = [NSLocalizedDescriptionKey: errorMessage]
+    return NSError(domain: "RedisDomain", code: code, userInfo: userInfo)
 }

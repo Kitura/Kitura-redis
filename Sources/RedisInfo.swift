@@ -112,8 +112,8 @@ public struct RedisInfo {
         /// - Returns: true if the Redis server is compatable with the
         ///           specified major and minor Redis version number.
         public func checkVersionCompatible(major: Int, minor: Int=0) -> Bool {
-            let v = self.redis_version.components(separatedBy: ".")
-            return Int(v[0])! >= major && Int(v[1])! >= minor
+            let v = redis_version.components(separatedBy: ".").map { Int($0)! }
+            return (v[0] > major) || (v[0] == major && v[1] >= minor)
         }
 
         /// Check if the Redis server is compatable with a certain Major.Minor.Micro version of Redis
@@ -124,10 +124,12 @@ public struct RedisInfo {
         ///
         /// - Returns: true if the Redis server is compatable with the
         ///           specified major, minor, and micro Redis version number.
-        public func checkVersionCompatible(major: Int, minor: Int=0, micro: Int) -> Bool {
-            let v = self.redis_version.components(separatedBy: ".")
-            return Int(v[0])! >= major && Int(v[1])! >= minor && Int(v[2])! >= micro
+        public func checkVersionCompatible(major: Int, minor: Int=0, micro: Int=0) -> Bool {
+            let v = redis_version.components(separatedBy: ".").map { Int($0)! }
+            return
+                (v[0] > major) ||
+                (v[0] == major && v[1] > minor) ||
+                (v[0] == major && v[1] == minor && v[2] >= micro)
         }
     }
-
 }
