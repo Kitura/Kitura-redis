@@ -41,6 +41,14 @@ extension Redis {
             self.redisIntegerResponseHandler(response, callback: callback)
         }
     }
+    
+    public func hdel(key: String, field: String, fields: String...) throws -> Int {
+        var command = ["HDEL", key, field]
+        for field in fields {
+            command.append(field)
+        }
+        return try redisIntegerResponseHandler(issueCommand(command))
+    }
 
     /// Determine if the specified field exists in the hash stored at a key
     ///
@@ -55,6 +63,10 @@ extension Redis {
         }
     }
     
+    public func hexists(key: String, field: String) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand("HEXISTS", key, field))
+    }
+    
     /// Get the value associated with a field in the hash stored at a key.
     ///
     /// - Parameter key: The key.
@@ -66,6 +78,10 @@ extension Redis {
         issueCommand("HGET", key, field) {(response: RedisResponse) in
             self.redisStringResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func hget(key: String, field: String) throws -> RedisString? {
+        return try redisStringResponseHandler(issueCommand("HGET", key, field))
     }
 
     /// Get all fields and values of the hash stored at a key.
@@ -104,6 +120,32 @@ extension Redis {
         }
     }
 
+    public func hgetall(key: String) throws -> [String: RedisString] {
+        let res = try issueCommand("HGETALL", key)
+        var vals = [String: RedisString]()
+        switch(res) {
+        case .Array(let responses):
+            for i in stride(from: 0, to: responses.count-1, by: 2) {
+                switch(responses[i]) {
+                case .StringValue(let field):
+                    switch(responses[i+1]) {
+                    case .StringValue(let value):
+                        vals[field.asString] = value
+                    default:
+                        throw createUnexpectedResponseError(res)
+                    }
+                default:
+                    throw createUnexpectedResponseError(res)
+                }
+            }
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
+        }
+        return vals
+    }
+    
     /// Increments the number stored in a field in the hash stored at a key by a value
     ///
     /// - Parameter key: The key.
@@ -116,6 +158,10 @@ extension Redis {
         issueCommand("HINCRBY", key, field, String(by)) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func hincrby(key: String, field: String, increment: Int) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("HINCRBY", key, field, String(increment)))
     }
 
     /// Increments the number stored in a field in the hash stored at a key by floating point value
@@ -131,6 +177,11 @@ extension Redis {
             self.redisStringResponseHandler(response, callback: callback)
         }
     }
+    
+    public func hincrbyfloat(key: String, field: String, increment: Float) throws -> RedisString {
+        return try redisStringResponseHandler(issueCommand("HINCRBYFLOAT", key, field, String(increment)))
+    }
+    
     /// Get all of the field names in the hash stored at a key
     ///
     /// - Parameter key: The key.
@@ -161,6 +212,27 @@ extension Redis {
         }
     }
     
+    public func hkeys(key: String) throws -> [String] {
+        let res = try issueCommand("HKEYS", key)
+        var strings = [String]()
+        switch(res) {
+        case .Array(let responses):
+            for innerResponse in responses {
+                switch(innerResponse) {
+                case .StringValue(let str):
+                    strings.append(str.asString)
+                default:
+                    throw createUnexpectedResponseError(res)
+                }
+            }
+        case .Error(let err):
+            throw createError(err, code: 1)
+        default:
+            throw createUnexpectedResponseError(res)
+        }
+        return strings
+    }
+    
     /// Get the number of fields contained in the hash stored at a key
     ///
     /// - Parameter key: The key.
@@ -171,6 +243,10 @@ extension Redis {
         issueCommand("HLEN", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func hlen(key: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("HLEN", key))
     }
 
     /// Get the values associated with the specified fields in the hash stored at a key.
@@ -189,6 +265,14 @@ extension Redis {
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
     }
+    
+    public func hmget(key: String, field: String, fields: String...) throws -> [RedisString?] {
+        var command = ["HMGET", key, field]
+        for field in fields {
+            command.append(field)
+        }
+        return try redisStringArrayResponseHandler(issueCommand(command))
+    }
 
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If the key does not exist,
@@ -200,6 +284,10 @@ extension Redis {
     ///                      fields were set. NSError will be non-nil if an error occurred.
     public func hmset(_ key: String, fieldValuePairs: (String, String)..., callback: (Bool, NSError?) -> Void) {
         hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
+    }
+    
+    public func hmset(key: String, fieldValuePair: (String, String), fieldValuePairs: (String, String)...) throws -> Bool {
+        return try hmset(key: key, fieldValuePair: fieldValuePair, fieldValuePairs: fieldValuePairs)
     }
 
     /// Sets the specified fields to their respective values in the hash stored at key.
@@ -222,6 +310,15 @@ extension Redis {
         }
     }
 
+    public func hmset(key: String, fieldValuePair: (String, String), fieldValuePairs: [(String, String)]) throws -> Bool {
+        var command = ["HMSET", key, fieldValuePair.0, fieldValuePair.1]
+        for (field, value) in fieldValuePairs {
+            command.append(field)
+            command.append(value)
+        }
+        return try redisOkResponseHandler(issueCommand(command), nilOk: false)
+    }
+    
     /// Sets the specified fields to their respective values in the hash stored at key.
     /// This command overwrites any existing fields in the hash. If key does not exist,
     /// a new key holding a hash is created.
@@ -232,6 +329,10 @@ extension Redis {
     ///                      fields were set. NSError will be non-nil if an error occurred.
     public func hmset(_ key: String, fieldValuePairs: (String, RedisString)..., callback: (Bool, NSError?) -> Void) {
         hmsetArrayOfKeyValues(key, fieldValuePairs: fieldValuePairs, callback: callback)
+    }
+    
+    public func hmset(key: String, fieldValuePair: (String, RedisString), fieldValuePairs: (String, RedisString)...) throws -> Bool {
+        return try hmset(key: key, fieldValuePair: fieldValuePair, fieldValuePairs: fieldValuePairs)
     }
 
     /// Sets the specified fields to their respective values in the hash stored at key.
@@ -252,6 +353,15 @@ extension Redis {
             let (ok, error) = self.redisOkResponseHandler(response, nilOk: false)
             callback(ok, _: error)
         }
+    }
+    
+    public func hmset(key: String, fieldValuePair: (String, RedisString), fieldValuePairs: [(String, RedisString)]) throws -> Bool {
+        var command = [RedisString("HMSET"), RedisString(key), RedisString(fieldValuePair.0), fieldValuePair.1]
+        for (field, value) in fieldValuePairs {
+            command.append(RedisString(field))
+            command.append(value)
+        }
+        return try redisOkResponseHandler(issueCommand(command), nilOk: false)
     }
     
     /// Iterates fields of Hash types and their associated values.
@@ -286,6 +396,25 @@ extension Redis {
             }
         }
     }
+    
+    public func hscan(key: String, cursor: Int, match: String?=nil, count: Int?=nil) throws -> (RedisString, [RedisString]) {
+        var command = ["HSCAN", key, String(cursor)]
+        if let match = match, let count = count {
+            command.append("MATCH")
+            command.append(match)
+            command.append("COUNT")
+            command.append(String(count))
+        }
+        if let match = match, count == nil {
+            command.append("MATCH")
+            command.append(match)
+        }
+        if let count = count, match == nil {
+            command.append("COUNT")
+            command.append(String(count))
+        }
+        return try redisScanResponseHandler(issueCommand(command))
+    }
 
     /// Sets the specified field in a hash stored at a key to a value. This command overwrites
     /// an existing field in the hash. If key does not exist, a new key holding a hash is created.
@@ -300,6 +429,10 @@ extension Redis {
         issueCommand(exists ? "HSET" : "HSETNX", key, field, value) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func hset(key: String, field: String, value: String, exists: Bool=true) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand(exists ? "HSET" : "HSETNX", key, field, value))
     }
 
     /// Sets the specified field in a hash stored at a key to a value. This command overwrites
@@ -317,6 +450,10 @@ extension Redis {
         }
     }
     
+    public func hset(key: String, field: String, value: RedisString, exists: Bool=true) throws -> Bool {
+        return try redisBoolResponseHandler(issueCommand(RedisString(exists ? "HSET" : "HSETNX"), RedisString(key), RedisString(field), value))
+    }
+    
     /// Get the string length of the value in a field in a hash stored at a key.
     /// If the key or the field do not exist, 0 is returned.
     ///
@@ -331,6 +468,10 @@ extension Redis {
         }
     }
 
+    public func hstrlen(key: String, field: String) throws -> Int {
+        return try redisIntegerResponseHandler(issueCommand("HSTRLEN", key, field))
+    }
+    
     /// Get all of the values in the hash stored at a key.
     ///
     /// - Parameter key: The key.
@@ -341,5 +482,9 @@ extension Redis {
         issueCommand("HVALS", key) {(response: RedisResponse) in
             self.redisStringArrayResponseHandler(response, callback: callback)
         }
+    }
+    
+    public func hvals(key: String) throws -> [RedisString] {
+        return try redisStringArrayResponseHandler(issueCommand("HVALS", key))
     }
 }

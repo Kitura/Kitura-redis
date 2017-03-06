@@ -43,10 +43,9 @@ public class TestBasicCommands: XCTestCase {
         ]
     }
     
-    var key1 = "test1"
-    var key2 = "test2"
-    var key3 = "test3"
-    var key4 = "test4"
+    var key1 = "key1"
+    var key2 = "key2"
+    var key3 = "key3"
     
     private func setup(major: Int, minor: Int, micro: Int) throws -> Bool {
         try connectRedis()
@@ -102,21 +101,21 @@ public class TestBasicCommands: XCTestCase {
     func test_keys() throws {
         guard try setup(major: 1, minor: 0, micro: 0) else { return }
         
-        XCTAssert(try redis.mset(pair: (key1, "1"), pairs: (key2, "2"), (key3, "3")))
+        XCTAssert(try redis.mset(keyValuePair: (key1, "1"), keyValuePairs: (key2, "2"), (key3, "3")))
         XCTAssertEqual(try redis.keys(pattern: "*1").count, 1)
     }
     
     func test_randomkey() throws {
         guard try setup(major: 1, minor: 0, micro: 0) else { return }
         
-        XCTAssert(try redis.mset(pair: (key1, "1"), pairs: (key2, "2"), (key3, "3")))
+        XCTAssert(try redis.mset(keyValuePair: (key1, "1"), keyValuePairs: (key2, "2"), (key3, "3")))
         XCTAssertNotNil(try redis.randomkey())
     }
     
     func test_scan() throws {
         guard try setup(major: 2, minor: 8, micro: 0) else { return }
         
-        XCTAssert(try redis.mset(pair: (key1, "val1"), pairs: (key2, "val2")))
+        XCTAssert(try redis.mset(keyValuePair: (key1, "val1"), keyValuePairs: (key2, "val2")))
         XCTAssertEqual(try redis.scan(cursor: 0).1.count, 2)
         XCTAssertGreaterThan(try redis.scan(cursor: 0, match: "*", count: 1).1.count, 0)
         XCTAssertGreaterThan(try redis.scan(cursor: 0, match: "*").1.count, 0)
@@ -161,12 +160,11 @@ public class TestBasicCommands: XCTestCase {
         usleep(3000000)
         XCTAssertNil(try redis.get(key: key3))
     }
-
     
     func test_touch() throws {
         guard try setup(major: 3, minor: 2, micro: 1) else { return }
         
-        XCTAssert(try redis.mset(pair: (key1, "val1"), pairs: (key2, "val2")))
+        XCTAssert(try redis.mset(keyValuePair: (key1, "val1"), keyValuePairs: (key2, "val2")))
         XCTAssertEqual(try redis.touch(key: "bad key"), 0)
         XCTAssertEqual(try redis.touch(key: key1), 1)
         XCTAssertEqual(try redis.touch(key: key1, keys: key2), 2)

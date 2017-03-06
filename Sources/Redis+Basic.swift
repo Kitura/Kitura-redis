@@ -688,13 +688,13 @@ extension Redis {
         }
     }
     
-    public func mset(pair: (String, String), pairs: (String, String)..., exists: Bool=true) throws -> Bool {
-        return try msetArrayOfPairs(pair: pair, pairs: pairs)
+    public func mset(keyValuePair: (String, String), keyValuePairs: (String, String)..., exists: Bool=true) throws -> Bool {
+        return try msetArrayOfPairs(keyValuePair: keyValuePair, keyValuePairs: keyValuePairs)
     }
     
-    public func msetArrayOfPairs(pair: (String, String), pairs: [(String, String)], exists: Bool=true) throws -> Bool {
-        var command = [exists ? "MSET" : "MSETNX", pair.0, pair.1]
-        for (key, value) in pairs {
+    public func msetArrayOfPairs(keyValuePair: (String, String), keyValuePairs: [(String, String)], exists: Bool=true) throws -> Bool {
+        var command = [exists ? "MSET" : "MSETNX", keyValuePair.0, keyValuePair.1]
+        for (key, value) in keyValuePairs {
             command.append(key)
             command.append(value)
         }
@@ -706,13 +706,13 @@ extension Redis {
         }
     }
     
-    public func mset(pair: (String, RedisString), pairs: (String, RedisString)..., exists: Bool=true) throws -> Bool {
-        return try msetArrayOfPairs(pair: pair, pairs: pairs)
+    public func mset(keyValuePair: (String, RedisString), keyValuePairs: (String, RedisString)..., exists: Bool=true) throws -> Bool {
+        return try msetArrayOfPairs(keyValuePair: keyValuePair, keyValuePairs: keyValuePairs)
     }
     
-    public func msetArrayOfPairs(pair: (String, RedisString), pairs: [(String, RedisString)], exists: Bool=true) throws -> Bool {
-        var command = [exists ? RedisString("MSET") : RedisString("MSETNX"), RedisString(pair.0), pair.1]
-        for (key, value) in pairs {
+    public func msetArrayOfPairs(keyValuePair: (String, RedisString), keyValuePairs: [(String, RedisString)], exists: Bool=true) throws -> Bool {
+        var command = [exists ? RedisString("MSET") : RedisString("MSETNX"), RedisString(keyValuePair.0), keyValuePair.1]
+        for (key, value) in keyValuePairs {
             command.append(RedisString(key))
             command.append(value)
         }
@@ -1016,11 +1016,11 @@ extension Redis {
         }
     }
     
-    public func sort(key: String, pattern: String?=nil, limit: (Int, Int)?=nil, get: String..., desc: Bool?=false, alpha: Bool?=false, store: String?=nil) throws -> [RedisString] {
-        return try sortArrayOfGetPatterns(key: key, pattern: pattern, limit: limit, get: get, desc: desc, alpha: alpha, store: store)
+    public func sort(key: String, by pattern: String?=nil, limit: (Int, Int)?=nil, get keys: String..., desc: Bool?=false, alpha: Bool?=false, store: String?=nil) throws -> [RedisString?] {
+        return try sortArrayOfGetPatterns(key: key, by: pattern, limit: limit, get: keys, desc: desc, alpha: alpha, store: store)
     }
     
-    public func sortArrayOfGetPatterns(key: String, pattern: String?=nil, limit: (Int, Int)?=nil, get: [String], desc: Bool?=false, alpha: Bool?=false, store: String?=nil) throws -> [RedisString] {
+    public func sortArrayOfGetPatterns(key: String, by pattern: String?=nil, limit: (Int, Int)?=nil, get keys: [String], desc: Bool?=false, alpha: Bool?=false, store: String?=nil) throws -> [RedisString?] {
         var command = ["SORT", key]
         if let pattern = pattern {
             command.append("BY")
@@ -1031,7 +1031,7 @@ extension Redis {
             command.append(String(offset))
             command.append(String(count))
         }
-        for pattern in get {
+        for pattern in keys {
             command.append("GET")
             command.append(pattern)
         }
