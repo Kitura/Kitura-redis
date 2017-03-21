@@ -148,7 +148,7 @@ public class TestHashCommands: XCTestCase {
 
                 redis.hget(self.key1, field: self.field1) {(value: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertEqual(value!.asString, expVal1, "\(self.key1).\(self.field1) wasn't set to \(expVal1). Instead was \(value)")
+                    XCTAssertEqual(value!.asString, expVal1, "\(self.key1).\(self.field1) wasn't set to \(expVal1). Instead was \(String(describing: value))")
 
                     redis.hmget(self.key1, fields: self.field1, self.field2, self.field4, self.field3) {(values: [RedisString?]?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -158,7 +158,7 @@ public class TestHashCommands: XCTestCase {
                         XCTAssertEqual(values![0]!.asString, expVal1, "Values array [0] wasn't equal to \(expVal1), was \(values![0]!)")
                         XCTAssertNotNil(values![1], "Values array [1] was nil")
                         XCTAssertEqual(values![1]!.asString, expVal2, "Values array [1] wasn't equal to \(expVal2), was \(values![1]!)")
-                        XCTAssertNil(values![2], "Values array [2] wasn't nil. Was \(values![2])")
+                        XCTAssertNil(values![2], "Values array [2] wasn't nil. Was \(String(describing: values![2]))")
                         XCTAssertNotNil(values![3], "Values array [3] was nil")
                         XCTAssertEqual(values![3]!.asString, expVal3, "Values array [3] wasn't equal to \(expVal3), was \(values![3]!)")
 
@@ -181,7 +181,7 @@ public class TestHashCommands: XCTestCase {
                                     for idx in 0..<fieldNames.count {
                                         let field = values[fieldNames[idx]]
                                         XCTAssertNotNil(field, "\(fieldNames[idx]) in \(self.key1) was nil")
-                                        XCTAssertEqual(field!.asString, fieldValues[idx], "\(fieldNames[idx]) in \(self.key1) wasn't '\(fieldValues[idx])', it was \(field)")
+                                        XCTAssertEqual(field!.asString, fieldValues[idx], "\(fieldNames[idx]) in \(self.key1) wasn't '\(fieldValues[idx])', it was \(String(describing: field))")
                                     }
                                 }
                             }
@@ -219,7 +219,7 @@ public class TestHashCommands: XCTestCase {
                         for idx in 0..<fieldNames.count {
                             let field = values[fieldNames[idx]]
                             XCTAssertNotNil(field, "\(fieldNames[idx]) in \(self.key1) was nil")
-                            XCTAssertEqual(field!.asData, fieldValues[idx], "\(fieldNames[idx]) in \(self.key1) wasn't '\(fieldValues[idx])', it was \(field)")
+                            XCTAssertEqual(field!.asData, fieldValues[idx], "\(fieldNames[idx]) in \(self.key1) wasn't '\(fieldValues[idx])', it was \(String(describing: field))")
                         }
                     }
                 }

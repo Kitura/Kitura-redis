@@ -53,7 +53,7 @@ public class TestTransactionsPart4: XCTestCase {
                 if  let nestedResponses = self.baseAsserts(response: response, count: 10) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(1), "\(self.field1) wasn't a new field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(0), "\(self.field1) wasn't an existing field in \(self.key1)")
-                    XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(expVal2)), "\(self.key1) should have been equal to \(expVal2). Was \(nestedResponses[2].asString?.asString)")
+                    XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(expVal2)), "\(self.key1) should have been equal to \(expVal2). Was \(String(describing: nestedResponses[2].asString?.asString))")
                     XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(0), "\(self.field2) isn't suppose to exist in \(self.key1)")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "\(self.field2) wasn't a new field in \(self.key1)")
                     XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(2), "There should be two fields in \(self.key1)")
@@ -82,8 +82,8 @@ public class TestTransactionsPart4: XCTestCase {
 
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 2  /* Should be 4 if testing hstrlen */ ) {
-                    XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(Int64(incInt)), "Value of the field should be \(incInt), was \(nestedResponses[0].asInteger)")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(String(incFloat))), "Value of the field should be \(incFloat). Was \(nestedResponses[1].asString?.asString)")
+                    XCTAssertEqual(nestedResponses[0], RedisResponse.IntegerValue(Int64(incInt)), "Value of the field should be \(incInt), was \(String(describing: nestedResponses[0].asInteger))")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(String(incFloat))), "Value of the field should be \(incFloat). Was \(String(describing: nestedResponses[1].asString?.asString))")
 
                     // To test HSTRLEN one needs a Redis 3.2 server
                     //
@@ -109,7 +109,7 @@ public class TestTransactionsPart4: XCTestCase {
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "Fields 1,2,3 should have been set")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(expVal1)), "\(self.key1).\(self.field1) wasn't set to \(expVal1). Was \(nestedResponses[1].asString?.asString)")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.StringValue(RedisString(expVal1)), "\(self.key1).\(self.field1) wasn't set to \(expVal1). Was \(String(describing: nestedResponses[1].asString?.asString))")
                     let innerResponses = nestedResponses[2].asArray!
                     XCTAssertEqual(innerResponses.count, 4, "Values array didn't have four elements. Had \(innerResponses.count) elements")
                     XCTAssertEqual(innerResponses[0].asString!.asString, expVal1, "Values array [0] wasn't equal to \(expVal1), was \(innerResponses[0].asString!.asString)")
@@ -147,7 +147,7 @@ public class TestTransactionsPart4: XCTestCase {
                     let valuesMap = [self.field1:expData1, self.field2:expData2, self.field3:expData3]
                     for idx in stride(from: 0, to: innerResponses.count-1, by:2) {
                         XCTAssertNotNil(valuesMap[innerResponses[idx].asString!.asString], "Unknown field \(innerResponses[idx].asString!.asString)")
-                        XCTAssertEqual(valuesMap[innerResponses[idx].asString!.asString], innerResponses[idx+1].asString!.asData, "Value of \(innerResponses[idx].asString!.asData) wasn't '\(valuesMap[innerResponses[idx].asString!.asString])'. It was '\(innerResponses[idx+1].asString!.asData)'")
+                        XCTAssertEqual(valuesMap[innerResponses[idx].asString!.asString], innerResponses[idx+1].asString!.asData, "Value of \(innerResponses[idx].asString!.asData) wasn't '\(String(describing: valuesMap[innerResponses[idx].asString!.asString]))'. It was '\(innerResponses[idx+1].asString!.asData)'")
                     }
                 }
             }

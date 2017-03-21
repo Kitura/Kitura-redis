@@ -111,7 +111,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lpop(self.key1)
                     XCTAssertNotNil(response2, "Result of lpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response2, RedisString(value2), "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    XCTAssertEqual(response2, RedisString(value2), "Popped \(String(describing: response2)) for \(self.key1) instead of \(value2)")
                     
                     // lpushx(self.key1, value: value3)
                     XCTAssertNotNil(response3, "Result of lpushx was nil, without an error")
@@ -122,7 +122,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lpushx(self.key3, value: value3)
                     XCTAssertNotNil(response5, "Result of lpushx was nil, without an error")
-                    XCTAssertEqual(response5, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
+                    XCTAssertEqual(response5, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(String(describing: response5))")
                 }
             }
         }
@@ -156,7 +156,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lpop(self.key1)
                     XCTAssertNotNil(response2, "Result of lpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response2, value2, "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    XCTAssertEqual(response2, value2, "Popped \(String(describing: response2)) for \(self.key1) instead of \(value2)")
                     
                     // lpushx(self.key1, value: value3)
                     XCTAssertNotNil(response3, "Result of lpushx was nil, without an error")
@@ -167,7 +167,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lpushx(self.key3, value: value3)
                     XCTAssertNotNil(response5, "Result of lpushx was nil, without an error")
-                    XCTAssertEqual(response5, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
+                    XCTAssertEqual(response5, 0, "lpushx to \(self.key3) should have returned 0 (list not found) returned \(String(describing: response5))")
                 }
             }
         }
@@ -201,7 +201,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // rpop(self.key1)
                     XCTAssertNotNil(response2, "Result of rpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response2, RedisString(value2), "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    XCTAssertEqual(response2, RedisString(value2), "Popped \(String(describing: response2)) for \(self.key1) instead of \(value2)")
                     
                     // rpushx(self.key1, value: value3)
                     XCTAssertNotNil(response3, "Result of rpushx was nil, without an error")
@@ -212,7 +212,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // rpushx(self.key3, value: value3)
                     XCTAssertNotNil(response5, "Result of rpushx was nil, without an error")
-                    XCTAssertEqual(response5, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
+                    XCTAssertEqual(response5, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(String(describing: response5))")
                 }
             }
         }
@@ -246,7 +246,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // rpop(self.key1)
                     XCTAssertNotNil(response2, "Result of rpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response2, value2, "Popped \(response2) for \(self.key1) instead of \(value2)")
+                    XCTAssertEqual(response2, value2, "Popped \(String(describing: response2)) for \(self.key1) instead of \(value2)")
                     
                     // rpushx(self.key1, value: value3)
                     XCTAssertNotNil(response3, "Result of rpushx was nil, without an error")
@@ -257,7 +257,7 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // rpushx(self.key3, value: value3)
                     XCTAssertNotNil(response5, "Result of rpushx was nil, without an error")
-                    XCTAssertEqual(response5, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(response5)")
+                    XCTAssertEqual(response5, 0, "rpushx to \(self.key3) should have returned 0 (list not found) returned \(String(describing: response5))")
                 }
             }
         }
@@ -292,23 +292,23 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lrange(self.key1, start: 1, end: 2)
                     XCTAssertNotNil(response2, "Result of lrange was nil, without an error")
-                    XCTAssertEqual(response2?.count, 2, "Number of values returned by lrange was \(response2?.count) should have been 2")
-                    XCTAssertEqual(response2?[0].asString, RedisString(value3), "Returned value #1 was \(response2?[0]) should have been \(value3)")
-                    XCTAssertEqual(response2?[1].asString, RedisString(value2), "Returned value #2 was \(response2?[1]) should have been \(value2)")
+                    XCTAssertEqual(response2?.count, 2, "Number of values returned by lrange was \(String(describing: response2?.count)) should have been 2")
+                    XCTAssertEqual(response2?[0].asString, RedisString(value3), "Returned value #1 was \(String(describing: response2?[0])) should have been \(value3)")
+                    XCTAssertEqual(response2?[1].asString, RedisString(value2), "Returned value #2 was \(String(describing: response2?[1])) should have been \(value2)")
                     
                     // lrem(self.key1, count: 3, value: value3)
                     XCTAssertNotNil(response3, "Result of lrem was nil, without an error")
-                    XCTAssertEqual(response3, 1, "Number of values removed by lrem was \(response3) should have been 1")
+                    XCTAssertEqual(response3, 1, "Number of values removed by lrem was \(String(describing: response3)) should have been 1")
                     
                     //(self.key2, values: binaryValue4, binaryValue3, binaryValue2, binaryValue1)
                     XCTAssertNotNil(response5, "Result of lrange was nil, without an error")
-                    XCTAssertEqual(response5?.count, 2, "Number of values returned by lrange was \(response5?.count) should have been 2")
-                    XCTAssertEqual(response5?[0].asString, binaryValue2, "Returned value #1 was \(response5?[0]) should have been \(binaryValue2)")
-                    XCTAssertEqual(response5?[1].asString, binaryValue3, "Returned value #2 was \(response5?[1]) should have been \(binaryValue3)")
+                    XCTAssertEqual(response5?.count, 2, "Number of values returned by lrange was \(String(describing: response5?.count)) should have been 2")
+                    XCTAssertEqual(response5?[0].asString, binaryValue2, "Returned value #1 was \(String(describing: response5?[0])) should have been \(binaryValue2)")
+                    XCTAssertEqual(response5?[1].asString, binaryValue3, "Returned value #2 was \(String(describing: response5?[1])) should have been \(binaryValue3)")
                     
                     // lrem(self.key1, count: 3, value: binaryValue2)
                     XCTAssertNotNil(response6, "Result of lrem was nil, without an error")
-                    XCTAssertEqual(response6, 1, "Number of values removed by lrem was \(response6) should have been 1")
+                    XCTAssertEqual(response6, 1, "Number of values removed by lrem was \(String(describing: response6)) should have been 1")
                 }
             }
         }
@@ -336,15 +336,15 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // linsert(self.key1, before: true, pivot: value3, value: value2)
                     XCTAssertNotNil(response2, "Result of linsert was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response2, 3, "Returned \(response2) for \(self.key1) instead of 3")
+                    XCTAssertEqual(response2, 3, "Returned \(String(describing: response2)) for \(self.key1) instead of 3")
                     
                     // llen(self.key1)
                     XCTAssertNotNil(response3, "Result of llen was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response3, 3, "Returned \(response3) for \(self.key1) instead of 3")
+                    XCTAssertEqual(response3, 3, "Returned \(String(describing: response3)) for \(self.key1) instead of 3")
                     
                     // lindex(self.key1, index: 2)
                     XCTAssertNotNil(response4, "Result of lindex was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response4, RedisString(value1), "Result of lindex was \(response4). It should have been \(value1)")
+                    XCTAssertEqual(response4, RedisString(value1), "Result of lindex was \(String(describing: response4)). It should have been \(value1)")
                 }
             }
         }
@@ -371,15 +371,15 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // linsert(self.key1, before: true, pivot: value3, value: value2)
                     XCTAssertNotNil(response2, "Result of linsert was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response2, 3, "Returned \(response2) for \(self.key1) instead of 3")
+                    XCTAssertEqual(response2, 3, "Returned \(String(describing: response2)) for \(self.key1) instead of 3")
                     
                     // llen(self.key1)
                     XCTAssertNotNil(response3, "Result of llen was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response3, 3, "Returned \(response3) for \(self.key1) instead of 3")
+                    XCTAssertEqual(response3, 3, "Returned \(String(describing: response3)) for \(self.key1) instead of 3")
                     
                     // lindex(self.key1, index: 2)
                     XCTAssertNotNil(response4, "Result of lindex was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(response4, value1, "Result of lindex was \(response4). It should have been \(value1)")
+                    XCTAssertEqual(response4, value1, "Result of lindex was \(String(describing: response4)). It should have been \(value1)")
                 }
             }
         }
@@ -411,14 +411,14 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lindex(self.key1, index: 1)
                     XCTAssertNotNil(response3, "Returned values of lindex was nil, even though no error occurred.")
-                    XCTAssertEqual(response3, RedisString(value2), "lindex returned \(response3). It should have returned \(value2)")
+                    XCTAssertEqual(response3, RedisString(value2), "lindex returned \(String(describing: response3)). It should have returned \(value2)")
                     
                     // ltrim(self.key1, start: 0, end: 0)
                     XCTAssertEqual(response4, "OK", "lset failed")
                     
                     // llen(self.key1)
                     XCTAssertNotNil(response5, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response5, 1, "The length of the list was \(response5). It should have been 1.")
+                    XCTAssertEqual(response5, 1, "The length of the list was \(String(describing: response5)). It should have been 1.")
                 }
             }
         }
@@ -450,14 +450,14 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // lindex(self.key1, index: 1)
                     XCTAssertNotNil(response3, "Returned values of lindex was nil, even though no error occurred.")
-                    XCTAssertEqual(response3, value2, "lindex returned \(response3). It should have returned \(value2)")
+                    XCTAssertEqual(response3, value2, "lindex returned \(String(describing: response3)). It should have returned \(value2)")
                     
                     // ltrim(self.key1, start: 0, end: 0)
                     XCTAssertEqual(response4, "OK", "lset failed")
                     
                     // llen(self.key1)
                     XCTAssertNotNil(response5, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response5, 1, "The length of the list was \(response5). It should have been 1.")
+                    XCTAssertEqual(response5, 1, "The length of the list was \(String(describing: response5)). It should have been 1.")
                 }
             }
         }
@@ -484,15 +484,15 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // rpoplpush(self.key1, destination: self.key2)
                     XCTAssertNotNil(response2, "Returned values of rpoplpush was nil, even though no error occurred.")
-                    XCTAssertEqual(response2, RedisString(value3), "rpoplpush returned \(response2). It should have returned \(value3)")
+                    XCTAssertEqual(response2, RedisString(value3), "rpoplpush returned \(String(describing: response2)). It should have returned \(value3)")
                     
                     // llen(self.key1)
                     XCTAssertNotNil(response3, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response3, 2, "The length of the list \(self.key1) was \(response3). It should have been 2.")
+                    XCTAssertEqual(response3, 2, "The length of the list \(self.key1) was \(String(describing: response3)). It should have been 2.")
                     
                     // llen(self.key2)
                     XCTAssertNotNil(response4, "Returned values of llen was nil, even though no error occurred.")
-                    XCTAssertEqual(response4, 1, "The length of the list \(self.key2) was \(response4). It should have been 1.")
+                    XCTAssertEqual(response4, 1, "The length of the list \(self.key2) was \(String(describing: response4)). It should have been 1.")
                 }
             }
         }
@@ -550,9 +550,9 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // blpop(self.key1, self.key2, self.key3, timeout: 4.0)
                     XCTAssertNotNil(response2, "blpop should not have returned nil.")
-                    XCTAssertEqual(response2?.count, 2, "blpop should have returned an array of two elements. It returned an array of \(response2?.count) elements")
-                    XCTAssertEqual(response2?[0].asString, RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(response2?[0])")
-                    XCTAssertEqual(response2?[1].asString, RedisString(value1), "blpop's return value element #1 should have been \(value1). It was \(response2?[1])")
+                    XCTAssertEqual(response2?.count, 2, "blpop should have returned an array of two elements. It returned an array of \(String(describing: response2?.count)) elements")
+                    XCTAssertEqual(response2?[0].asString, RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(String(describing: response2?[0]))")
+                    XCTAssertEqual(response2?[1].asString, RedisString(value1), "blpop's return value element #1 should have been \(value1). It was \(String(describing: response2?[1]))")
                 }
             }
         }
@@ -578,9 +578,9 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // brpop(self.key1, self.key2, self.key3, timeout: 4.0)
                     XCTAssertNotNil(response2, "brpop should not have returned nil.")
-                    XCTAssertEqual(response2?.count, 2, "brpop should have returned an array of two elements. It returned an array of \(response2?.count) elements")
-                    XCTAssertEqual(response2?[0].asString, RedisString(self.key3), "brpop's return value element #0 should have been \(self.key3). It was \(response2?[0])")
-                    XCTAssertEqual(response2?[1].asString, RedisString(value2), "brpop's return value element #1 should have been \(value2). It was \(response2?[1])")
+                    XCTAssertEqual(response2?.count, 2, "brpop should have returned an array of two elements. It returned an array of \(String(describing: response2?.count)) elements")
+                    XCTAssertEqual(response2?[0].asString, RedisString(self.key3), "brpop's return value element #0 should have been \(self.key3). It was \(String(describing: response2?[0]))")
+                    XCTAssertEqual(response2?[1].asString, RedisString(value2), "brpop's return value element #1 should have been \(value2). It was \(String(describing: response2?[1]))")
                 }
             }
         }
@@ -604,11 +604,11 @@ public class TestTransactionsPart7: XCTestCase {
                     
                     // brpoplpush(self.key1, destination: self.key2, timeout: 4.0)
                     XCTAssertNotNil(response2, "brpoplpush should not have returned nil.")
-                    XCTAssertEqual(response2, RedisString(value1), "brpoplpush's return value  should have been \(value1). It was \(response2)")
+                    XCTAssertEqual(response2, RedisString(value1), "brpoplpush's return value  should have been \(value1). It was \(String(describing: response2))")
                     
                     // brpoplpush(self.key1, destination: self.key2, timeout: 4.0)
                     XCTAssertNotNil(response3, "brpoplpush should not have returned nil.")
-                    XCTAssertEqual(response3, RedisString(value2), "brpoplpush's return value  should have been \(value2). It was \(response3)")
+                    XCTAssertEqual(response3, RedisString(value2), "brpoplpush's return value  should have been \(value2). It was \(String(describing: response3))")
                 }
             }
         }

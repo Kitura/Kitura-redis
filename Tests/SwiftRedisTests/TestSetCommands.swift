@@ -77,13 +77,13 @@ public class TestSetCommands: XCTestCase {
 
                     XCTAssertNil(zRangeError)
 
-                    XCTAssertEqual(resultList?[0], RedisString("one"), "The first element of the list should be \(RedisString("one")). It was \(resultList?[0])")
+                    XCTAssertEqual(resultList?[0], RedisString("one"), "The first element of the list should be \(RedisString("one")). It was \(String(describing: resultList?[0]))")
 
-                    XCTAssertEqual(resultList?[1], RedisString("two"), "The first element of the list should be \(RedisString("two")). It was \(resultList?[1])")
+                    XCTAssertEqual(resultList?[1], RedisString("two"), "The first element of the list should be \(RedisString("two")). It was \(String(describing: resultList?[1]))")
 
-                    XCTAssertEqual(resultList?[2], RedisString("three"), "The first element of the list should be \(RedisString("three")). It was \(resultList?[2])")
+                    XCTAssertEqual(resultList?[2], RedisString("three"), "The first element of the list should be \(RedisString("three")). It was \(String(describing: resultList?[2]))")
 
-                    XCTAssertEqual(resultList?.count, 3, "The size of the list should be 3. It was \(resultList?.count)")
+                    XCTAssertEqual(resultList?.count, 3, "The size of the list should be 3. It was \(String(describing: resultList?.count))")
                     expectation1.fulfill()
                 })
 
@@ -106,7 +106,7 @@ public class TestSetCommands: XCTestCase {
                     (retrievedTotalElements: Int?, zCardError: NSError?) in
 
                     XCTAssertNil(zCardError)
-                    XCTAssertEqual(retrievedTotalElements, 3, "The cardinality of the sorted set should be 3. It was \(retrievedTotalElements)")
+                    XCTAssertEqual(retrievedTotalElements, 3, "The cardinality of the sorted set should be 3. It was \(String(describing: retrievedTotalElements))")
                     expectation1.fulfill()
                 })
             }
@@ -129,7 +129,7 @@ public class TestSetCommands: XCTestCase {
 
                     XCTAssertNil(error)
                     XCTAssertNotNil(totalElements)
-                    XCTAssertEqual(totalElements, 3, "The number of items should be 3, there were \(totalElements)")
+                    XCTAssertEqual(totalElements, 3, "The number of items should be 3, there were \(String(describing: totalElements))")
 
                     expectation1.fulfill()
                 })
@@ -153,7 +153,7 @@ public class TestSetCommands: XCTestCase {
 
                     XCTAssertNil(error)
                     XCTAssertNotNil(newScore)
-                    XCTAssertEqual(newScore, RedisString("4"), "New score should be 3 but is \(newScore)")
+                    XCTAssertEqual(newScore, RedisString("4"), "New score should be 3 but is \(String(describing: newScore))")
 
                     expectation1.fulfill()
                 })
@@ -233,7 +233,7 @@ public class TestSetCommands: XCTestCase {
                     (resultList: [RedisString?]?, zRangeError: NSError?) in
 
                     XCTAssertNil(zRangeError)
-                    XCTAssertEqual(resultList?.count, 1, "The number of element(s) return from the specific range should be 1. It was \(resultList?.count)")
+                    XCTAssertEqual(resultList?.count, 1, "The number of element(s) return from the specific range should be 1. It was \(String(describing: resultList?.count))")
                     expectation1.fulfill()
 
                 })
@@ -331,7 +331,7 @@ public class TestSetCommands: XCTestCase {
 
                     XCTAssertNil(error)
                     XCTAssertNotNil(memberRank)
-                    XCTAssertEqual(memberRank, 2, "The rank should be 2, it was \(memberRank)")
+                    XCTAssertEqual(memberRank, 2, "The rank should be 2, it was \(String(describing: memberRank))")
 
                     redis.zrank(self.key1, member: "four", callback: {
                         (memberRank: Int?, error: NSError?) in
@@ -361,7 +361,7 @@ public class TestSetCommands: XCTestCase {
                     (totalElementRem: Int?, zRemError: NSError?) in
 
                     XCTAssertNil(zRemError)
-                    XCTAssertEqual(totalElementRem, 2, "The number of items deleted in the set should be 2. It was \(totalElementRem)")
+                    XCTAssertEqual(totalElementRem, 2, "The number of items deleted in the set should be 2. It was \(String(describing: totalElementRem))")
                     expectation1.fulfill()
                 })
             }
@@ -680,7 +680,7 @@ public class TestSetCommands: XCTestCase {
                     (retrievedTotalElements: Int?, zCardError: NSError?) in
 
                     XCTAssertNil(zCardError)
-                    XCTAssertEqual(retrievedTotalElements, 0, "The cardinality of the sorted set should be 0. It was \(retrievedTotalElements)")
+                    XCTAssertEqual(retrievedTotalElements, 0, "The cardinality of the sorted set should be 0. It was \(String(describing: retrievedTotalElements))")
                 })
             }
             expectation1.fulfill()

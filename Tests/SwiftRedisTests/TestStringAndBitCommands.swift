@@ -95,17 +95,17 @@ public class TestStringAndBitCommands: XCTestCase {
                             redis.bitpos(self.key1, bit: true) {(position: Int?, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(position, "Position result shouldn't be nil")
-                                XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(position)")
+                                XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(String(describing: position))")
 
                                 redis.bitpos(self.key1, bit: true, start: 2) {(position: Int?, error: NSError?) in
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                     XCTAssertNotNil(position, "Position result shouldn't be nil")
-                                    XCTAssertEqual(position!, 23, "Bit position should have been 23, was \(position)")
+                                    XCTAssertEqual(position!, 23, "Bit position should have been 23, was \(String(describing: position))")
 
                                     redis.bitpos(self.key1, bit: true, start: 1, end: 2) {(position: Int?, error: NSError?) in
                                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                         XCTAssertNotNil(position, "Position result shouldn't be nil")
-                                        XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(position)")
+                                        XCTAssertEqual(position!, 15, "Bit position should have been 15, was \(String(describing: position))")
                                     }
                                 }
                             }
@@ -116,12 +116,12 @@ public class TestStringAndBitCommands: XCTestCase {
                             redis.bitcount(self.key1) {(count: Int?, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(count, "Count result shouldn't be nil")
-                                XCTAssertEqual(count!, 2, "Bit count should have been 2, was \(count)")
+                                XCTAssertEqual(count!, 2, "Bit count should have been 2, was \(String(describing: count))")
 
                                 redis.bitcount(self.key1, start: 2, end: 2) {(count: Int?, error: NSError?) in
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                     XCTAssertNotNil(count, "Count result shouldn't be nil")
-                                    XCTAssertEqual(count!, 1, "Bit count should have been 1, was \(count)")
+                                    XCTAssertEqual(count!, 1, "Bit count should have been 1, was \(String(describing: count))")
                                 }
                             }
                      /*   }
@@ -151,7 +151,7 @@ public class TestStringAndBitCommands: XCTestCase {
 
                         redis.get(self.key1) {(value: RedisString?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertEqual(value!.asData, newVal1, "The updated bit string had a value of '\(value)'")
+                            XCTAssertEqual(value!.asData, newVal1, "The updated bit string had a value of '\(String(describing: value))'")
                         }
                     }
                 }
@@ -172,7 +172,7 @@ public class TestStringAndBitCommands: XCTestCase {
                 redis.bitop(self.key3, and: self.key1, self.key2) {(length: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(length, "Length result shouldn't be nil")
-                    XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(length)")
+                    XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(String(describing: length))")
 
                     redis.get(self.key3) {(value: RedisString?, error: NSError?) in
                         bytes = [0x00, 0x00, 0x00, 0x04]
@@ -180,12 +180,12 @@ public class TestStringAndBitCommands: XCTestCase {
 
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssertNotNil(value, "Value result shouldn't be nil")
-                        XCTAssertEqual(value!.asData, newValue, "\(self.key3) after an and had a value of '\(value)'")
+                        XCTAssertEqual(value!.asData, newValue, "\(self.key3) after an and had a value of '\(String(describing: value))'")
 
                         redis.bitop(self.key3, or: self.key1, self.key2) {(length: Int?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                             XCTAssertNotNil(length, "Length result shouldn't be nil")
-                            XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(length)")
+                            XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(String(describing: length))")
 
                             redis.get(self.key3) {(value: RedisString?, error: NSError?) in
                                 bytes = [0x00, 0x09, 0x09, 0x04]
@@ -193,12 +193,12 @@ public class TestStringAndBitCommands: XCTestCase {
 
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(value, "Value result shouldn't be nil")
-                                XCTAssertEqual(value!.asData, newValue, "\(self.key3) after an or had a value of '\(value)'")
+                                XCTAssertEqual(value!.asData, newValue, "\(self.key3) after an or had a value of '\(String(describing: value))'")
 
                                 redis.bitop(self.key3, xor: self.key1, self.key2) {(length: Int?, error: NSError?) in
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                     XCTAssertNotNil(length, "Length result shouldn't be nil")
-                                    XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(length)")
+                                    XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(String(describing: length))")
 
                                     redis.get(self.key3) {(value: RedisString?, error: NSError?) in
                                         bytes = [0x00, 0x09, 0x09, 0x00]
@@ -206,12 +206,12 @@ public class TestStringAndBitCommands: XCTestCase {
 
                                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                         XCTAssertNotNil(value, "Value result shouldn't be nil")
-                                        XCTAssertEqual(value!.asData, newValue, "\(self.key3) after a xor had a value of '\(value)'")
+                                        XCTAssertEqual(value!.asData, newValue, "\(self.key3) after a xor had a value of '\(String(describing: value))'")
 
                                         redis.bitop(self.key3, not: self.key1) {(length: Int?, error: NSError?) in
                                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                             XCTAssertNotNil(length, "Length result shouldn't be nil")
-                                            XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(length)")
+                                            XCTAssertEqual(length!, 4, "Destination field length should have been 4, was \(String(describing: length))")
 
                                             redis.get(self.key3) {(value: RedisString?, error: NSError?) in
                                                 bytes = [0xff, 0xfe, 0xfe, 0xfb]
@@ -219,7 +219,7 @@ public class TestStringAndBitCommands: XCTestCase {
 
                                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                                 XCTAssertNotNil(value, "Value result shouldn't be nil")
-                                                XCTAssertEqual(value!.asData, newValue, "\(self.key3) after a not had a value of '\(value)'")
+                                                XCTAssertEqual(value!.asData, newValue, "\(self.key3) after a not had a value of '\(String(describing: value))'")
                                             }
                                         }
                                     }
