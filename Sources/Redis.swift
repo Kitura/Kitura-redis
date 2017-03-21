@@ -98,7 +98,7 @@ public class Redis {
                 if  pingStr != nil  &&  pingStr! == str.asString {
                     callback(nil)
                 } else {
-                    callback(self.createError("String result other than '\(pingStr)' received from Redis (\(str))", code: 2))
+                    callback(self.createError("String result other than '\(String(describing: pingStr))' received from Redis (\(str))", code: 2))
                 }
             case .Error(let error):
                 callback(self.createError("Error: \(error)", code: 1))

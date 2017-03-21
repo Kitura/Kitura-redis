@@ -49,7 +49,7 @@ public class TestMoreCommands: XCTestCase {
 
                 redis.get(self.key1) {(value: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertEqual(value!.asString, self.expVal1, "\(self.key1) wasn't set to \(self.expVal1). Instead was \(value)")
+                    XCTAssertEqual(value!.asString, self.expVal1, "\(self.key1) wasn't set to \(self.expVal1). Instead was \(String(describing: value))")
 
                     redis.mget(self.key1, self.key2, self.key4, self.key3) {(values: [RedisString?]?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -59,7 +59,7 @@ public class TestMoreCommands: XCTestCase {
                         XCTAssertEqual(values![0]!.asString, self.expVal1, "Values array [0] wasn't equal to \(self.expVal1), was \(values![0]!)")
                         XCTAssertNotNil(values![1], "Values array [1] was nil")
                         XCTAssertEqual(values![1]!.asString, self.expVal2, "Values array [1] wasn't equal to \(self.expVal2), was \(values![1]!)")
-                        XCTAssertNil(values![2], "Values array [2] wasn't nil. Was \(values![2])")
+                        XCTAssertNil(values![2], "Values array [2] wasn't nil. Was \(String(describing: values![2]))")
                         XCTAssertNotNil(values![3], "Values array [3] was nil")
                         XCTAssertEqual(values![3]!.asString, self.expVal3, "Values array [3] wasn't equal to \(self.expVal3), was \(values![3]!)")
 
@@ -94,7 +94,7 @@ public class TestMoreCommands: XCTestCase {
                     redis.get(self.key3) {(value: RedisString?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssertNotNil(value, "\(self.key3) should have been found")
-                        XCTAssertEqual(value!.asString, self.expVal1, "\(self.key3) should have been equal to \(self.expVal1). Was \(value)")
+                        XCTAssertEqual(value!.asString, self.expVal1, "\(self.key3) should have been equal to \(self.expVal1). Was \(String(describing: value))")
 
                         redis.rename(self.key3, newKey: self.key2, exists: false) {(renamed: Bool, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")

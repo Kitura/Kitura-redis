@@ -118,7 +118,7 @@ public class TestTransactionsPart2: XCTestCase {
                     XCTAssertEqual(nestedResponses[3], RedisResponse.StringValue(RedisString(", 1 2")), "Get of getrange wasn't ', 1 2' was \(nestedResponses[3])")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(updatedLength), "Length of updated \(self.key1) is incorrect")
                     let updatedValue = "Testing, 5 4 3A testing we go, a testing we go"
-                    XCTAssertEqual(nestedResponses[5], RedisResponse.StringValue(RedisString(updatedValue)), "Value of updated \(self.key1) isn't '\(updatedValue), returned \(nestedResponses[5].asString?.asString)")
+                    XCTAssertEqual(nestedResponses[5], RedisResponse.StringValue(RedisString(updatedValue)), "Value of updated \(self.key1) isn't '\(updatedValue), returned \(String(describing: nestedResponses[5].asString?.asString))")
                 }
             }
         }
@@ -139,8 +139,8 @@ public class TestTransactionsPart2: XCTestCase {
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 3) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(2), "Bit count should have been 2, was \(nestedResponses[4].asInteger)")
-                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Bit count should have been 1, was \(nestedResponses[5].asInteger)")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(2), "Bit count should have been 2, was \(String(describing: nestedResponses[4].asInteger))")
+                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Bit count should have been 1, was \(String(describing: nestedResponses[5].asInteger))")
                     /* Removed tests of bitpos - not in Redis 2.8.0
                     XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(15), "Bit position should have been 15, was \(nestedResponses[1].asInteger)")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(23), "Bit position should have been 23, was \(nestedResponses[1].asInteger)")
@@ -162,12 +162,12 @@ public class TestTransactionsPart2: XCTestCase {
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 4) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(0), "The bit should have been a 0, it was \(nestedResponses[1].asInteger)")
-                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(0), "The bit should have been a 0, it was \(nestedResponses[2].asInteger)")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(0), "The bit should have been a 0, it was \(String(describing: nestedResponses[1].asInteger))")
+                    XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(0), "The bit should have been a 0, it was \(String(describing: nestedResponses[2].asInteger))")
 
                     bytes = [0x00, 0x05, 0x01, 0x00]
                     let newVal1 = Data(bytes: bytes, count: bytes.count)
-                    XCTAssertEqual(nestedResponses[3].asString?.asData, newVal1, "The updated bit string had a value of '\(nestedResponses[3].asString?.asData)'")
+                    XCTAssertEqual(nestedResponses[3].asString?.asData, newVal1, "The updated bit string had a value of '\(String(describing: nestedResponses[3].asString?.asData))'")
                 }
             }
         }
@@ -190,22 +190,22 @@ public class TestTransactionsPart2: XCTestCase {
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 9) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(nestedResponses[1].asInteger)")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(String(describing: nestedResponses[1].asInteger))")
                     bytes = [0x00, 0x00, 0x00, 0x04]
                     var newValue = Data(bytes: bytes, count: bytes.count)
-                    XCTAssertEqual(nestedResponses[2].asString?.asData, newValue, "\(self.key3) after an and had a value of '\(nestedResponses[2].asString?.asData)'")
-                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(nestedResponses[3].asInteger)")
+                    XCTAssertEqual(nestedResponses[2].asString?.asData, newValue, "\(self.key3) after an and had a value of '\(String(describing: nestedResponses[2].asString?.asData))'")
+                    XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(String(describing: nestedResponses[3].asInteger))")
                     bytes = [0x00, 0x09, 0x09, 0x04]
                     newValue = Data(bytes: bytes, count: bytes.count)
-                    XCTAssertEqual(nestedResponses[4].asString?.asData, newValue, "\(self.key3) after an or had a value of '\(nestedResponses[4].asString?.asData)'")
-                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(nestedResponses[5].asInteger)")
+                    XCTAssertEqual(nestedResponses[4].asString?.asData, newValue, "\(self.key3) after an or had a value of '\(String(describing: nestedResponses[4].asString?.asData))'")
+                    XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(String(describing: nestedResponses[5].asInteger))")
                     bytes = [0x00, 0x09, 0x09, 0x00]
                     newValue = Data(bytes: bytes, count: bytes.count)
-                    XCTAssertEqual(nestedResponses[6].asString?.asData, newValue, "\(self.key3) after an xor had a value of '\(nestedResponses[6].asString?.asData)'")
-                    XCTAssertEqual(nestedResponses[7], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(nestedResponses[7].asInteger)")
+                    XCTAssertEqual(nestedResponses[6].asString?.asData, newValue, "\(self.key3) after an xor had a value of '\(String(describing: nestedResponses[6].asString?.asData))'")
+                    XCTAssertEqual(nestedResponses[7], RedisResponse.IntegerValue(4), "Destination field length should have been 4, it was \(String(describing: nestedResponses[7].asInteger))")
                     bytes = [0xff, 0xfe, 0xfe, 0xfb]
                     newValue = Data(bytes: bytes, count: bytes.count)
-                    XCTAssertEqual(nestedResponses[8].asString?.asData, newValue, "\(self.key3) after a not had a value of '\(nestedResponses[8].asString?.asData)'")
+                    XCTAssertEqual(nestedResponses[8].asString?.asData, newValue, "\(self.key3) after a not had a value of '\(String(describing: nestedResponses[8].asString?.asData))'")
                 }
             }
         }

@@ -132,7 +132,7 @@ public class TestConnectCommands: XCTestCase {
 
                         redis.get(self.key) {(returnedValue: RedisString?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                            XCTAssertNil(returnedValue, "Returned value was not nil. Was '\(returnedValue)'")
+                            XCTAssertNil(returnedValue, "Returned value was not nil. Was '\(String(describing: returnedValue))'")
 
                             redis.set(self.key, value: newValue) {(wasSet: Bool, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
