@@ -236,7 +236,7 @@ public class TestTransactionsPart3: XCTestCase {
                 if  let nestedResponses = self.baseAsserts(response: response, count: 7) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "mset didn't return an 'OK'")
                     XCTAssertEqual(nestedResponses[1], RedisResponse.Status("OK"), "Failed to rename \(self.key1) to \(self.key3)")
-                    XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(self.expVal1)), "\(self.key3) should have been equal to \(self.expVal1). Was \(nestedResponses[2].asString?.asString)")
+                    XCTAssertEqual(nestedResponses[2], RedisResponse.StringValue(RedisString(self.expVal1)), "\(self.key3) should have been equal to \(self.expVal1). Was \(String(describing: nestedResponses[2].asString?.asString))")
                     XCTAssertEqual(nestedResponses[3], RedisResponse.IntegerValue(0), "Shouldn't have renamed \(self.key3) to \(self.key2)")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.IntegerValue(1), "Should have renamed \(self.key3) to \(self.key4)")
                     XCTAssertEqual(nestedResponses[5], RedisResponse.IntegerValue(0), "\(self.key1) shouldn't exist")
@@ -258,7 +258,7 @@ public class TestTransactionsPart3: XCTestCase {
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Should have moved \(self.key1) to DB 0")
                     XCTAssertEqual(nestedResponses[3], RedisResponse.Nil, "\(self.key1) should no longer exist in DB 1")
                     XCTAssertEqual(nestedResponses[4], RedisResponse.Status("OK"), "Select(0) didn't return an 'OK'")
-                    XCTAssertEqual(nestedResponses[5], RedisResponse.StringValue(RedisString(self.expVal1)), "\(self.key1) should have been equal to \(self.expVal1). Was \(nestedResponses[5].asString?.asString)")
+                    XCTAssertEqual(nestedResponses[5], RedisResponse.StringValue(RedisString(self.expVal1)), "\(self.key1) should have been equal to \(self.expVal1). Was \(String(describing: nestedResponses[5].asString?.asString))")
                 }
             }
         }
@@ -278,7 +278,7 @@ public class TestTransactionsPart3: XCTestCase {
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 7) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
-                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(-1), "\(self.key1) shouldn't have an expiration. It has \(nestedResponses[1].asInteger)")
+                    XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(-1), "\(self.key1) shouldn't have an expiration. It has \(String(describing: nestedResponses[1].asInteger))")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(1), "Expiration for \(self.key1) wasn't set")
                     var intResponse = nestedResponses[3].asInteger
                     XCTAssertNotNil(intResponse, "ttl for \(self.key1) was nil")

@@ -68,7 +68,7 @@ public class TestListsPart1: XCTestCase {
                 redis.lpop(self.key1) {(popedValue: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(popedValue, "Result of lpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(popedValue) for \(self.key1) instead of \(value2)")
+                    XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(String(describing: popedValue)) for \(self.key1) instead of \(value2)")
 
                     redis.lpushx(self.key1, value: value3) {(numberSet: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -105,7 +105,7 @@ public class TestListsPart1: XCTestCase {
                 redis.lpop(self.key2) {(popedValue: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(popedValue, "Result of lpop was nil, but \(self.key2) should exist")
-                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(popedValue) for \(self.key2) instead of \(binaryValue1)")
+                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(String(describing: popedValue)) for \(self.key2) instead of \(binaryValue1)")
 
                     redis.lpushx(self.key2, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -142,7 +142,7 @@ public class TestListsPart1: XCTestCase {
                 redis.rpop(self.key1) {(popedValue: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(popedValue, "Result of rpop was nil, but \(self.key1) should exist")
-                    XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(popedValue) for \(self.key1) instead of \(value2)")
+                    XCTAssertEqual(popedValue!, RedisString(value2), "Popped \(String(describing: popedValue)) for \(self.key1) instead of \(value2)")
 
                     redis.rpushx(self.key1, value: value3) {(numberSet: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -179,7 +179,7 @@ public class TestListsPart1: XCTestCase {
                 redis.rpop(self.key2) {(popedValue: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(popedValue, "Result of rpop was nil, but \(self.key2) should exist")
-                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(popedValue) for \(self.key2) instead of \(binaryValue1)")
+                    XCTAssertEqual(popedValue!, binaryValue1, "Popped \(String(describing: popedValue)) for \(self.key2) instead of \(binaryValue1)")
 
                     redis.rpushx(self.key2, value: binaryValue3) {(numberSet: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -220,8 +220,8 @@ public class TestListsPart1: XCTestCase {
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
                     XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
-                    XCTAssertEqual(returnedValues![0], RedisString(value3), "Returned value #1 was \(returnedValues![0]) should have been \(value3)")
-                    XCTAssertEqual(returnedValues![1], RedisString(value2), "Returned value #2 was \(returnedValues![1]) should have been \(value2)")
+                    XCTAssertEqual(returnedValues![0], RedisString(value3), "Returned value #1 was \(String(describing: returnedValues![0])) should have been \(value3)")
+                    XCTAssertEqual(returnedValues![1], RedisString(value2), "Returned value #2 was \(String(describing: returnedValues![1])) should have been \(value2)")
 
                     redis.lrem(self.key1, count: 3, value: value3) {(removedValues: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -235,8 +235,8 @@ public class TestListsPart1: XCTestCase {
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(returnedValues, "Result of lrange was nil, without an error")
                                 XCTAssertEqual(returnedValues!.count, 2, "Number of values returned by lrange was \(returnedValues!.count) should have been 2")
-                                XCTAssertEqual(returnedValues![0], binaryValue2, "Returned value #1 was \(returnedValues![0]) should have been \(binaryValue2)")
-                                XCTAssertEqual(returnedValues![1], binaryValue3, "Returned value #2 was \(returnedValues![1]) should have been \(binaryValue3)")
+                                XCTAssertEqual(returnedValues![0], binaryValue2, "Returned value #1 was \(String(describing: returnedValues![0])) should have been \(binaryValue2)")
+                                XCTAssertEqual(returnedValues![1], binaryValue3, "Returned value #2 was \(String(describing: returnedValues![1])) should have been \(binaryValue3)")
 
                                 redis.lrem(self.key1, count: 3, value: binaryValue2) {(removedValues: Int?, error: NSError?) in
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")

@@ -79,15 +79,15 @@ public class TestListsPart3: XCTestCase {
         localSetup() {
             redis.blpop(self.key1, self.key2, timeout: 4.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                XCTAssertNil(retrievedValue, "A blpop that timed out should have returned nil. It returned \(retrievedValue)")
+                XCTAssertNil(retrievedValue, "A blpop that timed out should have returned nil. It returned \(String(describing: retrievedValue))")
 
                 redis.brpop(self.key3, self.key1, timeout: 5.0) {(retrievedValue: [RedisString?]?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertNil(retrievedValue, "A brpop that timed out should have returned nil. It returned \(retrievedValue)")
+                    XCTAssertNil(retrievedValue, "A brpop that timed out should have returned nil. It returned \(String(describing: retrievedValue))")
 
                     redis.brpoplpush(self.key2, destination: self.key2, timeout: 3.0) {(retrievedValue: RedisString?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                        XCTAssertNil(retrievedValue, "A brpoplpush that timed out should have returned nil. It returned \(retrievedValue)")
+                        XCTAssertNil(retrievedValue, "A brpoplpush that timed out should have returned nil. It returned \(String(describing: retrievedValue))")
                     }
                 }
             }
@@ -110,8 +110,8 @@ public class TestListsPart3: XCTestCase {
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssertNotNil(retrievedValue, "blpop should not have returned nil.")
                 XCTAssertEqual(retrievedValue!.count, 2, "blpop should have returned an array of two elements. It returned an array of \(retrievedValue!.count) elements")
-                XCTAssertEqual(retrievedValue![0], RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(retrievedValue![0])")
-                XCTAssertEqual(retrievedValue![1], RedisString(value1), "blpop's return value element #1 should have been \(value1). It was \(retrievedValue![1])")
+                XCTAssertEqual(retrievedValue![0], RedisString(self.key2), "blpop's return value element #0 should have been \(self.key2). It was \(String(describing: retrievedValue![0]))")
+                XCTAssertEqual(retrievedValue![1], RedisString(value1), "blpop's return value element #1 should have been \(value1). It was \(String(describing: retrievedValue![1]))")
             }
         }
     }
@@ -131,8 +131,8 @@ public class TestListsPart3: XCTestCase {
                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                 XCTAssertNotNil(retrievedValue, "brpop should not have returned nil.")
                 XCTAssertEqual(retrievedValue!.count, 2, "brpop should have returned an array of two elements. It returned an array of \(retrievedValue!.count) elements")
-                XCTAssertEqual(retrievedValue![0], RedisString(self.key3), "brpop's return value element #0 should have been \(self.key3). It was \(retrievedValue![0])")
-                XCTAssertEqual(retrievedValue![1], RedisString(value2), "brpop's return value element #1 should have been \(value2). It was \(retrievedValue![1])")
+                XCTAssertEqual(retrievedValue![0], RedisString(self.key3), "brpop's return value element #0 should have been \(self.key3). It was \(String(describing: retrievedValue![0]))")
+                XCTAssertEqual(retrievedValue![1], RedisString(value2), "brpop's return value element #1 should have been \(value2). It was \(String(describing: retrievedValue![1]))")
             }
         }
     }
