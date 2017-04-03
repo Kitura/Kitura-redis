@@ -29,8 +29,6 @@ public class TestTransactionsPart4: XCTestCase {
             ("test_hscan", test_hscan)
         ]
     }
-
-    var exp: XCTestExpectation?
     
     let key1 = "test1"
 
@@ -38,22 +36,6 @@ public class TestTransactionsPart4: XCTestCase {
     let field2 = "f2"
     let field3 = "f3"
     let field4 = "f4"
-
-    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
-        connectRedis() {(err) in
-            guard err == nil else {
-                XCTFail("\(String(describing: err))")
-                return
-            }
-            redis.info { (info: RedisInfo?, _) in
-                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
-                    redis.flushdb(callback: { (_, _) in
-                        callback()
-                    })
-                }
-            }
-        }
-    }
     
     private func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
@@ -210,8 +192,6 @@ public class TestTransactionsPart4: XCTestCase {
     
     func test_hscan() {
         setup(major: 2, minor: 8, micro: 0) {
-            exp = expectation(description: "Iterate fields of Hash types and their associated values.")
-            
             let p1 = "linkin"
             let v1 = "crawling"
             let p2 = "incubus"
@@ -239,11 +219,8 @@ public class TestTransactionsPart4: XCTestCase {
                     XCTAssertEqual(((responses[3].asArray)?[1].asArray)?[1].asString, RedisString(v1))
                     XCTAssertEqual(((responses[3].asArray)?[1].asArray)?[2].asString, RedisString(p2))
                     XCTAssertEqual(((responses[3].asArray)?[1].asArray)?[3].asString, RedisString(v2))
-                    
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
 }

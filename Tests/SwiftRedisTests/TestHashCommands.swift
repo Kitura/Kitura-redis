@@ -30,8 +30,6 @@ public class TestHashCommands: XCTestCase {
             ("test_hscanMatchCount", test_hscanMatchCount)
         ]
     }
-
-    var exp: XCTestExpectation?
     
     let key = "key"
 
@@ -39,22 +37,6 @@ public class TestHashCommands: XCTestCase {
     let field2 = "f2"
     let field3 = "f3"
     let field4 = "f4"
-    
-    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
-        connectRedis() {(err) in
-            guard err == nil else {
-                XCTFail()
-                return
-            }
-            redis.info { (info: RedisInfo?, _) in
-                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
-                    redis.flushdb(callback: { (_, _) in
-                        callback()
-                    })
-                }
-            }
-        }
-    }
     
     func test_hashSetAndGet() {
         setup(major: 2, minor: 0, micro: 0) {
@@ -251,8 +233,6 @@ public class TestHashCommands: XCTestCase {
 
     func test_hscan() {
         setup(major: 2, minor: 8, micro: 0) {
-            exp = expectation(description: "Iterate fields of Hash types and their associated values.")
-
             redis.hmset(key, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssert(res)
@@ -261,17 +241,13 @@ public class TestHashCommands: XCTestCase {
                     XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertEqual(res?.count, 4)
-                    exp?.fulfill()
                 })
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
     
     func test_hscanMatch() {
         setup(major: 2, minor: 8, micro: 0) {
-            exp = expectation(description: "Iterate fields of Hash types and their associated values that match a pattern.")
-
             redis.hmset(key, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssert(res)
@@ -280,17 +256,13 @@ public class TestHashCommands: XCTestCase {
                     XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertNotNil(res)
-                    exp?.fulfill()
                 })
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
 
     func test_hscanCount() {
         setup(major: 2, minor: 8, micro: 0) {
-            exp = expectation(description: "Iterate a certain number of fields of Hash types and their associated values.")
-
             redis.hmset(key, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssert(res)
@@ -299,17 +271,13 @@ public class TestHashCommands: XCTestCase {
                     XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertNotNil(res)
-                    exp?.fulfill()
                 })
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
     
     func test_hscanMatchCount() {
         setup(major: 2, minor: 8, micro: 0) {
-            exp = expectation(description: "Iterate a certain number of fields of Hash types and their associated values that match a pattern.")
-
             redis.hmset(key, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
                 XCTAssertNil(err)
                 XCTAssert(res)
@@ -317,10 +285,8 @@ public class TestHashCommands: XCTestCase {
                     XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertNotNil(res)
-                    exp?.fulfill()
                 })
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
 }

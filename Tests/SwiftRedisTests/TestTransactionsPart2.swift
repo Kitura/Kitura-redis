@@ -32,8 +32,6 @@ public class TestTransactionsPart2: XCTestCase {
         ]
     }
 
-    var exp: XCTestExpectation?
-    
     let key1 = "test1"
     let key2 = "test2"
     let key3 = "test3"
@@ -43,22 +41,6 @@ public class TestTransactionsPart2: XCTestCase {
     let expVal3 = "Hi ho, hi ho"
     let expVal4 = "it's off to test"
     let updVal1 = ", 5 4"
-
-    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
-        connectRedis() {(err) in
-            guard err == nil else {
-                XCTFail("\(String(describing: err))")
-                return
-            }
-            redis.info { (info: RedisInfo?, _) in
-                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
-                    redis.flushdb(callback: { (_, _) in
-                        callback()
-                    })
-                }
-            }
-        }
-    }
     
     private func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
@@ -266,9 +248,7 @@ public class TestTransactionsPart2: XCTestCase {
     }
 
     func test_bitfield() {
-        setup(major: 3, minor: 2, micro: 0) { 
-            exp = expectation(description: "The command treats a Redis string as a array of bits, and is capable of addressing specific integer fields of varying bit widths and arbitrary non (necessary) aligned offset.")
-            
+        setup(major: 3, minor: 2, micro: 0) {
             let multi = redis.multi()
             multi.bitfield(key: key1, subcommands: .get("u2", 0))
             multi.bitfield(key: key1, subcommands: .set("u2", "0", 1))
@@ -284,10 +264,8 @@ public class TestTransactionsPart2: XCTestCase {
                     XCTAssertEqual((responses[3].asArray)?[0].asInteger, 3)
                     XCTAssertEqual((responses[4].asArray)?[0].asInteger, 3)
                     XCTAssertEqual((responses[5].asArray)?[0], RedisResponse.Nil)
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
 }

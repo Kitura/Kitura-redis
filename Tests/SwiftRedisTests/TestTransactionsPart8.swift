@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-import Foundation
 import XCTest
 import SwiftRedis
 
@@ -31,8 +30,6 @@ public class TestTransactionsPart8: XCTestCase {
         ]
     }
     
-    var exp: XCTestExpectation?
-    
     let key = "Sicily"
     
     let longitude1 = 13.361389
@@ -42,22 +39,6 @@ public class TestTransactionsPart8: XCTestCase {
     let longitude2 = 15.087269
     let latitude2 = 37.502669
     let member2 = "Catania"
-    
-    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
-        connectRedis() {(err) in
-            guard err == nil else {
-                XCTFail("\(String(describing: err))")
-                return
-            }
-            redis.info { (info: RedisInfo?, _) in
-                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
-                    redis.flushdb(callback: { (_, _) in
-                        callback()
-                    })
-                }
-            }
-        }
-    }
     
     private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
         switch(response) {
@@ -81,7 +62,6 @@ public class TestTransactionsPart8: XCTestCase {
     
     func test_geoadd() {
         setup(major: 3, minor: 2, micro: 0) {
-            exp = expectation(description: "Adds the specified geospatial items (latitude, longitude, name) to the specified `key`.")
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
@@ -89,16 +69,13 @@ public class TestTransactionsPart8: XCTestCase {
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     XCTAssertEqual(responses[0].asInteger, 1)
                     XCTAssertEqual(responses[1].asInteger, 0)
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
     
     func test_geohash() {
         setup(major: 3, minor: 2, micro: 0) {
-            exp = expectation(description: "Return valid Geohash strings representing the position of one or more elements in a sorted set value representing a geospatial index (where elements were added using GEOADD).")
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
             multi.geohash(key: key, members: member1, member2)
@@ -106,16 +83,13 @@ public class TestTransactionsPart8: XCTestCase {
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     XCTAssertEqual(responses[0].asInteger, 1)
                     XCTAssertEqual((responses[1].asArray)?[0].asString, RedisString("sqc8b49rny0"))
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
     
     func test_geopos() {
         setup(major: 3, minor: 2, micro: 0) {
-            exp = expectation(description: "Return the positions (longitude,latitude) of all the specified members of the geospatial index represented by the sorted set at `key`.")
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
             multi.geopos(key: key, members: member1)
@@ -124,16 +98,13 @@ public class TestTransactionsPart8: XCTestCase {
                     XCTAssertEqual(responses[0].asInteger, 1)
                     XCTAssertEqual(((responses[1].asArray)?[0].asArray)?[0].asString, RedisString("13.36138933897018433"))
                     XCTAssertEqual(((responses[1].asArray)?[0].asArray)?[1].asString, RedisString("38.11555639549629859"))
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
     
     func test_geodist() {
         setup(major: 3, minor: 2, micro: 0) {
-            exp = expectation(description: "Return the distance between two members in the geospatial index represented by the sorted set.")
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1), (longitude2, latitude2, member2))
             multi.geodist(key: key, member1: member1, member2: member2, unit: .m)
@@ -147,16 +118,13 @@ public class TestTransactionsPart8: XCTestCase {
                     XCTAssertEqual(responses[2].asString, RedisString("166.2742"))
                     XCTAssertEqual(responses[3].asString, RedisString("103.3182"))
                     XCTAssertEqual(responses[4].asString, RedisString("545518.8700"))
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
     
     func test_georadius() {
         setup(major: 3, minor: 2, micro: 0) {
-            exp = expectation(description: "Return the members of a sorted set populated with geospatial information using GEOADD, which are within the borders of the area specified with the center location and the maximum distance from the center (the radius).")
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
             multi.georadius(key: key, longitude: longitude1, latitude: latitude1, radius: 1, unit: .km)
@@ -180,16 +148,13 @@ public class TestTransactionsPart8: XCTestCase {
                     XCTAssertEqual((responses[7].asArray)?[0].asString, RedisString(self.member1))
                     XCTAssertEqual((responses[8].asArray)?[0].asString, RedisString(self.member1))
                     XCTAssertEqual((responses[9].asArray)?[0].asString, RedisString(self.member1))
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
     
     func test_georadiusbymember() {
         setup(major: 3, minor: 2, micro: 0) {
-            exp = expectation(description: "This command is exactly like GEORADIUS with the sole difference that instead of taking, as the center of the area to query, a longitude and latitude value, it takes the name of a member already existing inside the geospatial index represented by the sorted set.")
             let multi = redis.multi()
             multi.geoadd(key: key, geospatialItems: (longitude1, latitude1, member1))
             multi.georadiusbymember(key: key, member: member1, radius: 1, unit: .km)
@@ -213,10 +178,8 @@ public class TestTransactionsPart8: XCTestCase {
                     XCTAssertEqual((responses[7].asArray)?[0].asString, RedisString(self.member1))
                     XCTAssertEqual((responses[8].asArray)?[0].asString, RedisString(self.member1))
                     XCTAssertEqual((responses[9].asArray)?[0].asString, RedisString(self.member1))
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1) { (_) in }
         }
     }
 }

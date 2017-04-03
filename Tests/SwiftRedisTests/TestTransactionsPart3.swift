@@ -33,8 +33,6 @@ public class TestTransactionsPart3: XCTestCase {
             ("test_type", test_type)
         ]
     }
-
-    var exp: XCTestExpectation?
     
     let key1 = "test1"
     let key2 = "test2"
@@ -47,22 +45,6 @@ public class TestTransactionsPart3: XCTestCase {
     let expVal3 = "we go"
     let expVal4 = "Testing"
     let expVal5 = "testing 1 2 3"
-    
-    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
-        connectRedis() {(err) in
-            guard err == nil else {
-                XCTFail("\(String(describing: err))")
-                return
-            }
-            redis.info { (info: RedisInfo?, _) in
-                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
-                    redis.flushdb(callback: { (_, _) in
-                        callback()
-                    })
-                }
-            }
-        }
-    }
 
     private func setupTests(callback: () -> Void) {
         connectRedis() {(error: NSError?) in
@@ -101,7 +83,6 @@ public class TestTransactionsPart3: XCTestCase {
     
     func test_keys() {
         setup(major: 1, minor: 0, micro: 0) { 
-            exp = expectation(description: "Returns all keys matching `pattern`.")
             
             let multi = redis.multi()
             multi.mset((key1, "1"), (key2, "2"), (key3, "3"), (key4, "4"))
@@ -110,17 +91,13 @@ public class TestTransactionsPart3: XCTestCase {
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     XCTAssertEqual(responses[0].asStatus, "OK")
                     XCTAssertEqual((responses[1].asArray)?[0].asString, RedisString(self.key1))
-                    self.exp?.fulfill()
                 }
-                
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_randomkey() {
         setup(major: 1, minor: 0, micro: 0) { 
-            exp = expectation(description: "Return a random key from the currently selected database.")
             
             let multi = redis.multi()
             multi.mset((key1, "1"))
@@ -129,16 +106,13 @@ public class TestTransactionsPart3: XCTestCase {
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     XCTAssertEqual(responses[0].asStatus, "OK")
                     XCTAssertEqual(responses[1].asString, RedisString(self.key1))
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_scan() {
         setup(major: 2, minor: 8, micro: 0) { 
-            exp = expectation(description: "Iterate the set of keys in the currently selected Redis database.")
             
             let multi = redis.multi()
             multi.mset((key1, "val1"), (key2, "val2"))
@@ -151,16 +125,13 @@ public class TestTransactionsPart3: XCTestCase {
                     XCTAssertNotNil(responses[1])
                     XCTAssertNotNil(responses[2])
                     XCTAssertNotNil(responses[3])
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
 
     func test_sort() {
         setup(major: 1, minor: 0, micro: 0) { 
-            exp = expectation(description: "Returns or stores the elements contained in the list, set or sorted set at key.")
             
             let val1 = "1"
             let val2 = "2"
@@ -215,11 +186,8 @@ public class TestTransactionsPart3: XCTestCase {
 
                     // sort store
                     XCTAssertEqual(responses[7].asInteger, 3)
-                    
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
@@ -297,7 +265,6 @@ public class TestTransactionsPart3: XCTestCase {
     
     func test_touch() {
         setup(major: 3, minor: 2, micro: 1) { 
-            exp = expectation(description: "Alters the last access time of a `key`(s). A key is ignored if it does not exist.")
             
             let multi = redis.multi()
             multi.set(key1, value: "1")
@@ -306,16 +273,13 @@ public class TestTransactionsPart3: XCTestCase {
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     XCTAssertEqual(responses[0].asStatus, "OK")
                     XCTAssertEqual(responses[1].asInteger, 1)
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_type() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Returns the string representation of the type of the value stored at `key`. The different types that can be returned are: string, list, set, zset and hash.")
             
             let multi = redis.multi()
             multi.set(key1, value: "1")
@@ -324,10 +288,8 @@ public class TestTransactionsPart3: XCTestCase {
                 if let responses = self.baseAsserts(response: res, count: 2) {
                     XCTAssertEqual(responses[0].asStatus, "OK")
                     XCTAssertEqual(responses[1].asStatus, "string")
-                    self.exp?.fulfill()
                 }
             })
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
 }

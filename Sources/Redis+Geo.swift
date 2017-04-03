@@ -33,13 +33,13 @@ extension Redis {
     
     /// Adds the specified geospatial items (longitude, latitude, name) to the
     /// specified key.
-    /// 
-    /// - parameter key: The key of the geospatial index to add the geospacial 
+    ///
+    /// - parameter key: The key of the geospatial index to add the geospacial
     ///                  items to. It will be created if it does not exist.
     /// - parameter geospatialItems: A geospatial item is (longitude: Double,
     ///                              latitude: Double, name: String).
     /// - parameter callback: The callback function.
-    /// - parameter result: The number of elements added to the sorted set, not 
+    /// - parameter result: The number of elements added to the sorted set, not
     ///                     including elements already existing for which the
     ///                     score was updated.
     /// - parameter error: Non-nil if error occurred.
@@ -71,22 +71,22 @@ extension Redis {
         }
     }
     
-    /// Return valid Geohash strings representing the position of one or more 
+    /// Return valid Geohash strings representing the position of one or more
     /// elements in a sorted set value representing a geospatial index (where
     /// elements were added using GEOADD).
     ///
     /// - parameter key: The key of the geospatial index.
-    /// - parameter members: List of members from which to get their Geohash 
+    /// - parameter members: List of members from which to get their Geohash
     ///                      strings.
     /// - parameter callback: The callback function.
-    /// - parameter result: An array where each element is the Geohash 
+    /// - parameter result: An array where each element is the Geohash
     ///                     corresponding to each member name passed as argument
     ///                     to the command.
     /// - parameter error: Non-nil if error occurred.
     public func geohash(key: String, members: String..., callback: (_ result: [RedisString?]?, _ error: NSError?) -> Void) {
         geohashArrayOfMembers(key: key, members: members, callback: callback)
     }
-
+    
     /// Return valid Geohash strings representing the position of one or more
     /// elements in a sorted set value representing a geospatial index (where
     /// elements were added using GEOADD).
@@ -109,45 +109,51 @@ extension Redis {
         }
     }
     
-    /// Return the positions (longitude,latitude) of all the specified members
-    /// of the geospatial index represented by the sorted set at key.
+    /// Return the positions (longitude, latitude) of all the specified members
+    /// of the geospatial index represented by the sorted set at `key`.
     ///
     /// - parameter key: The key of the geospatial index.
     /// - parameter members: The members from which to get their positions.
     /// - parameter callback: The callback function.
-    /// - parameter result: An array where each element is a two elements array 
-    ///                     representing longitude and latitude (x,y) of each 
-    ///                     member name passed as argument to the command. Non
-    ///                     existing elements are reported as NULL elements of 
-    ///                     the array.
-    /// - parameter error: Non-nil if error occurred.
-    public func geopos(key: String, members: String..., callback: (_ result: [RedisResponse?]?, _ error: NSError?) -> Void) {
-        geoposArrayOfMembers(key: key, members: members, callback: callback)
-    }
-
-    /// Return the positions (longitude,latitude) of all the specified members
-    /// of the geospatial index represented by the sorted set at key.
-    ///
-    /// - parameter key: The key of the geospatial index.
-    /// - parameter members: The members from which to get their positions.
-    /// - parameter callback: The callback function.
-    /// - parameter result: An array where each element is a two elements array
+    /// - parameter result: An array where each element is (Double, Double)
     ///                     representing longitude and latitude (x,y) of each
     ///                     member name passed as argument to the command. Non
     ///                     existing elements are reported as NULL elements of
     ///                     the array.
     /// - parameter error: Non-nil if error occurred.
-    public func geoposArrayOfMembers(key: String, members: [String], callback: (_ result: [RedisResponse?]?, _ error: NSError?) -> Void) {
+    public func geopos(key: String, members: String..., callback: (_ result: [(Double, Double)?]?, _ error: NSError?) -> Void) {
+        geoposArrayOfMembers(key: key, members: members, callback: callback)
+    }
+    
+    /// Return the positions (longitude, latitude) of all the specified members
+    /// of the geospatial index represented by the sorted set at `key`.
+    ///
+    /// - parameter key: The key of the geospatial index.
+    /// - parameter members: The members from which to get their positions.
+    /// - parameter callback: The callback function.
+    /// - parameter result: An array where each element is (Double, Double)
+    ///                     representing longitude and latitude (x,y) of each
+    ///                     member name passed as argument to the command. Non
+    ///                     existing elements are reported as NULL elements of
+    ///                     the array.
+    /// - parameter error: Non-nil if error occurred.
+    public func geoposArrayOfMembers(key: String, members: [String], callback: (_ result: [(Double, Double)?]?, _ error: NSError?) -> Void) {
         var command = ["GEOPOS", key]
         for member in members {
             command.append(member)
         }
         issueCommandInArray(command) { (response) in
-            redisArrayResponseHandler(response: response, callback: callback)
+            redisArrayResponseHandler(response: response, callback: { (responses, err) in
+                if let err = err {
+                    callback(nil, err)
+                    return
+                }
+                getCoordinates(from: responses, callback: callback)
+            })
         }
     }
-
-    /// Return the distance between two members in the geospatial index 
+    
+    /// Return the distance between two members in the geospatial index
     /// represented by the sorted set.
     ///
     /// - parameter key: The key of the geospatial index.
@@ -159,7 +165,7 @@ extension Redis {
     ///                   mi - miles
     ///                   ft - feet
     /// - parameter callback: The callback function.
-    /// - parameter result: Distance as a double (represented as a string) in 
+    /// - parameter result: Distance as a double (represented as a string) in
     ///                     the specified unit, or NULL if one or both the
     ///                     elements are missing.
     /// - parameter error: Non-nil if error occurred.
@@ -179,16 +185,16 @@ extension Redis {
     }
     
     /// Return the members of a sorted set populated with geospatial information
-    /// using GEOADD, which are within the borders of the area specified with 
+    /// using GEOADD, which are within the borders of the area specified with
     /// the center location and the maximum distance from the center (the
     /// radius).
     ///
     /// - parameter key: The key of the geospatial index.
-    /// - parameter longitude: The longitude of the center area of which to 
+    /// - parameter longitude: The longitude of the center area of which to
     ///                        perform the search.
-    /// - parameter latitude: The latitude of the center area of which to 
+    /// - parameter latitude: The latitude of the center area of which to
     ///                       perform the search.
-    /// - parameter radius: The radius of the circle from which to perform the 
+    /// - parameter radius: The radius of the circle from which to perform the
     ///                     search.
     /// - parameter unit: The unit of distance for the radius.
     ///                   m - meters
@@ -197,25 +203,25 @@ extension Redis {
     ///                   ft - feet
     /// - parameter withCoord: If true, result will also return the longitude,
     ///                        latitude coordinates of the matching items.
-    /// - parameter withDist: If true, result will also return the distance of 
-    ///                       the returned items from the specified center. The 
-    ///                       distance is returned in the same unit as the unit 
+    /// - parameter withDist: If true, result will also return the distance of
+    ///                       the returned items from the specified center. The
+    ///                       distance is returned in the same unit as the unit
     ///                       specified as the radius argument of the command.
     /// - parameter withHash: If true, result will also return the raw geohash-
-    ///                       encoded sorted set score of the item, in the form 
-    ///                       of a 52 bit unsigned integer. This is only useful 
-    ///                       for low level hacks or debugging and is otherwise 
+    ///                       encoded sorted set score of the item, in the form
+    ///                       of a 52 bit unsigned integer. This is only useful
+    ///                       for low level hacks or debugging and is otherwise
     ///                       of little interest for the general user.
-    /// - parameter count: Amount to limit number of results to. Exclude to 
+    /// - parameter count: Amount to limit number of results to. Exclude to
     ///                    retrieve all results.
-    /// - parameter ascending: If true, return results sorted nearest to 
+    /// - parameter ascending: If true, return results sorted nearest to
     ///                        farthest. If false, return results sorted
-    ///                        farthest to nearest. If excluded, results are 
+    ///                        farthest to nearest. If excluded, results are
     ///                        unsorted.
     /// - parameter callback: The callback function.
-    /// - parameter result: With no `WITH` options included, returns a linear 
-    ///                     array of location names. If any `WITH` options are 
-    ///                     included, returns an array of sub-arrays, where each 
+    /// - parameter result: With no `WITH` options included, returns a linear
+    ///                     array of location names. If any `WITH` options are
+    ///                     included, returns an array of sub-arrays, where each
     ///                     represents an item with its extra data.
     /// - parameter error: Non-nil if error occurred.
     public func georadius(key: String, longitude: Double, latitude: Double, radius: Double, unit: GeoDistanceUnit, withCoord: Bool?=nil, withDist: Bool?=nil, withHash: Bool?=nil, count: Int?=nil, ascending: Bool?=nil, callback: (_ result: [RedisResponse?]?, _ error: NSError?) -> Void) {
@@ -251,13 +257,13 @@ extension Redis {
         }
     }
     
-    /// This command is exactly like GEORADIUS with the sole difference that 
-    /// instead of taking, as the center of the area to query, a longitude and 
+    /// This command is exactly like GEORADIUS with the sole difference that
+    /// instead of taking, as the center of the area to query, a longitude and
     /// latitude value, it takes the name of a member already existing inside
     /// the geospatial index represented by the sorted set.
     ///
     /// - parameter key: The key of the geospatial index.
-    /// - parameter member: The existing member of the geospatial index in which 
+    /// - parameter member: The existing member of the geospatial index in which
     ///                     to set as the center of the search.
     /// - parameter radius: The radius of the circle from which to perform the
     ///                     search.

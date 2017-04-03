@@ -14,17 +14,12 @@
  * limitations under the License.
  **/
 
+import XCTest
 import SwiftRedis
 
 #if os(Linux)
-    import Glibc
     import Dispatch
-#else
-    import Darwin
 #endif
-
-import Foundation
-import XCTest
 
 public class TestSort: XCTestCase {
     
@@ -44,32 +39,12 @@ public class TestSort: XCTestCase {
         ]
     }
     
-    var exp: XCTestExpectation?
-    
     var key1 = "1"
     var key2 = "2"
     var key3 = "3"
     
-    private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
-        connectRedis() {(err) in
-            guard err == nil else {
-                XCTFail("\(String(describing: err))")
-                return
-            }
-            redis.info { (info: RedisInfo?, _) in
-                if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
-                    redis.flushdb(callback: { (_, _) in
-                        callback()
-                    })
-                }
-            }
-        }
-    }
-    
     func test_sort() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Return sorted list at `key`.")
-            
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -82,17 +57,13 @@ public class TestSort: XCTestCase {
                     XCTAssertEqual(res?[0]?.asString, val2)
                     XCTAssertEqual(res?[1]?.asString, val1)
                     XCTAssertEqual(res?[2]?.asString, val3)
-                    exp?.fulfill()
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortDesc() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Return list at `key` sorted in descending order.")
-            
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -105,17 +76,13 @@ public class TestSort: XCTestCase {
                     XCTAssertEqual(res?[0]?.asString, val3)
                     XCTAssertEqual(res?[1]?.asString, val1)
                     XCTAssertEqual(res?[2]?.asString, val2)
-                    exp?.fulfill()
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortAlpha() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Return lexicograpically sorted list at `key`.")
-            
             let val1 = "red"
             let val2 = "blue"
             let val3 = "green"
@@ -128,17 +95,13 @@ public class TestSort: XCTestCase {
                     XCTAssertEqual(res?[0]?.asString, val2)
                     XCTAssertEqual(res?[1]?.asString, val3)
                     XCTAssertEqual(res?[2]?.asString, val1)
-                    exp?.fulfill()
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortLimit() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Return sorted list with `offset` and `count`.")
-            
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -153,17 +116,13 @@ public class TestSort: XCTestCase {
                     XCTAssertEqual(res?[0]?.asString, val1)
                     XCTAssertEqual(res?[1]?.asString, val4)
                     XCTAssertEqual(res?[2]?.asString, val3)
-                    exp?.fulfill()
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortMultiModifiers() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "SORT with many modifiers.")
-            
             let val1 = "red"
             let val2 = "blue"
             let val3 = "green"
@@ -176,17 +135,13 @@ public class TestSort: XCTestCase {
                     XCTAssertEqual(res?[0]?.asString, val1)
                     XCTAssertEqual(res?[1]?.asString, val3)
                     XCTAssertEqual(res?[2]?.asString, val2)
-                    exp?.fulfill()
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortBy() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Sort by external keys.")
-            
             let val1 = "1"
             let val2 = "2"
             let val3 = "3"
@@ -203,18 +158,14 @@ public class TestSort: XCTestCase {
                         XCTAssertEqual(res?[0]?.asString, val2)
                         XCTAssertEqual(res?[1]?.asString, val1)
                         XCTAssertEqual(res?[2]?.asString, val3)
-                        exp?.fulfill()
                     })
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortByNoSort() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Give bad key to return unsorted list.")
-            
             let val1 = "345"
             let val2 = "8"
             let val3 = "90"
@@ -227,17 +178,13 @@ public class TestSort: XCTestCase {
                     XCTAssertEqual(res?[0]?.asString, val3)
                     XCTAssertEqual(res?[1]?.asString, val2)
                     XCTAssertEqual(res?[2]?.asString, val1)
-                    exp?.fulfill()
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortGet() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Sort by external keys and retrieve external keys.")
-            
             let val1 = "1"
             let val2 = "2"
             let val3 = "3"
@@ -257,18 +204,14 @@ public class TestSort: XCTestCase {
                         XCTAssertEqual(res?[0]?.asString, obj2)
                         XCTAssertEqual(res?[1]?.asString, obj1)
                         XCTAssertEqual(res?[2]?.asString, obj3)
-                        exp?.fulfill()
                     })
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortGetMulti() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Sort by external keys and retrieve multiple external keys.")
-            
             let val1 = "1"
             let val2 = "2"
             let val3 = "3"
@@ -291,18 +234,14 @@ public class TestSort: XCTestCase {
                         XCTAssertEqual(res?[3]?.asString, val1)
                         XCTAssertEqual(res?[4]?.asString, obj3)
                         XCTAssertEqual(res?[5]?.asString, val3)
-                        exp?.fulfill()
                     })
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortStore() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Sort list and store at `store key`.")
-            
             let val1 = "20"
             let val2 = "5"
             let val3 = "90"
@@ -324,17 +263,15 @@ public class TestSort: XCTestCase {
                         XCTAssertEqual(res0, val2)
                         XCTAssertEqual(res1, val1)
                         XCTAssertEqual(res2, val3)
-                        exp?.fulfill()
                     })
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
         }
     }
     
     func test_sortByGetHashes() {
         setup(major: 1, minor: 0, micro: 0) {
-            exp = expectation(description: "Sort list and use BY and GET options against hash fields.")
+            let exp = expectation(description: "Sort list and use BY and GET options against hash fields.")
             
             let val1 = "1"
             let val2 = "2"
@@ -387,10 +324,11 @@ public class TestSort: XCTestCase {
                     XCTAssertEqual(res?[0]?.asString, obj2)
                     XCTAssertEqual(res?[1]?.asString, obj1)
                     XCTAssertEqual(res?[2]?.asString, obj3)
-                    exp?.fulfill()
+                    exp.fulfill()
                 })
             }
-            waitForExpectations(timeout: 1, handler: { (_) in })
+            
+            waitForExpectations(timeout: 5)
         }
     }
 }
