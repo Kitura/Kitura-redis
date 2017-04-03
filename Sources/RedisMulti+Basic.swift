@@ -112,14 +112,7 @@ extension RedisMulti {
                 command.append(String(incr))
             case .overflow(let overflow):
                 command.append("OVERFLOW")
-                switch(overflow) {
-                case .WRAP:
-                    command.append(BitfieldSubcommand.BitfieldOverflow.WRAP.rawValue)
-                case .SAT:
-                    command.append(BitfieldSubcommand.BitfieldOverflow.SAT.rawValue)
-                case .FAIL:
-                    command.append(BitfieldSubcommand.BitfieldOverflow.FAIL.rawValue)
-                }
+                command.append(overflow.rawValue)
             }
         }
         queuedCommands.append(stringArrToRedisStringArr(command))
