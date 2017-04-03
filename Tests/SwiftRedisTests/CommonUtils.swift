@@ -17,6 +17,11 @@
 import XCTest
 import SwiftRedis
 
+#if os(Linux)
+    import Glibc
+    import Foundation
+#endif
+
 var redis = Redis()
 
 func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {

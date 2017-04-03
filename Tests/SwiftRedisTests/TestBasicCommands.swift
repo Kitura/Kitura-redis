@@ -17,6 +17,11 @@
 import XCTest
 import SwiftRedis
 
+#if os(Linux)
+    import Glibc
+    import Foundation
+#endif
+
 public class TestBasicCommands: XCTestCase {
     
     static var allTests: [(String, (TestBasicCommands) -> () throws -> Void)] {
