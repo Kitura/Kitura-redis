@@ -26,9 +26,9 @@ import SwiftRedis
 import Foundation
 import XCTest
 
-public class TestSORT: XCTestCase {
+public class TestSort: XCTestCase {
     
-    static var allTests: [(String, (TestSORT) -> () throws -> Void)] {
+    static var allTests: [(String, (TestSort) -> () throws -> Void)] {
         return [
             ("test_sort", test_sort),
             ("test_sortDesc", test_sortDesc),
@@ -53,7 +53,7 @@ public class TestSORT: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail("\(err)")
+                XCTFail("\(String(describing: err))")
                 return
             }
             redis.info { (info: RedisInfo?, _) in

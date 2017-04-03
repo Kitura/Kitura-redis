@@ -47,7 +47,7 @@ public class TestTransactionsPart2: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail("\(err)")
+                XCTFail("\(String(describing: err))")
                 return
             }
             redis.info { (info: RedisInfo?, _) in

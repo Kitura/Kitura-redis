@@ -14,9 +14,8 @@
  * limitations under the License.
  **/
 
-import SwiftRedis
-import Foundation
 import XCTest
+import SwiftRedis
 
 public class TestGeoCommands: XCTestCase {
     static var allTests: [(String, (TestGeoCommands) -> () throws -> Void)] {
@@ -50,7 +49,7 @@ public class TestGeoCommands: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail("\(err)")
+                XCTFail("\(String(describing: err))")
                 return
             }
             redis.info { (info: RedisInfo?, _) in

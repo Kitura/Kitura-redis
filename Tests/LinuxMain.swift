@@ -15,15 +15,13 @@
  **/
 
 import XCTest
-
 @testable import SwiftRedisTests
 
 XCTMain([
     testCase(AuthTests.allTests),
 	testCase(TestBasicCommands.allTests),
-	testCase(TestBITFIELD.allTests),
-	testCase(TestSORT.allTests),
 	testCase(TestBinarySafeCommands.allTests),
+	testCase(TestBitfield.allTests),
 	testCase(TestConnectCommands.allTests),
 	testCase(TestGeoCommands.allTests),
 	testCase(TestGEORADIUS.allTests),
@@ -36,6 +34,7 @@ XCTMain([
 	testCase(TestMoreCommands.allTests),
 	testCase(TestSetCommands.allTests),
 	testCase(TestSetCommandsPart2.allTests),
+	testCase(TestSort.allTests),
 	testCase(TestStringAndBitCommands.allTests),
 	testCase(TestTransactionsPart1.allTests),
 	testCase(TestTransactionsPart2.allTests),

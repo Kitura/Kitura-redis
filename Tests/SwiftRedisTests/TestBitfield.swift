@@ -14,20 +14,12 @@
  * limitations under the License.
  **/
 
+import XCTest
 import SwiftRedis
 
-#if os(Linux)
-    import Glibc
-#else
-    import Darwin
-#endif
-
-import Foundation
-import XCTest
-
-public class TestBITFIELD: XCTestCase {
+public class TestBitfield: XCTestCase {
     
-    static var allTests: [(String, (TestBITFIELD) -> () throws -> Void)] {
+    static var allTests: [(String, (TestBitfield) -> () throws -> Void)] {
         return [
             ("test_bitfieldGet", test_bitfieldGet),
             ("test_bitfieldSet", test_bitfieldSet),
@@ -46,7 +38,7 @@ public class TestBITFIELD: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail("\(err)")
+                XCTFail("\(String(describing: err))")
                 return
             }
             redis.info { (info: RedisInfo?, _) in

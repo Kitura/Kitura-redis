@@ -14,10 +14,8 @@
  * limitations under the License.
  **/
 
-import SwiftRedis
-
-import Foundation
 import XCTest
+import SwiftRedis
 
 public class TestHashCommands: XCTestCase {
     static var allTests: [(String, (TestHashCommands) -> () throws -> Void)] {
@@ -170,7 +168,7 @@ public class TestHashCommands: XCTestCase {
 
                 redis.hget(self.key, field: self.field1) {(value: RedisString?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-                    XCTAssertEqual(value!.asString, expVal1, "\(self.key1).\(self.field1) wasn't set to \(expVal1). Instead was \(String(describing: value))")
+                    XCTAssertEqual(value!.asString, expVal1, "\(self.key).\(self.field1) wasn't set to \(expVal1). Instead was \(String(describing: value))")
 
                     redis.hmget(self.key, fields: self.field1, self.field2, self.field4, self.field3) {(values: [RedisString?]?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -203,8 +201,8 @@ public class TestHashCommands: XCTestCase {
                                     for idx in 0..<fieldNames.count {
                                         let field = values[fieldNames[idx]]
                                       
-                                        XCTAssertNotNil(field, "\(fieldNames[idx]) in \(self.key1) was nil")
-                                        XCTAssertEqual(field!.asString, fieldValues[idx], "\(fieldNames[idx]) in \(self.key1) wasn't '\(fieldValues[idx])', it was \(String(describing: field))")
+                                        XCTAssertNotNil(field, "\(fieldNames[idx]) in \(self.key) was nil")
+                                        XCTAssertEqual(field!.asString, fieldValues[idx], "\(fieldNames[idx]) in \(self.key) wasn't '\(fieldValues[idx])', it was \(String(describing: field))")
                                     }
                                 }
                             }
@@ -242,8 +240,8 @@ public class TestHashCommands: XCTestCase {
                         for idx in 0..<fieldNames.count {
                             let field = values[fieldNames[idx]]
 
-                            XCTAssertNotNil(field, "\(fieldNames[idx]) in \(self.key1) was nil")
-                            XCTAssertEqual(field!.asData, fieldValues[idx], "\(fieldNames[idx]) in \(self.key1) wasn't '\(fieldValues[idx])', it was \(String(describing: field))")
+                            XCTAssertNotNil(field, "\(fieldNames[idx]) in \(self.key) was nil")
+                            XCTAssertEqual(field!.asData, fieldValues[idx], "\(fieldNames[idx]) in \(self.key) wasn't '\(fieldValues[idx])', it was \(String(describing: field))")
                         }
                     }
                 }
@@ -256,7 +254,7 @@ public class TestHashCommands: XCTestCase {
             exp = expectation(description: "Iterate fields of Hash types and their associated values.")
 
             redis.hmset(key, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.hscan(key: key, cursor: 0, callback: { (newCursor, res, err) in
@@ -275,7 +273,7 @@ public class TestHashCommands: XCTestCase {
             exp = expectation(description: "Iterate fields of Hash types and their associated values that match a pattern.")
 
             redis.hmset(key, fieldValuePairs: ("linkin park", "crawling"), ("incubus", "drive"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.hscan(key: key, cursor: 0, match: "link*", callback: { (newCursor, res, err) in
@@ -298,7 +296,7 @@ public class TestHashCommands: XCTestCase {
                 XCTAssert(res)
                 
                 redis.hscan(key: key, cursor: 0, count: 1, callback: { (newCursor, res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertNotNil(res)
                     exp?.fulfill()

@@ -59,7 +59,7 @@ public class TestBasicCommands: XCTestCase {
     private func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
         connectRedis() {(err) in
             guard err == nil else {
-                XCTFail("\(err)")
+                XCTFail("\(String(describing: err))")
                 return
             }
             redis.info { (info: RedisInfo?, _) in
@@ -173,11 +173,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Return all keys matching `pattern`.")
             
             redis.mset((key1, "1"), (key2, "2"), (key3, "3"), (key4, "4"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.keys(pattern: "*1", callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertEqual(res?.count, 1)
                     exp?.fulfill()
                 })
@@ -191,11 +191,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Return a random key from the currently selected database.")
             
             redis.mset((key1, "1"), (key2, "2"), (key3, "3"), (key4, "4"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.randomkey(callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertNotNil(res)
                     exp?.fulfill()
                 })
@@ -289,11 +289,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Iterate over some elements.")
             
             redis.mset((key1, "val1"), (key2, "val2"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.scan(cursor: 0, callback: { (newCursor, res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertEqual(res?.count, 2)
                     exp?.fulfill()
@@ -308,11 +308,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Iterate over elements matching a pattern.")
             
             redis.mset((key1, "val1"), (key2, "val2"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.scan(cursor: 0, match: "*1", callback: { (newCursor, res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertNotNil(res)
                     exp?.fulfill()
@@ -327,11 +327,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Iterate over a specified number of elements.")
             
             redis.mset((key1, "val1"), (key2, "val2"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.scan(cursor: 0, count: 2, callback: { (newCursor, res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertNotNil(res)
                     exp?.fulfill()
@@ -346,11 +346,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Iterate over a specified number of elements matching a pattern.")
             
             redis.mset((key1, "val1"), (key2, "val2"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.scan(cursor: 0, match: "*1", count: 1, callback: { (newCursor, res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertNotNil(newCursor)
                     XCTAssertNotNil(res)
                     exp?.fulfill()
@@ -365,7 +365,7 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Return 0 for bad key.")
             
             redis.touch(key: key1, callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssertEqual(res, 0)
                 exp?.fulfill()
             })
@@ -378,11 +378,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Alters the last access time of a key(s).")
             
             redis.set(key1, value: "Hello", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.touch(key: key1, callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertEqual(res, 1)
                     exp?.fulfill()
                 })
@@ -396,11 +396,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Alters the last access time of a key(s).")
             
             redis.mset((key1, "val2"), (key2, "val2"), callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.touch(key: key1, keys: key2, callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertEqual(res, 2)
                     exp?.fulfill()
                 })
@@ -414,11 +414,11 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Returns the string representation of the type of the value stored at key.")
             
             redis.set(key1, value: "Hello", callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssert(res)
                 
                 redis.type(key: key1, callback: { (res, err) in
-                    XCTAssertNil(err, "\(err)")
+                    XCTAssertNil(err)
                     XCTAssertEqual(res, "string")
                     exp?.fulfill()
                 })
@@ -432,7 +432,7 @@ public class TestBasicCommands: XCTestCase {
             exp = expectation(description: "Return `none` for bad key.")
             
             redis.type(key: key1, callback: { (res, err) in
-                XCTAssertNil(err, "\(err)")
+                XCTAssertNil(err)
                 XCTAssertEqual(res, "none")
                 exp?.fulfill()
             })
