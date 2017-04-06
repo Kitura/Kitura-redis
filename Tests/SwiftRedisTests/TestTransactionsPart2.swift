@@ -27,7 +27,8 @@ public class TestTransactionsPart2: XCTestCase {
             ("test_StringManipulation", test_StringManipulation),
             ("test_bitPosAndCountCommands", test_bitPosAndCountCommands),
             ("test_bitSetAndGetCommands", test_bitSetAndGetCommands),
-            ("test_bitOpCommands", test_bitOpCommands)
+            ("test_bitOpCommands", test_bitOpCommands),
+            ("test_bitfield", test_bitfield)
         ]
     }
 
@@ -40,7 +41,42 @@ public class TestTransactionsPart2: XCTestCase {
     let expVal3 = "Hi ho, hi ho"
     let expVal4 = "it's off to test"
     let updVal1 = ", 5 4"
-
+    
+    private func setupTests(callback: () -> Void) {
+        connectRedis() {(error: NSError?) in
+            if error != nil {
+                XCTFail("Could not connect to Redis")
+                return
+            }
+            
+            redis.del(self.key1, self.key2, self.key3, self.key4) {(deleted: Int?, error: NSError?) in
+                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
+                
+                callback()
+            }
+        }
+    }
+    
+    private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
+        switch(response) {
+        case .Array(let responses):
+            XCTAssertEqual(responses.count, count, "Number of nested responses wasn't \(count), was \(responses.count)")
+            for  nestedResponse in responses {
+                switch(nestedResponse) {
+                case .Error:
+                    XCTFail("Nested transaction response was a \(nestedResponse)")
+                    return nil
+                default:
+                    break
+                }
+            }
+            return responses
+        default:
+            XCTFail("EXEC response wasn't an Array response. Was \(response)")
+            return nil
+        }
+    }
+    
     func test_msetAndMget() {
         setupTests() {
             let multi = redis.multi()
@@ -211,39 +247,25 @@ public class TestTransactionsPart2: XCTestCase {
         }
     }
 
-
-    private func baseAsserts(response: RedisResponse, count: Int) -> [RedisResponse]? {
-        switch(response) {
-        case .Array(let responses):
-            XCTAssertEqual(responses.count, count, "Number of nested responses wasn't \(count), was \(responses.count)")
-            for  nestedResponse in responses {
-                switch(nestedResponse) {
-                case .Error:
-                    XCTFail("Nested transaction response was a \(nestedResponse)")
-                    return nil
-                default:
-                    break
+    func test_bitfield() {
+        setup(major: 3, minor: 2, micro: 0) {
+            let multi = redis.multi()
+            multi.bitfield(key: key1, subcommands: .get("u2", 0))
+            multi.bitfield(key: key1, subcommands: .set("u2", "0", 1))
+            multi.bitfield(key: key1, subcommands: .incrby("u2", "0", 1))
+            multi.bitfield(key: key1, subcommands: .overflow(.WRAP), .incrby("u2", "0", 1))
+            multi.bitfield(key: key1, subcommands: .overflow(.SAT), .incrby("u2", "0", 1))
+            multi.bitfield(key: key1, subcommands: .overflow(.FAIL), .incrby("u2", "0", 1))
+            multi.exec({ (res) in
+                if let responses = self.baseAsserts(response: res, count: 6) {
+                    XCTAssertEqual((responses[0].asArray)?[0].asInteger, 0)
+                    XCTAssertEqual((responses[1].asArray)?[0].asInteger, 0)
+                    XCTAssertEqual((responses[2].asArray)?[0].asInteger, 2)
+                    XCTAssertEqual((responses[3].asArray)?[0].asInteger, 3)
+                    XCTAssertEqual((responses[4].asArray)?[0].asInteger, 3)
+                    XCTAssertEqual((responses[5].asArray)?[0], RedisResponse.Nil)
                 }
-            }
-            return responses
-        default:
-            XCTFail("EXEC response wasn't an Array response. Was \(response)")
-            return nil
-        }
-    }
-
-    private func setupTests(callback: () -> Void) {
-        connectRedis() {(error: NSError?) in
-            if error != nil {
-                XCTFail("Could not connect to Redis")
-                return
-            }
-
-            redis.del(self.key1, self.key2, self.key3, self.key4) {(deleted: Int?, error: NSError?) in
-                XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
-
-                callback()
-            }
+            })
         }
     }
 }

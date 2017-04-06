@@ -18,7 +18,7 @@ import Foundation
 
 /// Extend RedisMulti by adding the Basic operations
 extension RedisMulti {
-
+    
     /// Add an APPEND command to the "transaction"
     ///
     /// - Parameter key: The key.
@@ -52,6 +52,70 @@ extension RedisMulti {
     @discardableResult
     public func bitcount(_ key: String, start: Int, end: Int) -> RedisMulti {
         queuedCommands.append([RedisString("BITCOUNT"), RedisString(key), RedisString(start), RedisString(end)])
+        return self
+    }
+    
+    /// Used in BITFIELD
+    public enum BitfieldSubcommand {
+        // (type, offset)
+        case get(String, Int)
+        
+        // (type, offset, value)
+        case set(String, String, Int)
+        
+        // (type, offset, increment)
+        case incrby(String, String, Int)
+        
+        // (wrap/sat/fail)
+        case overflow(BitfieldOverflow)
+        
+        public enum BitfieldOverflow: String {
+            case WRAP, SAT, FAIL
+        }
+    }
+    
+    /// Add a BITFIELD command to the "transaction"
+    ///
+    /// - parameter key: The key of the string to manipulate.
+    /// - parameter subcommands: `BitfieldSubcommand`s to do on the string.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func bitfield(key: String, subcommands: BitfieldSubcommand...) -> RedisMulti {
+        return bitfieldArrayOfSubcommands(key: key, subcommands: subcommands)
+    }
+    
+    /// Add a BITFIELD command to the "transaction"
+    ///
+    /// - parameter key: The key of the string to manipulate.
+    /// - parameter subcommands: `BitfieldSubcommand`s to do on the string.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func bitfieldArrayOfSubcommands(key: String, subcommands: [BitfieldSubcommand]) -> RedisMulti {
+        var command = ["BITFIELD", key]
+        for subcommand in subcommands {
+            switch(subcommand) {
+            case .get(let type, let offset):
+                command.append("GET")
+                command.append(String(type))
+                command.append(String(offset))
+            case .set(let type, let offset, let value):
+                command.append("SET")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(value))
+            case .incrby(let type, let offset, let incr):
+                command.append("INCRBY")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(incr))
+            case .overflow(let overflow):
+                command.append("OVERFLOW")
+                command.append(overflow.rawValue)
+            }
+        }
+        queuedCommands.append(stringArrToRedisStringArr(command))
         return self
     }
 
@@ -304,6 +368,17 @@ extension RedisMulti {
         return self
     }
 
+    /// Add a KEYS command to the "transaction"
+    ///
+    /// - parameter pattern: The glob-style pattern to match against.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func keys(pattern: String) -> RedisMulti {
+        queuedCommands.append(stringArrToRedisStringArr(["KEYS", pattern]))
+        return self
+    }
+    
     /// Add a MGET command to the "transaction"
     ///
     /// - Parameter keys: The list of keys.
@@ -397,6 +472,15 @@ extension RedisMulti {
         queuedCommands.append([RedisString("PERSIST"), RedisString(key)])
         return self
     }
+    
+    /// Add a RANDOMKEY command to the "transaction"
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func randomkey() -> RedisMulti {
+        queuedCommands.append([RedisString("RANDOMKEY")])
+        return self
+    }
 
     /// Add a RENAME or a RENAMENX command to the "transaction"
     ///
@@ -411,6 +495,32 @@ extension RedisMulti {
         return self
     }
 
+    /// Add a SCAN command to the "transaction"
+    ///
+    /// - parameter cursor: Where to begin iterating.
+    /// - parameter match: Glob-style pattern to match elements against.
+    /// - parameter count: Amount of elements to try to iterate.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func scan(cursor: Int, match: String?=nil, count: Int?=nil) -> RedisMulti {
+        var command = ["SCAN", String(cursor)]
+        if let match = match, let count = count {
+            command.append("MATCH")
+            command.append(match)
+            command.append("COUNT")
+            command.append(String(count))
+        } else if let match = match {
+            command.append("MATCH")
+            command.append(match)
+        } else if let count = count {
+            command.append("COUNT")
+            command.append(String(count))
+        }
+        queuedCommands.append(stringArrToRedisStringArr(command))
+        return self
+    }
+    
     /// Add a SELECT command to the "transaction"
     ///
     /// - Parameter db: numeric index for the database.
@@ -491,6 +601,75 @@ extension RedisMulti {
         queuedCommands.append([RedisString("SETRANGE"), RedisString(key), RedisString(offset), RedisString(value)])
         return self
     }
+    
+    /// A parameter of the SORT command
+    /// (offset, count)
+    public typealias Limit = (Int, Int)
+    
+    /// Add a SORT command to the "transaction"
+    ///
+    /// - parameter key: They key for the list, set, or sorted set.
+    /// - parameter pattern: Pattern used to generate keys used for sorting.
+    /// - parameter limit: (offset, count) where `offset` is the  number of
+    ///                    elements to skip in the result, and `count` is the
+    ///                    number of elements to return starting from `offset`.
+    /// - parameter get: Pattern to use to retrieve an external key based on the
+    ///                  elements in the list. Multiple `get`s can be chained to
+    ///                  retrieve multiple external keys.
+    /// - parameter desc: Sort the list from large to small.
+    /// - parameter alpha: Sort the list of string values lexicographically.
+    /// - parameter store: The key to where the result should be stored.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func sort(key: String, by pattern: String?=nil, limit: Limit?=nil, get: String..., desc: Bool?=false, alpha: Bool?=false, store: String?=nil) -> RedisMulti {
+        return sortArrayOfGetPatterns(key: key, by: pattern, limit: limit, get: get, desc: desc, alpha: alpha, store: store)
+    }
+    
+    /// Add a SORT command to the "transaction"
+    ///
+    /// - parameter key: They key for the list, set, or sorted set.
+    /// - parameter pattern: Pattern used to generate keys used for sorting.
+    /// - parameter limit: (offset, count) where `offset` is the  number of
+    ///                    elements to skip in the result, and `count` is the
+    ///                    number of elements to return starting from `offset`.
+    /// - parameter get: Pattern to use to retrieve an external key based on the
+    ///                  elements in the list. Multiple `get`s can be chained to
+    ///                  retrieve multiple external keys.
+    /// - parameter desc: Sort the list from large to small.
+    /// - parameter alpha: Sort the list of string values lexicographically.
+    /// - parameter store: The key to where the result should be stored.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func sortArrayOfGetPatterns(key: String, by pattern: String?=nil, limit: Limit?=nil, get: [String], desc: Bool?=false, alpha: Bool?=false, store: String?=nil) -> RedisMulti {
+        var command = ["SORT", key]
+        if let pattern = pattern {
+            command.append("BY")
+            command.append(pattern)
+        }
+        if let limit = limit {
+            command.append("LIMIT")
+            command.append(String(limit.0))
+            command.append(String(limit.1))
+        }
+        for pattern in get {
+            command.append("GET")
+            command.append(pattern)
+        }
+        if let desc = desc, desc {
+            command.append("DESC")
+        }
+        if let alpha = alpha, alpha {
+            command.append("ALPHA")
+        }
+        if let destination = store {
+            command.append("STORE")
+            command.append(destination)
+        }
+        queuedCommands.append(stringArrToRedisStringArr(command))
+        return self
+    }
 
     /// Add a STRLEN command to the "transaction"
     ///
@@ -502,6 +681,33 @@ extension RedisMulti {
         queuedCommands.append([RedisString("STRLEN"), RedisString(key)])
         return self
     }
+    
+    /// Add a TOUCH command to the "transaction"
+    ///
+    /// - parameter key: The key to touch.
+    /// - parameter keys: Additional keys to touch.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func touch(key: String, keys: String...) -> RedisMulti {
+        return touchArrayOfKeys(key: key, keys: keys)
+    }
+    
+    /// Add a TOUCH command to the "transaction"
+    ///
+    /// - parameter key: The key to touch.
+    /// - parameter keys: Additional keys to touch.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func touchArrayOfKeys(key: String, keys: [String]) -> RedisMulti {
+        var command = ["TOUCH", key]
+        for key in keys {
+            command.append(key)
+        }
+        queuedCommands.append(stringArrToRedisStringArr(command))
+        return self
+    }
 
     /// Add a PTTL command to the "transaction"
     ///
@@ -511,6 +717,17 @@ extension RedisMulti {
     @discardableResult
     public func ttl(_ key: String) -> RedisMulti {
         queuedCommands.append([RedisString("PTTL"), RedisString(key)])
+        return self
+    }
+    
+    /// Add a TYPE command to the "transaction"
+    ///
+    /// - parameter key: The key to get the type of.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func type(key: String) -> RedisMulti {
+        queuedCommands.append(stringArrToRedisStringArr(["TYPE", key]))
         return self
     }
 }

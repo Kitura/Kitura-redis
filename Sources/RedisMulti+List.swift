@@ -17,6 +17,13 @@
 import Foundation
 
 /// Extend RedisMulti by adding the List operations
+
+/* NOTE
+ *
+ * Blocking commands in transactions return nil immediately when their list parameters are empty.
+ *
+ * See https://redis.io/commands/blpop
+ */
 extension RedisMulti {
     
     /// Add a BLPOP command to the "transaction"

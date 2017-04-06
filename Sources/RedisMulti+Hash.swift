@@ -190,6 +190,33 @@ extension RedisMulti {
         return self
     }
 
+    /// Add a HSCAN command to the "transaction"
+    ///
+    /// - Parameter key: The key of the hash.
+    /// - parameter cursor: Where to begin iterating.
+    /// - parameter match: Glob-style pattern to match elements against.
+    /// - parameter count: Amount of elements to try to iterate.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func hscan(key: String, cursor: Int, match: String?=nil, count: Int?=nil) -> RedisMulti {
+        var command = ["HSCAN", key, String(cursor)]
+        if let match = match, let count = count {
+            command.append("MATCH")
+            command.append(match)
+            command.append("COUNT")
+            command.append(String(count))
+        } else if let match = match {
+            command.append("MATCH")
+            command.append(match)
+        } else if let count = count {
+            command.append("COUNT")
+            command.append(String(count))
+        }
+        queuedCommands.append(stringArrToRedisStringArr(command))
+        return self
+    }
+    
     /// Add a HSET or a HSETNX command to the "transaction"
     ///
     /// - Parameter key: The key.

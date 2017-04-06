@@ -14,17 +14,13 @@
 * limitations under the License.
 **/
 
-#if os(Linux)
-    import Glibc
-#elseif os(OSX)
-    import Darwin
-#endif
-
 import XCTest
-import Foundation
-
 import SwiftRedis
 
+#if os(Linux)
+    import Glibc
+    import Foundation
+#endif
 
 var redis = Redis()
 
@@ -42,6 +38,33 @@ func connectRedis (authenticate: Bool = true, callback: (NSError?) -> Void) {
         }
     } else {
         callback(nil)
+    }
+}
+
+func setup(major: Int, minor: Int, micro: Int, callback: () -> Void) {
+    connectRedis() {(err) in
+        if let err = err {
+            XCTFail(String(describing: err))
+            return
+        }
+        
+        redis.info { (info: RedisInfo?, err) in
+            if let err = err {
+                XCTFail(String(describing: err))
+                return
+            }
+            
+            if let info = info, info.server.checkVersionCompatible(major: major, minor: minor, micro: micro) {
+                redis.flushdb(callback: { (_, err) in
+                    if let err = err {
+                        XCTFail(String(describing: err))
+                        return
+                    }
+                    
+                    callback()
+                })
+            }
+        }
     }
 }
 

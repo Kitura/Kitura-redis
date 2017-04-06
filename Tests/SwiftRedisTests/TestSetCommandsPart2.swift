@@ -1064,7 +1064,6 @@ public class TestSetCommandsPart2: XCTestCase {
 
                             redis.sscan(self.key2, cursor: 0, match: "f*") {
                             (cursor: RedisString?, retrievedResults: [RedisString?]?, error: NSError?) in
-
                             XCTAssertNil(error)
                             XCTAssertNotNil(cursor)
                             XCTAssertNotNil(retrievedResults)

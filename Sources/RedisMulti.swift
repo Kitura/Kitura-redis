@@ -80,4 +80,12 @@ public class RedisMulti {
             callback(response)
         }
     }
+    
+    func stringArrToRedisStringArr(_ stringArr: [String]) -> [RedisString] {
+        var res = [RedisString]()
+        for s in stringArr {
+            res.append(RedisString(s))
+        }
+        return res
+    }
 }

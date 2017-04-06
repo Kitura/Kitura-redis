@@ -58,6 +58,81 @@ extension Redis {
         }
     }
     
+    /// Used in BITFIELD
+    public enum BitfieldSubcommand {
+        // (type, offset)
+        case get(String, Int)
+        
+        // (type, offset, value)
+        case set(String, String, Int)
+        
+        // (type, offset, increment)
+        case incrby(String, String, Int)
+        
+        // (wrap/sat/fail)
+        case overflow(BitfieldOverflow)
+        
+        public enum BitfieldOverflow: String {
+            case WRAP, SAT, FAIL
+        }
+    }
+    
+    /// Treats a Redis string as a array of bits, and is capable of addressing 
+    /// specific integer fields of varying bit widths and arbitrary non 
+    /// (necessary) aligned offset.
+    /// https://redis.io/commands/bitfield
+    ///
+    /// - parameter key: The key of the string to manipulate.
+    /// - parameter subcommands: `BitfieldSubcommand`s to do on the string.
+    /// - parameter callback: The callback function.
+    /// - parameter res: An array with each entry being the corresponding result 
+    ///                  of the sub command given at the same position. OVERFLOW 
+    ///                  subcommands don't count as generating a reply.
+    /// - parameter err: The error, if one occurred.
+    public func bitfield(key: String, subcommands: BitfieldSubcommand..., callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
+        bitfieldArrayOfSubcommands(key: key, subcommands: subcommands, callback: callback)
+    }
+    
+    /// Treats a Redis string as a array of bits, and is capable of addressing
+    /// specific integer fields of varying bit widths and arbitrary non
+    /// (necessary) aligned offset.
+    /// https://redis.io/commands/bitfield
+    ///
+    /// - parameter key: The key of the string to manipulate.
+    /// - parameter subcommands: `BitfieldSubcommand`s to do on the string.
+    /// - parameter callback: The callback function.
+    /// - parameter res: An array with each entry being the corresponding result
+    ///                  of the sub command given at the same position. OVERFLOW
+    ///                  subcommands don't count as generating a reply.
+    /// - parameter err: The error, if one occurred.
+    public func bitfieldArrayOfSubcommands(key: String, subcommands: [BitfieldSubcommand], callback: (_ res: [RedisResponse?]?, _ err: NSError?) -> Void) {
+        var command = ["BITFIELD", key]
+        for subcommand in subcommands {
+            switch(subcommand) {
+            case .get(let type, let offset):
+                command.append("GET")
+                command.append(String(type))
+                command.append(String(offset))
+            case .set(let type, let offset, let value):
+                command.append("SET")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(value))
+            case .incrby(let type, let offset, let incr):
+                command.append("INCRBY")
+                command.append(type)
+                command.append(String(offset))
+                command.append(String(incr))
+            case .overflow(let overflow):
+                command.append("OVERFLOW")
+                command.append(overflow.rawValue)
+            }
+        }
+        issueCommandInArray(command) { (res) in
+            redisArrayResponseHandler(response: res, callback: callback)
+        }
+    }
+    
     /// Perform a bitwise AND operation between multiple keys and store the result at the destination key.
     ///
     /// - Parameter destKey: The destination key.
@@ -245,6 +320,18 @@ extension Redis {
     public func expire(_ key: String, atDate: NSDate, callback: (Bool, NSError?) -> Void) {
         issueCommand("PEXPIREAT", key, String(Int(atDate.timeIntervalSince1970 * 1000.0))) {(response: RedisResponse) in
             self.redisBoolResponseHandler(response, callback: callback)
+        }
+    }
+    
+    /// Returns all keys matching `pattern`.
+    ///
+    /// - parameter pattern: The glob-style pattern to match against.
+    /// - parameter callback: The callback function.
+    /// - parameter res: List of keys matching `pattern`.
+    /// - parameter err: The error, if one occurred.
+    public func keys(pattern: String, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        issueCommand("KEYS", pattern) { (res) in
+            redisStringArrayResponseHandler(res, callback: callback)
         }
     }
 
@@ -448,6 +535,17 @@ extension Redis {
             self.redisBoolResponseHandler(response, callback: callback)
         }
     }
+    
+    /// Return a random key from the currently selected database.
+    ///
+    /// - parameter callback: The callback function.
+    /// - parameter res: The random key, or nil when the database is empty.
+    /// - parameter err: The error, if one occurred.
+    public func randomkey(callback: (_ res: RedisString?, _ err: NSError?) -> Void) {
+        issueCommand("RANDOMKEY") { (res) in
+            redisStringResponseHandler(res, callback: callback)
+        }
+    }
 
     /// Renames a key. It returns an error if the original and new names are the same,
     /// or when the original key does not exist.
@@ -470,6 +568,38 @@ extension Redis {
         }
     }
 
+    /// Iterates the set of keys in the currently selected Redis database.
+    ///
+    /// - parameter cursor: Where to begin iterating.
+    /// - parameter match: Glob-style pattern to match elements against.
+    /// - parameter count: Amount of elements to try to iterate.
+    /// - parameter callback: The callback function.
+    /// - parameter newCursor: The new cursor to be used to continue iterating
+    ///                        remaining elements. If 0, all elements have been
+    ///                        iterated.
+    /// - parameter res: The results of the scan.
+    /// - parameter err: The error, if one occured.
+    public func scan(cursor: Int, match: String?=nil, count: Int?=nil, callback: (_ newCursor: RedisString?, _ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        if let match = match, let count = count {
+            issueCommand("SCAN", String(cursor), "MATCH", match, "COUNT", String(count)) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        } else if let match = match {
+            issueCommand("SCAN", String(cursor), "MATCH", match) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        } else if let count = count {
+            issueCommand("SCAN", String(cursor), "COUNT", String(count)) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        } else {
+            issueCommand("SCAN", String(cursor)) {(res: RedisResponse) in
+                redisScanResponseHandler(res, callback: callback)
+            }
+        }
+    }
+
+    
     /// Set a key to hold a value. If key already holds a value, it is overwritten.
     ///
     /// - Parameter key: The key.
@@ -544,6 +674,82 @@ extension Redis {
         }
     }
     
+    /// A parameter of the SORT command
+    /// (offset, count)
+    public typealias Limit = (Int, Int)
+    
+    /// Returns or stores the elements contained in the list, set or sorted set
+    /// at key.
+    ///
+    /// - parameter key: They key for the list, set, or sorted set.
+    /// - parameter pattern: Pattern used to generate keys used for sorting.
+    /// - parameter limit: (offset, count) where `offset` is the  number of
+    ///                    elements to skip in the result, and `count` is the
+    ///                    number of elements to return starting from `offset`.
+    /// - parameter get: Pattern to use to retrieve an external key based on the
+    ///                  elements in the list. Multiple `get`s can be chained to
+    ///                  retrieve multiple external keys.
+    /// - parameter desc: Sort the list from large to small.
+    /// - parameter alpha: Sort the list of string values lexicographically.
+    /// - parameter store: The key to where the result should be stored.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The list of sorted elements. If `store` is used, array
+    ///                  contains one element indicating number of values
+    ///                  stored.
+    /// - parameter err: The error, if one occurred.
+    public func sort(key: String, by pattern: String?=nil, limit: Limit?=nil, get: String..., desc: Bool?=false, alpha: Bool?=false, store: String?=nil, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        sortArrayOfGetPatterns(key: key, by: pattern, limit: limit, get: get, desc: desc, alpha: alpha, store: store, callback: callback)
+    }
+    
+    /// Returns or stores the elements contained in the list, set or sorted set
+    /// at key.
+    ///
+    /// - parameter key: They key for the list, set, or sorted set.
+    /// - parameter pattern: Pattern used to generate keys used for sorting.
+    /// - parameter limit: (offset, count) where `offset` is the  number of 
+    ///                    elements to skip in the result, and `count` is the 
+    ///                    number of elements to return starting from `offset`.
+    /// - parameter get: Pattern to use to retrieve an external key based on the
+    ///                  elements in the list. Multiple `get`s can be chained to
+    ///                  retrieve multiple external keys.
+    /// - parameter desc: Sort the list from large to small.
+    /// - parameter alpha: Sort the list of string values lexicographically.
+    /// - parameter store: The key to where the result should be stored.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The list of sorted elements. If `store` is used, array
+    ///                  contains one element indicating number of values
+    ///                  stored.
+    /// - parameter err: The error, if one occurred.
+    public func sortArrayOfGetPatterns(key: String, by pattern: String?=nil, limit: Limit?=nil, get: [String], desc: Bool?=false, alpha: Bool?=false, store: String?=nil, callback: (_ res: [RedisString?]?, _ err: NSError?) -> Void) {
+        var command = ["SORT", key]
+        if let pattern = pattern {
+            command.append("BY")
+            command.append(pattern)
+        }
+        if let limit = limit {
+            command.append("LIMIT")
+            command.append(String(limit.0))
+            command.append(String(limit.1))
+        }
+        for pattern in get {
+            command.append("GET")
+            command.append(pattern)
+        }
+        if let desc = desc, desc {
+            command.append("DESC")
+        }
+        if let alpha = alpha, alpha {
+            command.append("ALPHA")
+        }
+        if let destination = store {
+            command.append("STORE")
+            command.append(destination)
+        }
+        issueCommandInArray(command) { (res) in
+            redisStringArrayOrIntegerResponseHandler(res, callback: callback)
+        }
+    }
+    
     /// Returns the length of the string value stored at the key
     ///
     /// - Parameter key: The key.
@@ -552,6 +758,36 @@ extension Redis {
     public func strlen(_ key: String, callback: (Int?, NSError?) -> Void) {
         issueCommand("STRLEN", key) {(response: RedisResponse) in
             self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+    
+    /// Alters the last access time of a key(s). A key is ignored if it does not 
+    /// exist.
+    ///
+    /// - parameter key: The key to touch.
+    /// - parameter keys: Additional keys to touch.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The number of keys that were touched.
+    /// - parameter err: The error, if one occurred.
+    public func touch(key: String, keys: String..., callback: (_ res: Int?, _ err: NSError?) -> Void) {
+        touchArrayOfKeys(key: key, keys: keys, callback: callback)
+    }
+    
+    /// Alters the last access time of a key(s). A key is ignored if it does not
+    /// exist.
+    ///
+    /// - parameter key: The key to touch.
+    /// - parameter keys: Additional keys to touch.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The number of keys that were touched.
+    /// - parameter err: The error, if one occurred.
+    public func touchArrayOfKeys(key: String, keys: [String], callback: (_ res: Int?, _ err: NSError?) -> Void) {
+        var command = ["TOUCH", key]
+        for key in keys {
+            command.append(key)
+        }
+        issueCommandInArray(command) { (res) in
+            redisIntegerResponseHandler(res, callback: callback)
         }
     }
     
@@ -577,6 +813,20 @@ extension Redis {
             default:
                 callback(nil, _: self.createUnexpectedResponseError(response))
             }
+        }
+    }
+    
+    /// Returns the string representation of the type of the value stored at 
+    /// `key`. The different types that can be returned are: string, list, set,
+    /// zset and hash.
+    ///
+    /// - parameter key: The key to get the type of.
+    /// - parameter callback: The callback function.
+    /// - parameter res: The type of key, or none when key does not exist.
+    /// - parameter err: The error, if one occurred.
+    public func type(key: String, callback: (_ res: String?, _ err: NSError?) -> Void) {
+        issueCommand("TYPE", key) { (res) in
+            redisSimpleStringResponseHandler(response: res, callback: callback)
         }
     }
 }
