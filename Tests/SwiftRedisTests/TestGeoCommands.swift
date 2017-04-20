@@ -25,6 +25,7 @@ public class TestGeoCommands: XCTestCase {
             ("test_geohash", test_geohash),
             ("test_geopos", test_geopos),
             ("test_geoposNonExisting", test_geoposNonExisting),
+            ("test_geoposMixed", test_geoposMixed),
             ("test_geodist", test_geodist),
             ("test_geodistM", test_geodistM),
             ("test_geodistKM", test_geodistKM),

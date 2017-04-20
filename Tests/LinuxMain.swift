@@ -15,33 +15,59 @@
  **/
 
 import XCTest
+import Glibc
 @testable import SwiftRedisTests
 
+srand(UInt32(time(nil)))
+
+// http://stackoverflow.com/questions/24026510/how-do-i-shuffle-an-array-in-swift
+extension MutableCollection where Indices.Iterator.Element == Index {
+    mutating func shuffle() {
+        let c = count
+        guard c > 1 else { return }
+
+        for (firstUnshuffled, unshuffledCount) in zip(indices, stride(from: c, to: 1, by: -1)) {
+            let d: IndexDistance = numericCast(random() % numericCast(unshuffledCount))
+            guard d != 0 else { continue }
+            let i = index(firstUnshuffled, offsetBy: d)
+            swap(&self[firstUnshuffled], &self[i])
+        }
+    }
+}
+
+extension Sequence {
+    func shuffled() -> [Iterator.Element] {
+        var result = Array(self)
+        result.shuffle()
+        return result
+    }
+}
+
 XCTMain([
-    testCase(AuthTests.allTests),
-	testCase(TestBasicCommands.allTests),
-	testCase(TestBinarySafeCommands.allTests),
-	testCase(TestBitfield.allTests),
-	testCase(TestConnectCommands.allTests),
-	testCase(TestGeoCommands.allTests),
-	testCase(TestGeoRadius.allTests),
-	testCase(TestGeoRadiusByMember.allTests),
-	testCase(TestHashCommands.allTests),
-	testCase(TestIssueCommand.allTests),
-	testCase(TestListsPart1.allTests),
-	testCase(TestListsPart2.allTests),
-	testCase(TestListsPart3.allTests),
-	testCase(TestMoreCommands.allTests),
-	testCase(TestSetCommands.allTests),
-	testCase(TestSetCommandsPart2.allTests),
-	testCase(TestSort.allTests),
-	testCase(TestStringAndBitCommands.allTests),
-	testCase(TestTransactionsPart1.allTests),
-	testCase(TestTransactionsPart2.allTests),
-	testCase(TestTransactionsPart3.allTests),
-	testCase(TestTransactionsPart4.allTests),
-	testCase(TestTransactionsPart5.allTests),
-	testCase(TestTransactionsPart6.allTests),
-	testCase(TestTransactionsPart7.allTests),
-	testCase(TestTransactionsPart8.allTests)
-])
+    testCase(AuthTests.allTests.shuffled()),
+    testCase(TestBasicCommands.allTests.shuffled()),
+    testCase(TestBinarySafeCommands.allTests.shuffled()),
+    testCase(TestBitfield.allTests.shuffled()),
+    testCase(TestConnectCommands.allTests.shuffled()),
+    testCase(TestGeoCommands.allTests.shuffled()),
+    testCase(TestGeoRadius.allTests.shuffled()),
+    testCase(TestGeoRadiusByMember.allTests.shuffled()),
+    testCase(TestHashCommands.allTests.shuffled()),
+    testCase(TestIssueCommand.allTests.shuffled()),
+    testCase(TestListsPart1.allTests.shuffled()),
+    testCase(TestListsPart2.allTests.shuffled()),
+    testCase(TestListsPart3.allTests.shuffled()),
+    testCase(TestMoreCommands.allTests.shuffled()),
+    testCase(TestSetCommands.allTests.shuffled()),
+    testCase(TestSetCommandsPart2.allTests.shuffled()),
+    testCase(TestSort.allTests.shuffled()),
+    testCase(TestStringAndBitCommands.allTests.shuffled()),
+    testCase(TestTransactionsPart1.allTests.shuffled()),
+    testCase(TestTransactionsPart2.allTests.shuffled()),
+    testCase(TestTransactionsPart3.allTests.shuffled()),
+    testCase(TestTransactionsPart4.allTests.shuffled()),
+    testCase(TestTransactionsPart5.allTests.shuffled()),
+    testCase(TestTransactionsPart6.allTests.shuffled()),
+    testCase(TestTransactionsPart7.allTests.shuffled()),
+    testCase(TestTransactionsPart8.allTests.shuffled())
+    ].shuffled())
