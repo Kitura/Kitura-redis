@@ -547,6 +547,19 @@ extension Redis {
         }
     }
 
+    /// Publishes a value on a channel
+    ///
+    /// - Parameter channel: The channel name
+    /// - Parameter value: The String value to post on the channel
+    /// - Parameter callback: The callback function after publishing the value. Int will be
+    ///                      the number of clients that received the message. NSError will be non-nil if an error occurred.
+    public func pub(_ channel: String, value: String, callback: (Int?, NSError?) -> Void) {
+        var command = ["PUBLISH", channel, value]
+        issueCommandInArray(command) {(response: RedisResponse) in
+            self.redisIntegerResponseHandler(response, callback: callback)
+        }
+    }
+
     /// Renames a key. It returns an error if the original and new names are the same,
     /// or when the original key does not exist.
     ///
