@@ -27,6 +27,7 @@ matrix:
       env: SWIFT_SNAPSHOT=4.0-DEVELOPMENT-SNAPSHOT-2017-06-11-a
 
 before_install:
+  - git clone https://github.com/IBM-Swift/Kitura-CI.git
   - git clone https://github.com/IBM-Swift/Package-Builder.git
 
 script:
