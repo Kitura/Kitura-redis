@@ -25,28 +25,28 @@ public class Redis {
     /// Redis Serialization Protocol handle
     private var respHandle: RedisResp?
     
-    /// Whether the client is connected or not
+    /// Whether the client is connected or not.
+    /// Does not reflect state changes in the event of a disconnect.
     public var connected: Bool {
-        return respHandle != nil ? respHandle?.status == .connected : false
+        return respHandle?.status == .connected
     }
     
     /// Initializes a `Redis` instance
-    public init () { }
+    public init () {}
     
     /// Connects to a redis server
     ///
     /// - Parameter host: the server IP address.
     /// - Parameter port: port number.
     /// - Parameter callback: callback function for on completion, NSError will be nil if successful.
-    public func connect (host: String, port: Int32, callback: (NSError?) -> Void) {
-        
-        var error: NSError? = nil
-        
+    public func connect(host: String, port: Int32, callback: (NSError?) -> Void) {
         respHandle = RedisResp(host: host, port: port)
-        if  respHandle!.status != .connected {
-            error = createError("Failed to connect to Redis server", code: 2)
+
+        if respHandle?.status == .notConnected {
+            callback(createError("Failed to connect to Redis server", code: 2))
+        } else {
+            callback(nil)
         }
-        callback(error)
     }
     
     /// Authenticate against the server
