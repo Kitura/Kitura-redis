@@ -17,11 +17,12 @@
 import Socket
 import Foundation
 
-internal enum RedisRespStatus {
-    case notConnected, connected, error
+enum RedisRespStatus {
+    case notConnected
+    case connected
 }
 
-internal class RedisResp {
+class RedisResp {
     ///
     /// Socket used to talk with the server
     private var socket: Socket?
@@ -34,22 +35,18 @@ internal class RedisResp {
     private static let minus = RedisString("-").asData
     private static let plus = RedisString("+").asData
 
-    ///
-    /// State of connection
-    ///
-    internal private(set) var status = RedisRespStatus.notConnected
-
-    internal init(host: String, port: Int32) {
-        do {
-            socket = try Socket.create()
-            try socket!.connect(to: host, port: port)
-            status = .connected
-        } catch {
-            status = .notConnected
-        }
+    /// State of connection.
+    /// Does not reflect state changes in the event of a disconnect.
+    var status: RedisRespStatus {
+        return socket?.isConnected == true ? .connected : .notConnected
     }
 
-    internal func issueCommand(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
+    init(host: String, port: Int32) {
+        socket = try? Socket.create()
+        try? socket?.connect(to: host, port: port)
+    }
+
+    func issueCommand(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
 
         var buffer = Data()
@@ -72,7 +69,7 @@ internal class RedisResp {
         }
     }
 
-    internal func issueCommand(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
+    func issueCommand(_ stringArgs: [RedisString], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
 
         var buffer = Data()
@@ -281,11 +278,13 @@ internal class RedisResp {
 }
 
 private enum RedisRespErrorCode {
-    case EOF, notInteger, notUTF8
+    case EOF
+    case notInteger
+    case notUTF8
 }
 
-fileprivate struct RedisRespError: Error {
-    fileprivate let code: RedisRespErrorCode
+private struct RedisRespError: Error {
+    let code: RedisRespErrorCode
 
     func description() -> String {
         switch(code) {
