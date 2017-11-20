@@ -41,7 +41,8 @@ public struct RedisInfo {
             let pos = val.range(of: ":")
             if let pos = pos {
                 let key = String(val[..<pos.lowerBound])
-                parsedInfo[key] = String(val[pos.upperBound...])
+                let value = val[pos.upperBound...]
+                parsedInfo[key] = String(value)
             }
         }
 
