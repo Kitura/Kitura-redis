@@ -148,7 +148,7 @@ public class TestTransactionsPart2: XCTestCase {
             multi.exec() {(response: RedisResponse) in
                 if  let nestedResponses = self.baseAsserts(response: response, count: 6) {
                     XCTAssertEqual(nestedResponses[0], RedisResponse.Status("OK"), "set didn't return an 'OK'")
-                    let updatedLength = Int64(self.expVal1.characters.count+self.expVal2.characters.count)
+                    let updatedLength = Int64(self.expVal1.count+self.expVal2.count)
                     XCTAssertEqual(nestedResponses[1], RedisResponse.IntegerValue(updatedLength), "Length of updated \(self.key1) is incorrect")
                     XCTAssertEqual(nestedResponses[2], RedisResponse.IntegerValue(updatedLength), "Length of updated \(self.key1) is incorrect")
                     XCTAssertEqual(nestedResponses[3], RedisResponse.StringValue(RedisString(", 1 2")), "Get of getrange wasn't ', 1 2' was \(nestedResponses[3])")

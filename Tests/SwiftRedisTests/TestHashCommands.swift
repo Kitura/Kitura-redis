@@ -132,7 +132,7 @@ public class TestHashCommands: XCTestCase {
                                     redis.hstrlen(self.key, field: self.field1) {(length: Int?, error: NSError?) in
                                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                         XCTAssertNotNil(length, "Length of field shouldn't be nil")
-                                        XCTAssertEqual(length!, expVal1.characters.count, "Length of field should be \(expVal1.characters.count), was \(length!)")
+                                        XCTAssertEqual(length!, expVal1.count, "Length of field should be \(expVal1.count), was \(length!)")
                                     }
                                 }
                             }
