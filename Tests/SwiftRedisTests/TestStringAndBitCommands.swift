@@ -47,12 +47,12 @@ public class TestStringAndBitCommands: XCTestCase {
                 redis.append(self.key1, value: self.expVal2) {(length: Int?, error: NSError?) in
                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                     XCTAssertNotNil(length, "Length result shouldn't be nil")
-                    XCTAssertEqual(length!, self.expVal1.characters.count+self.expVal2.characters.count, "Length of updated \(self.key1) is incorrect")
+                    XCTAssertEqual(length!, self.expVal1.count+self.expVal2.count, "Length of updated \(self.key1) is incorrect")
 
                     redis.strlen(self.key1) {(length: Int?, error: NSError?) in
                         XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                         XCTAssertNotNil(length, "Length result shouldn't be nil")
-                        XCTAssertEqual(length!, self.expVal1.characters.count+self.expVal2.characters.count, "Length of updated \(self.key1) is incorrect")
+                        XCTAssertEqual(length!, self.expVal1.count+self.expVal2.count, "Length of updated \(self.key1) is incorrect")
 
                         redis.getrange(self.key1, start: 7, end: 11) {(value: RedisString?, error: NSError?) in
                             XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
@@ -62,7 +62,7 @@ public class TestStringAndBitCommands: XCTestCase {
                             redis.setrange(self.key1, offset: 7, value: self.expVal3) {(length: Int?, error: NSError?) in
                                 XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")
                                 XCTAssertNotNil(length, "Length result shouldn't be nil")
-                                XCTAssertEqual(length!, self.expVal1.characters.count+self.expVal2.characters.count, "Length of updated \(self.key1) is incorrect")
+                                XCTAssertEqual(length!, self.expVal1.count+self.expVal2.count, "Length of updated \(self.key1) is incorrect")
 
                                 redis.get(self.key1) {(value: RedisString?, error: NSError?) in
                                     XCTAssertNil(error, "\(error != nil ? error!.localizedDescription : "")")

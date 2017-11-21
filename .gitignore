@@ -1,7 +1,7 @@
 *.DS_Store
-*.pkg
-.build
-/SwiftRedis.xcodeproj
+.build/*
+.build-ubuntu/*
+*.xcodeproj/*
 Package.resolved
 Packages
-build
+build/*
