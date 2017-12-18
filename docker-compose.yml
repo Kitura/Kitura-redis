@@ -1,5 +1,5 @@
 app:
-  image: ibmcom/swift-ubuntu:4.0.2
+  image: ibmcom/swift-ubuntu:4.0.3
   volumes:
     - .:/KituraRedis
   command: bash -c "cd /KituraRedis  && swift package --build-path .build-ubuntu clean && swift build --build-path .build-ubuntu && swift test --build-path .build-ubuntu"
