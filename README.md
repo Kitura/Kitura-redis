@@ -49,24 +49,24 @@ Add `SwiftRedis` to your target's dependencies:
   import SwiftRedis
   ```
 
-  ## Redis installation
+## Redis installation
 
-  To test Kitura-redis locally you need to install [Redis](https://redis.io).
+To test Kitura-redis locally you need to install [Redis](https://redis.io).
 
-  ### macOS
-  ```
-  brew install redis
-  ```
+### macOS
+```
+brew install redis
+```
 
-  To start redis as a background service and have the service restarted at login:
-  ```
-  brew services start redis
-  ```
+To start redis as a background service and have the service restarted at login:
+```
+brew services start redis
+```
 
-  Or, if you don't want redis running as a background service:
-  ```
-  redis-server /usr/local/etc/redis.conf
-  ```
+Or, if you don't want redis running as a background service:
+```
+redis-server /usr/local/etc/redis.conf
+```
 
 ## Example
 
