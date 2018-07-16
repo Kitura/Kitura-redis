@@ -6,8 +6,8 @@
 
 
 <p align="center">
-    <a href="http://www.kitura.io/">
-    <img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="Docs">
+    <a href="https://ibm-swift.github.io/Kitura-redis/index.html">
+    <img src="https://img.shields.io/badge/apidoc-KituraRedis-1FBCE4.svg?style=flat" alt="APIDoc">
     </a>
     <a href="https://travis-ci.org/IBM-Swift/Kitura-redis">
     <img src="https://travis-ci.org/IBM-Swift/Kitura-redis.svg?branch=master" alt="Build Status - Master">
@@ -22,27 +22,67 @@
 
 # KituraRedis
 
-***Swift Redis library***
-
-KituraRedis is a Swift library for interacting with a Redis database using.
-
-It is dependent on the [BlueSocket](https://github.com/IBM-Swift/BlueSocket.git) module.
+KituraRedis is a pure Swift client for interacting with a Redis database.
 
 ## Swift version
 The latest version of Kitura-redis requires **Swift 4.0.3 or later**. You can download this version of the Swift binaries by following this [link](https://swift.org/download/). Compatibility with other Swift versions is not guaranteed.
 
-## Build:
+## Usage
 
-  - `swift build`
+#### Add dependencies
 
-## Running Tests:
+Add the `Kitura-redis` package to the dependencies within your application’s `Package.swift` file. Substitute `"x.x.x"` with the latest `Kitura-redis` [release](https://github.com/IBM-Swift/Kitura-redis/releases).
 
-This example uses Docker to run Redis detached with the required password defined in Tests/SwiftRedis/password.txt.
+```swift
+.package(url: "https://github.com/IBM-Swift/Kitura-redis.git", from: "x.x.x")
+```
 
-  - `docker run -d -p 6379:6379 redis:alpine redis-server --requirepass password123`
-  - `swift test`
+Add `SwiftRedis` to your target's dependencies:
 
-## Usage:
+```swift
+.target(name: "example", dependencies: ["SwiftRedis"]),
+```
+
+#### Import package
+
+  ```swift
+  import SwiftRedis
+  ```
+
+## Redis installation
+
+To test Kitura-redis locally you need to install [Redis](https://redis.io).
+
+### macOS
+```
+brew install redis
+```
+
+To start redis as a background service and have the service restarted at login:
+```
+brew services start redis
+```
+
+Or, if you don't want redis running as a background service:
+```
+redis-server /usr/local/etc/redis.conf
+```
+
+## Example
+
+This example shows you how to connect and make calls to Redis from Swift.
+
+#### Create simple Swift executable
+
+Create a directory for this project, change into it and then initialize the project:
+```
+$ mkdir exampleRedis && cd exampleRedis
+$ swift package init --type executable
+```
+
+Add Kitura-redis as a dependency as described above in "Add dependencies".
+
+Now, edit your `main.swift` file to contain:
 
 ```swift
 import Foundation
@@ -56,12 +96,12 @@ redis.connect(host: "localhost", port: 6379) { (redisError: NSError?) in
     }
     else {
         print("Connected to Redis")
-        // set a key
+        // Set a key
         redis.set("Redis", value: "on Swift") { (result: Bool, redisError: NSError?) in
             if let error = redisError {
                 print(error)
             }
-            // get the same key
+            // Get the same key
             redis.get("Redis") { (string: RedisString?, redisError: NSError?) in
                 if let error = redisError {
                     print(error)
@@ -74,3 +114,39 @@ redis.connect(host: "localhost", port: 6379) { (redisError: NSError?) in
     }
 }
 ```
+
+Next, build the program and run it (either within Xcode or on the command line):
+```
+$ swift build
+$ .build/debug/redisExample
+```
+
+You should see:
+```
+$ Connected to Redis
+$ Redis on Swift
+```
+This shows that we've connected to Redis, set a string value for a key and then successfully retrieved the value for that key.
+
+## Contributing
+
+Contributions to the Kitura-redis project are welcome.  You will want to be able to test your changes locally before submitting a pull request.
+
+The tests require a Redis server to be accessible locally on the default port (6379).  If you do not wish to install Redis permanently, you can use Docker to run a temporary instance locally as follows:
+```
+docker run -d -p 6379:6379 redis:alpine redis-server --requirepass password123
+```
+The password specified above must match the one defined in `Tests/SwiftRedis/password.txt`.  Then you can run the tests as normal, either via Xcode or with:
+```
+swift test
+```
+
+## API Documentation
+For more information visit our [API reference](https://ibm-swift.github.io/Kitura-redis/index.html).
+
+## Community
+
+We love to talk server-side Swift, and Kitura. Join our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
+
+## License
+This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-redis/blob/master/LICENSE.txt).
