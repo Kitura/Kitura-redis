@@ -604,7 +604,7 @@ extension Redis {
     ///
     /// - Parameter key: The key.
     /// - Parameter value: The String value to set.
-    /// - Parameter exists: If true will only set the key if it already exists.
+    /// - Parameter exists: If true will only set the key if it already exists. If false will only set the key if it doesn't already exist.
     /// - Parameter expiresIn: If not nil, the expiration time, in milliseconds.
     /// - Parameter callback: The callback function after setting the value. Bool will be
     ///                      true if the key was set. NSError will be non-nil if an error occurred.
@@ -628,7 +628,7 @@ extension Redis {
     ///
     /// - Parameter key: The key.
     /// - Parameter value: The `RedisString` value to set.
-    /// - Parameter exists: If true will only set the key if it already exists.
+    /// - Parameter exists: If true will only set the key if it already exists. If false will only set the key if it doesn't already exist.
     /// - Parameter expiresIn: If not nil, the expiration time, in milliseconds.
     /// - Parameter callback: The callback function after setting the value. Bool will be
     ///                      true if the key was set. NSError will be non-nil if an error occurred.
