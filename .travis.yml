@@ -54,7 +54,7 @@ matrix:
       env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT
 
 before_install:
-  - git clone https://github.com/IBM-Swift/Kitura-CI.git -b redis_1804
+  - git clone https://github.com/IBM-Swift/Kitura-CI.git
   - git clone https://github.com/IBM-Swift/Package-Builder.git
 
 script:
