@@ -105,7 +105,7 @@ class RedisResp {
         } catch let error as Socket.Error {
             callback(RedisResponse.Error("Error reading from the Redis server. Error=\(error.description)"))
         } catch let error as RedisRespError {
-            callback(RedisResponse.Error("Error reading from the Redis server. Error=\(error.description)"))
+            callback(RedisResponse.Error("Error reading from the Redis server. Error=\(error.description())"))
         } catch {
             callback(RedisResponse.Error("Error reading from the Redis server. Unknown error"))
         }
