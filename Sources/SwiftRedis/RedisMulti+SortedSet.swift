@@ -29,6 +29,10 @@ extension RedisMulti {
     public func zadd(_ key: String, tuples: (Int, String)...) -> RedisMulti {
         return zaddArrayOfScoreMembers(key, tuples: tuples)
     }
+    @discardableResult
+    public func zadd(_ key: String, tuples: (Double, String)...) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
+    }
     
     /// Add an ZADD command to the "transaction"
     ///
@@ -38,6 +42,10 @@ extension RedisMulti {
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, String)]) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)})
+    }
+    @discardableResult
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, String)]) -> RedisMulti {
         var command = [RedisString("ZADD"), RedisString(key)]
         for tuple in tuples {
             command.append(RedisString(tuple.0))
@@ -57,6 +65,10 @@ extension RedisMulti {
     public func zadd(_ key: String, tuples: (Int, RedisString)...) -> RedisMulti {
         return zaddArrayOfScoreMembers(key, tuples: tuples)
     }
+    @discardableResult
+    public func zadd(_ key: String, tuples: (Double, RedisString)...) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
+    }
     
     /// Add an ZADD command to the "transaction"
     ///
@@ -66,6 +78,10 @@ extension RedisMulti {
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)]) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)})
+    }
+    @discardableResult
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, RedisString)]) -> RedisMulti {
         var command = [RedisString("ZADD"), RedisString(key)]
         for tuple in tuples {
             command.append(RedisString(tuple.0))

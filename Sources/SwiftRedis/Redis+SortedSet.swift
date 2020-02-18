@@ -33,6 +33,10 @@ extension Redis {
     public func zadd(_ key: String, tuples: (Int, String)..., callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
+    
+    public func zadd(_ key: String, tuples: (Double, String)..., callback: (Int?, NSError?) -> Void) {
+        zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
+    }
 
     /// Add elements to a sorted set.
     ///
@@ -44,6 +48,10 @@ extension Redis {
     public func zadd(_ key: String, tuples: (Int, RedisString)..., callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
+    
+    public func zadd(_ key: String, tuples: (Double, RedisString)..., callback: (Int?, NSError?) -> Void) {
+        zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
+    }
 
     /// Add elements to a sorted set.
     ///
@@ -53,6 +61,10 @@ extension Redis {
     ///                      number of elements added to the sorted set.
     ///                      NSError will be non-nil if an error occurred.
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, String)], callback: (Int?, NSError?) -> Void) {
+        zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)}, callback: callback)
+    }
+
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, String)], callback: (Int?, NSError?) -> Void) {
         var command = ["ZADD"]
         command.append(key)
         for tuple in tuples {
@@ -72,6 +84,9 @@ extension Redis {
     ///                      number of elements added to the sorted set.
     ///                      NSError will be non-nil if an error occurred.
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)], callback: (Int?, NSError?) -> Void) {
+        zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)}, callback: callback)
+    }
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, RedisString)], callback: (Int?, NSError?) -> Void) {
         var command = [RedisString("ZADD")]
         command.append(RedisString(key))
         for tuple in tuples {
@@ -239,11 +254,18 @@ extension Redis {
     /// - Parameter callback: The callback function, the Array<RedisString> will contain the
     ///                       elements fetched from the sorted set.
     ///                       NSError will be non-nil if an error occurred.
-    public func zrange(_ key: String, start: Int, stop: Int, callback: ([RedisString?]?, NSError?) -> Void) {
-        issueCommand("ZRANGE", key, String(start), String(stop)) { (response: RedisResponse) in
-            self.redisStringArrayResponseHandler(response, callback: callback)
+    public func zrange(_ key: String, start: Int, stop: Int, withscores: Bool = false, callback: ([RedisString?]?, NSError?) -> Void) {
+        if !withscores {
+            issueCommand("ZRANGE", key, String(start), String(stop)) { (response: RedisResponse) in
+                self.redisStringArrayResponseHandler(response, callback: callback)
+            }
+        } else {
+            issueCommand("ZRANGE", key, String(start), String(stop), "WITHSCORES") { (response: RedisResponse) in
+                self.redisStringArrayResponseHandler(response, callback: callback)
+            }
         }
     }
+
 
     /// Return a range of members in a sorted set, by lexicographical range.
     ///
