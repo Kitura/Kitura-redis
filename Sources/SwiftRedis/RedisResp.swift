@@ -143,13 +143,24 @@ class RedisResp {
         return (response, offset)
     }
 
+    /* 
+    Arrays usually need to parse bulk strings.  And the longer the array, the more optimization is needed.  So to save processing
+    time, check the $ first.  (https://redis.io/topics/protocol)
+    */
+    private func parseByPrefixArrayOptimization(_ buffer: inout Data, from: Int) throws -> (RedisResponse, Int) {
+        let (matched, offset) = try compare(&buffer, at: from, with: RedisResp.dollar)
+        if  matched {
+            return try parseBulkString(&buffer, offset: offset)
+        }
+        return try parseByPrefix(&buffer, from: offset)
+    }
     private func parseArray(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
         var (arrayLength, newOffset) = try parseIntegerValue(&buffer, offset: offset)
         var responses = [RedisResponse]()
         var response: RedisResponse
         if  arrayLength >= 0 {
             for _ in 0 ..< Int(arrayLength) {
-                (response, newOffset) = try parseByPrefix(&buffer, from: newOffset)
+                (response, newOffset) = try parseByPrefixArrayOptimization(&buffer, from: newOffset)
                 responses.append(response)
             }
             return (RedisResponse.Array(responses), newOffset)
@@ -207,15 +218,14 @@ class RedisResp {
     // Mark: Parser helper functions
 
     private func compare(_ buffer: inout Data, at offset: Int, with: Data) throws -> (Bool, Int) {
-        while  offset+with.count >= buffer.count {
+        while offset+with.count >= buffer.count {
             let length = try socket?.read(into: &buffer)
             if  length == 0 {
                 throw RedisRespError(code: .EOF)
             }
         }
 
-        let range = buffer.range(of: with, options: [], in: offset..<offset+with.count)
-        if range != nil {
+        if (buffer[offset..<offset+with.count] == with){
             return (true, offset+with.count)
         } else {
             return (false, offset)
