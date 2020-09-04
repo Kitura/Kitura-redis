@@ -251,7 +251,7 @@ class RedisResp {
         /* 5X faster than using find() above.  range() is expensive */
         var i = from
         while true {
-            while i <= buffer.count {
+            while i < buffer.count {
                 if buffer[i] == 13 && buffer[i+1] == 10{
                     return i
                 }
