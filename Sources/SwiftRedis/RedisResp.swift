@@ -114,54 +114,40 @@ class RedisResp {
     private func parseByPrefix(_ buffer: inout Data, from: Int) throws -> (RedisResponse, Int) {
         var response: RedisResponse
 
-        var (matched, offset) = try compare(&buffer, at: from, with: RedisResp.plus)
-        
-        if  matched {
-            (response, offset) = try parseSimpleString(&buffer, offset: offset)
-        } else {
-            (matched, offset) = try compare(&buffer, at: from, with: RedisResp.colon)
-            if  matched {
-                (response, offset) = try parseInteger(&buffer, offset: offset)
-            } else {
-                (matched, offset) = try compare(&buffer, at: from, with: RedisResp.dollar)
-                if  matched {
-                    (response, offset) = try parseBulkString(&buffer, offset: offset)
-                } else {
-                    (matched, offset) = try compare(&buffer, at: from, with: RedisResp.asterisk)
-                    if  matched {
-                        (response, offset) = try parseArray(&buffer, offset: offset)
-                    } else {
-                        (matched, offset) = try compare(&buffer, at: from, with: RedisResp.minus)
-                        if  matched {
-                            (response, offset) = try parseError(&buffer, offset: offset)
-                        } else {
-                            response = RedisResponse.Error("Unknown response type")
-                        }
-                    }
-                }
+        var offset = from
+
+        while offset+1 >= buffer.count {
+            let length = try socket?.read(into: &buffer)
+
+            if  length == 0 {
+                throw RedisRespError(code: .EOF)
             }
+        }
+        
+        switch (buffer[offset..<offset+1]){
+        case RedisResp.plus:
+            (response, offset) = try parseSimpleString(&buffer, offset: offset+1)
+        case RedisResp.colon:
+            (response, offset) = try parseInteger(&buffer, offset: offset+1)
+        case RedisResp.dollar:
+            (response, offset) = try parseBulkString(&buffer, offset: offset+1)
+        case RedisResp.asterisk:
+            (response, offset) = try parseArray(&buffer, offset: offset+1)
+        case RedisResp.minus:
+            (response, offset) = try parseError(&buffer, offset: offset+1)
+        default:
+            response = RedisResponse.Error("Unknown response type")
         }
         return (response, offset)
     }
 
-    /* 
-    Arrays usually need to parse bulk strings.  And the longer the array, the more optimization is needed.  So to save processing
-    time, check the $ first.  (https://redis.io/topics/protocol)
-    */
-    private func parseByPrefixArrayOptimization(_ buffer: inout Data, from: Int) throws -> (RedisResponse, Int) {
-        let (matched, offset) = try compare(&buffer, at: from, with: RedisResp.dollar)
-        if  matched {
-            return try parseBulkString(&buffer, offset: offset)
-        }
-        return try parseByPrefix(&buffer, from: offset)
-    }
     private func parseArray(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
         var (arrayLength, newOffset) = try parseIntegerValue(&buffer, offset: offset)
         var responses = [RedisResponse]()
         var response: RedisResponse
         if  arrayLength >= 0 {
             for _ in 0 ..< Int(arrayLength) {
-                (response, newOffset) = try parseByPrefixArrayOptimization(&buffer, from: newOffset)
+                (response, newOffset) = try parseByPrefix(&buffer, from: newOffset)
                 responses.append(response)
             }
             return (RedisResponse.Array(responses), newOffset)
