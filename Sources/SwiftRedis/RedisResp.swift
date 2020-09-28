@@ -123,7 +123,7 @@ class RedisResp {
                 throw RedisRespError(code: .EOF)
             }
         }
-        
+
         switch (buffer[offset..<offset+1]){
         case RedisResp.plus:
             (response, offset) = try parseSimpleString(&buffer, offset: offset+1)
@@ -237,12 +237,21 @@ class RedisResp {
         /* 5X faster than using find() above.  range() is expensive */
         var i = from
         while true {
-            while i < buffer.count {
-                if buffer[i] == 13 && buffer[i+1] == 10{
-                    return i
+            while i < buffer.count - 1 {
+                // if buffer[i] == 13 && buffer[i+1] == 10{
+                //     return i
+                // }
+                if buffer[i+1] == 10{
+                    if buffer[i] == 13{
+                        return i
+                    } else {
+                        i+=2
+                    }
+                } else {
+                    i+=1
                 }
-                i+=1
             }
+
             let length = try socket?.read(into: &buffer)
             if  length == 0 {
                 throw RedisRespError(code: .EOF)
