@@ -25,7 +25,7 @@ enum RedisRespStatus {
 class RedisResp {
     ///
     /// Socket used to talk with the server
-    private var socket: Socket?
+    public var socket: Socket?
 
     // Mark: Prebuilt constant UTF8 strings (these strings are all proper UTF-8 strings)
     private static let asterisk = RedisString("*").asData
@@ -238,9 +238,6 @@ class RedisResp {
         var i = from
         while true {
             while i < buffer.count - 1 {
-                // if buffer[i] == 13 && buffer[i+1] == 10{
-                //     return i
-                // }
                 if buffer[i+1] == 10{
                     if buffer[i] == 13{
                         return i
