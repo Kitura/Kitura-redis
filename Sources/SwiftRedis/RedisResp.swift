@@ -22,7 +22,7 @@ enum RedisRespStatus {
     case connected
 }
 
-class RedisResp {
+public class RedisResp {
     ///
     /// Socket used to talk with the server
     public var socket: Socket?
