@@ -46,6 +46,10 @@ public class RedisResp {
         try? socket?.connect(to: host, port: port)
     }
 
+    func disconnect(){
+        socket?.close()
+    }
+
     func issueCommand(_ stringArgs: [String], callback: (RedisResponse) -> Void) {
         guard let socket = socket else { return }
 

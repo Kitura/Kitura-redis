@@ -48,6 +48,10 @@ public class Redis {
             callback(nil)
         }
     }
+
+    public func disconnect(){
+        respHandle?.disconnect()
+    }
     
     /// Authenticate against the server
     ///
@@ -61,7 +65,18 @@ public class Redis {
             callback(error)
         }
     }
-    
+
+    public func auth(_ username: String, _ pswd: String, callback: (NSError?) -> Void) {
+        if username == "" {
+            return auth(pswd, callback: callback)
+        }
+        issueCommand("AUTH", username, pswd) {(response: RedisResponse) in
+            let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
+            callback(error)
+        }
+    }
+
+
     /// Select the database to use
     ///
     /// - Parameter db: numeric index for the database.
