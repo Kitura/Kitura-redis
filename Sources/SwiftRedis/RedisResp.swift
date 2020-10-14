@@ -141,6 +141,21 @@ class RedisResp {
         return (response, offset)
     }
 
+    private func parseArray(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
+        var (arrayLength, newOffset) = try parseIntegerValue(&buffer, offset: offset)
+        var responses = [RedisResponse]()
+        var response: RedisResponse
+        if  arrayLength >= 0 {
+            for _ in 0 ..< Int(arrayLength) {
+                (response, newOffset) = try parseByPrefix(&buffer, from: newOffset)
+                responses.append(response)
+            }
+            return (RedisResponse.Array(responses), newOffset)
+        } else {
+            return (RedisResponse.Nil, newOffset)
+        }
+    }
+
     private func parseBulkString(_ buffer: inout Data, offset: Int) throws -> (RedisResponse, Int) {
         let (strLen64, newOffset) = try parseIntegerValue(&buffer, offset: offset)
         if  strLen64 >= 0 {
