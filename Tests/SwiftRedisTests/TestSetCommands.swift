@@ -109,13 +109,13 @@ public class TestSetCommands: XCTestCase {
                     XCTAssertNil(zRangeError)
 
                     XCTAssertEqual(resultList?[0], RedisString("one"), "The first element of the list should be \(RedisString("one")). It was \(String(describing: resultList?[0]))")
-                    XCTAssertEqual(resultList?[1], RedisString("-1.5"), "The first score of the list should be  \(RedisString("-1.5")). It was \(String(describing: resultList?[0]))")
+                    XCTAssertEqual(resultList?[1]?.asDouble, -1.5, "The first score of the list should be  \(RedisString("-1.5")). It was \(String(describing: resultList?[1]))")
 
-                    XCTAssertEqual(resultList?[2], RedisString("two"), "The first element of the list should be \(RedisString("two")). It was \(String(describing: resultList?[1]))")
-                    XCTAssertEqual(resultList?[3], RedisString("2.33333333"), "The first score of the list should be \(RedisString("2.33333333")). It was \(String(describing: resultList?[1]))")
+                    XCTAssertEqual(resultList?[2], RedisString("two"), "The first element of the list should be \(RedisString("two")). It was \(String(describing: resultList?[2]))")
+                    XCTAssertEqual(resultList?[3]?.asDouble, 2.33333333, "The first score of the list should be \(RedisString("2.33333333")). It was \(String(describing: resultList?[3]))")
 
-                    XCTAssertEqual(resultList?[4], RedisString("three"), "The first element of the list should be \(RedisString("three")). It was \(String(describing: resultList?[2]))")
-                    XCTAssertEqual(resultList?[5], RedisString("3.14159"), "The first score of the list should be \(RedisString("3.14159")). It was \(String(describing: resultList?[2]))")
+                    XCTAssertEqual(resultList?[4], RedisString("three"), "The first element of the list should be \(RedisString("three")). It was \(String(describing: resultList?[4]))")
+                    XCTAssertEqual(resultList?[5]?.asDouble, 3.14159, "The first score of the list should be \(RedisString("3.14159")). It was \(String(describing: resultList?[5]))")
 
                     XCTAssertEqual(resultList?.count, 6, "The size of the list should be 6. It was \(String(describing: resultList?.count))")
                     expectation1.fulfill()
