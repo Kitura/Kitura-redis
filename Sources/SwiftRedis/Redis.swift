@@ -23,7 +23,7 @@ import Foundation
 public class Redis {
     
     /// Redis Serialization Protocol handle
-    private var respHandle: RedisResp?
+    public var respHandle: RedisResp?
     
     /// Whether the client is connected or not.
     /// Does not reflect state changes in the event of a disconnect.
@@ -48,9 +48,15 @@ public class Redis {
             callback(nil)
         }
     }
+
+    /// Disconnects from a redis server
+    public func disconnect(){
+         respHandle?.disconnect()
+     }
     
     /// Authenticate against the server
     ///
+    /// - Parameter username: String for the username (Redis 6+ only).
     /// - Parameter pswd: String for the password.
     /// - Parameter callback: callback function that is called after authenticating,
     ///                      NSError will be nil if successful.
@@ -61,6 +67,16 @@ public class Redis {
             callback(error)
         }
     }
+
+    public func auth(_ username: String, _ pswd: String, callback: (NSError?) -> Void) {
+         if username == "" {
+             return auth(pswd, callback: callback)
+         }
+         issueCommand("AUTH", username, pswd) {(response: RedisResponse) in
+             let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
+             callback(error)
+         }
+     }
     
     /// Select the database to use
     ///
