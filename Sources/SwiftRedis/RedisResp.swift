@@ -202,8 +202,7 @@ class RedisResp {
     // Mark: Parser helper functions
 
     private func compare(_ buffer: inout Data, at offset: Int, with: Data) throws -> (Bool, Int) {
-        // use offset+1 instead of offset+with.count as with.count is always == 1
-        while offset+1 >= buffer.count {
+        while offset+with.count >= buffer.count {
             let length = try socket?.read(into: &buffer)
             if  length == 0 {
                 throw RedisRespError(code: .EOF)
