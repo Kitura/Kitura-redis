@@ -29,8 +29,37 @@ extension RedisMulti {
     public func zadd(_ key: String, tuples: (Int, String)...) -> RedisMulti {
         return zaddArrayOfScoreMembers(key, tuples: tuples)
     }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zadd(_ key: String, tuples: (Double, String)...) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
+    }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func zadd(_ key: String, tuples: (Int, RedisString)...) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
+    }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func zadd(_ key: String, tuples: (Double, RedisString)...) -> RedisMulti {
         return zaddArrayOfScoreMembers(key, tuples: tuples)
     }
     
@@ -44,6 +73,24 @@ extension RedisMulti {
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, String)]) -> RedisMulti {
         return zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)})
     }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)]) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)})
+    }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, String)]) -> RedisMulti {
         var command = [RedisString("ZADD"), RedisString(key)]
@@ -61,25 +108,6 @@ extension RedisMulti {
     /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
     ///
     /// - Returns: The `RedisMulti` object being added to.
-    @discardableResult
-    public func zadd(_ key: String, tuples: (Int, RedisString)...) -> RedisMulti {
-        return zaddArrayOfScoreMembers(key, tuples: tuples)
-    }
-    @discardableResult
-    public func zadd(_ key: String, tuples: (Double, RedisString)...) -> RedisMulti {
-        return zaddArrayOfScoreMembers(key, tuples: tuples)
-    }
-    
-    /// Add an ZADD command to the "transaction"
-    ///
-    /// - Parameter key: The key.
-    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
-    ///
-    /// - Returns: The `RedisMulti` object being added to.
-    @discardableResult
-    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)]) -> RedisMulti {
-        return zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)})
-    }
     @discardableResult
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, RedisString)]) -> RedisMulti {
         var command = [RedisString("ZADD"), RedisString(key)]

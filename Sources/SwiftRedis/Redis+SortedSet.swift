@@ -34,6 +34,13 @@ extension Redis {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
     
+    /// Add elements to a sorted set.
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements added to the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zadd(_ key: String, tuples: (Double, String)..., callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
@@ -49,6 +56,13 @@ extension Redis {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
     
+    /// Add elements to a sorted set.
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements added to the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zadd(_ key: String, tuples: (Double, RedisString)..., callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
@@ -64,6 +78,13 @@ extension Redis {
         zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)}, callback: callback)
     }
 
+    /// Add elements to a sorted set.
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: An array of tuples containing a score and value to be added to the sorted set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements added to the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, String)], callback: (Int?, NSError?) -> Void) {
         var command = ["ZADD"]
         command.append(key)
@@ -86,6 +107,14 @@ extension Redis {
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)], callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)}, callback: callback)
     }
+    
+    /// Add elements to a sorted set.
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: An array of tuples containing a score and value to be added to the sorted set.
+    /// - Parameter callback: The callback function, the Int will contain the
+    ///                      number of elements added to the sorted set.
+    ///                      NSError will be non-nil if an error occurred.
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, RedisString)], callback: (Int?, NSError?) -> Void) {
         var command = [RedisString("ZADD")]
         command.append(RedisString(key))
