@@ -18,11 +18,11 @@ import Foundation
 
 /// Extend Redis by adding the Sorted Set operations
 extension Redis {
-    
+
     //
     //  MARK: Sorted set API functions
     //
-    
+
     /// Add elements to a sorted set.
     ///
     /// - Parameter key: The key.
@@ -33,7 +33,7 @@ extension Redis {
     public func zadd(_ key: String, tuples: (Int, String)..., callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
-    
+
     /// Add elements to a sorted set.
     ///
     /// - Parameter key: The key.
@@ -55,7 +55,7 @@ extension Redis {
     public func zadd(_ key: String, tuples: (Int, RedisString)..., callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples, callback: callback)
     }
-    
+
     /// Add elements to a sorted set.
     ///
     /// - Parameter key: The key.
@@ -107,7 +107,7 @@ extension Redis {
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)], callback: (Int?, NSError?) -> Void) {
         zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)}, callback: callback)
     }
-    
+
     /// Add elements to a sorted set.
     ///
     /// - Parameter key: The key.
