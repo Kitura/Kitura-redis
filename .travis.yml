@@ -42,18 +42,6 @@ matrix:
       services: docker
       env: DOCKER_IMAGE=swift:5.1 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT
     - os: osx
-      osx_image: xcode9.2
-      sudo: required
-      env: SWIFT_SNAPSHOT=4.0.3
-    - os: osx
-      osx_image: xcode9.4
-      sudo: required
-      env: SWIFT_SNAPSHOT=4.1.2
-    - os: osx
-      osx_image: xcode10.1
-      sudo: required
-      env: SWIFT_SNAPSHOT=4.2.1
-    - os: osx
       osx_image: xcode10.2
       sudo: required
       env: SWIFT_SNAPSHOT=5.0.1 JAZZY_ELIGIBLE=true
