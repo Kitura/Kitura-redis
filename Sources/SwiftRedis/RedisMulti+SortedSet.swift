@@ -37,14 +37,8 @@ extension RedisMulti {
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
-    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, String)]) -> RedisMulti {
-        var command = [RedisString("ZADD"), RedisString(key)]
-        for tuple in tuples {
-            command.append(RedisString(tuple.0))
-            command.append(RedisString(tuple.1))
-        }
-        queuedCommands.append(command)
-        return self
+    public func zadd(_ key: String, tuples: (Double, String)...) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
     }
     
     /// Add an ZADD command to the "transaction"
@@ -65,7 +59,57 @@ extension RedisMulti {
     ///
     /// - Returns: The `RedisMulti` object being added to.
     @discardableResult
+    public func zadd(_ key: String, tuples: (Double, RedisString)...) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples)
+    }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, String)]) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)})
+    }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
     public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Int, RedisString)]) -> RedisMulti {
+        return zaddArrayOfScoreMembers(key, tuples: tuples.map{(Double($0.0), $0.1)})
+    }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, String)]) -> RedisMulti {
+        var command = [RedisString("ZADD"), RedisString(key)]
+        for tuple in tuples {
+            command.append(RedisString(tuple.0))
+            command.append(RedisString(tuple.1))
+        }
+        queuedCommands.append(command)
+        return self
+    }
+    
+    /// Add an ZADD command to the "transaction"
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter tuples: A list of tuples containing a score and value to be added to the sorted set.
+    ///
+    /// - Returns: The `RedisMulti` object being added to.
+    @discardableResult
+    public func zaddArrayOfScoreMembers(_ key: String, tuples: [(Double, RedisString)]) -> RedisMulti {
         var command = [RedisString("ZADD"), RedisString(key)]
         for tuple in tuples {
             command.append(RedisString(tuple.0))
