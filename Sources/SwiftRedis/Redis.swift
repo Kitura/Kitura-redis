@@ -56,7 +56,6 @@ public class Redis {
 
     /// Authenticate against the server
     ///
-    /// - Parameter username: String for the username (Redis 6+ only).
     /// - Parameter pswd: String for the password.
     /// - Parameter callback: callback function that is called after authenticating,
     ///                      NSError will be nil if successful.
@@ -68,6 +67,12 @@ public class Redis {
         }
     }
 
+    /// Authenticate against the server using a username.  (Redis 6+)
+    ///
+    /// - Parameter username: String for the username.
+    /// - Parameter pswd: String for the password.
+    /// - Parameter callback: callback function that is called after authenticating,
+    ///                      NSError will be nil if successful.
     public func auth(_ username: String, _ pswd: String, callback: (NSError?) -> Void) {
          if username == "" {
              return auth(pswd, callback: callback)
