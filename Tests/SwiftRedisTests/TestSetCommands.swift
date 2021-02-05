@@ -23,6 +23,7 @@ public class TestSetCommands: XCTestCase {
     static var allTests: [(String, (TestSetCommands) -> () throws -> Void)] {
         return [
             ("test_ZAdd", test_ZAdd),
+            ("test_ZAddFloat", test_ZAddFloat),
             ("test_ZCard", test_ZCard),
             ("test_ZCount", test_ZCount),
             ("test_ZIncrby", test_ZIncrby),
@@ -84,6 +85,39 @@ public class TestSetCommands: XCTestCase {
                     XCTAssertEqual(resultList?[2], RedisString("three"), "The first element of the list should be \(RedisString("three")). It was \(String(describing: resultList?[2]))")
 
                     XCTAssertEqual(resultList?.count, 3, "The size of the list should be 3. It was \(String(describing: resultList?.count))")
+                    expectation1.fulfill()
+                })
+
+            }
+        }
+        waitForExpectations(timeout: 5, handler: { error in XCTAssertNil(error, "Timeout") })
+    }
+
+    func test_ZAddFloat() {
+        let expectation1 = expectation(description: "Add score(s) and member(s) to the set")
+
+        setupTests {
+            redis.zadd(self.key1, tuples: (-1.5, "one"), (2.33333333, "two"), (3.14159, "three")) {
+                (result: Int?, error: NSError?) in
+
+                XCTAssertNil(error)
+                XCTAssertNotNil(result)
+
+                redis.zrange(self.key1, start: 0, stop: 2, withscores: true, callback: {
+                    (resultList: [RedisString?]?, zRangeError: NSError?) in
+
+                    XCTAssertNil(zRangeError)
+
+                    XCTAssertEqual(resultList?[0], RedisString("one"), "The first element of the list should be \(RedisString("one")). It was \(String(describing: resultList?[0]))")
+                    XCTAssertEqual(resultList?[1]?.asDouble, -1.5, "The first score of the list should be  \(RedisString("-1.5")). It was \(String(describing: resultList?[1]))")
+
+                    XCTAssertEqual(resultList?[2], RedisString("two"), "The first element of the list should be \(RedisString("two")). It was \(String(describing: resultList?[2]))")
+                    XCTAssertEqual(resultList?[3]?.asDouble, 2.33333333, "The first score of the list should be \(RedisString("2.33333333")). It was \(String(describing: resultList?[3]))")
+
+                    XCTAssertEqual(resultList?[4], RedisString("three"), "The first element of the list should be \(RedisString("three")). It was \(String(describing: resultList?[4]))")
+                    XCTAssertEqual(resultList?[5]?.asDouble, 3.14159, "The first score of the list should be \(RedisString("3.14159")). It was \(String(describing: resultList?[5]))")
+
+                    XCTAssertEqual(resultList?.count, 6, "The size of the list should be 6. It was \(String(describing: resultList?.count))")
                     expectation1.fulfill()
                 })
 
