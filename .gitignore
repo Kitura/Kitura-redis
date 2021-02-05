@@ -5,3 +5,4 @@
 Package.resolved
 Packages
 build/*
+.swiftpm/*
