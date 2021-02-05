@@ -25,7 +25,7 @@ enum RedisRespStatus {
 public class RedisResp {
     ///
     /// Socket used to talk with the server
-    public var socket: Socket?
+    private var socket: Socket?
 
     // Mark: Prebuilt constant UTF8 strings (these strings are all proper UTF-8 strings)
     private static let asterisk = RedisString("*").asData
