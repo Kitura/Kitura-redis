@@ -6,6 +6,7 @@ import Socket
 // MARK: Redis with SSL
 
 /// Extend Redis and RedisResp to connect using sslConfigs if SSLService is available.
+/// Add https://github.com/Kitura/BlueSSLService to a project to enable.
 
 extension Redis {
 
