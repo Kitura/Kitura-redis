@@ -1,4 +1,3 @@
-#if canImport(SSLService)
 import SSLService
 import Foundation
 import Socket
@@ -58,4 +57,3 @@ extension RedisResp {
         self.connect(host: host, port: port)
     }
 }
-#endif
