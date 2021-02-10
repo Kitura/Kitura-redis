@@ -41,9 +41,20 @@ public class RedisResp {
         return socket?.isConnected == true ? .connected : .notConnected
     }
 
+    init(){
+
+    }
     init(host: String, port: Int32) {
         socket = try? Socket.create()
-        try? socket?.connect(to: host, port: port)
+        self.connect(host: host, port: port)
+    }
+
+    func connect(host: String, port: Int32) {
+        do{
+            try socket?.connect(to: host, port: port)
+        }catch{
+            print(error)
+        }
     }
 
     func disconnect(){
@@ -223,11 +234,11 @@ public class RedisResp {
 
     private func find(_ buffer: inout Data, from: Int, data: Data) throws -> Int {
         var offset = from
-        while true {            
+        while true {
             let range = buffer.range(of: data, options: [], in: offset..<buffer.count)
             if range != nil {
                 return range!.lowerBound
-                
+
             } else {
                 let length = try socket?.read(into: &buffer)
                 if  length == 0 {
