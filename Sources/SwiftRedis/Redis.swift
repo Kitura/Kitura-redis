@@ -52,10 +52,17 @@ public class Redis {
     /// Authenticate against the server
     ///
     /// - Parameter pswd: String for the password.
+    /// - Parameter username: String for the username (optional).
     /// - Parameter callback: callback function that is called after authenticating,
     ///                      NSError will be nil if successful.
-    public func auth(_ pswd: String, callback: (NSError?) -> Void) {
-        
+    public func auth(_ pswd: String, with username: String? = nil, callback: (NSError?) -> Void) {
+        if let username = username {
+            issueCommand("AUTH", username, pswd) {(response: RedisResponse) in
+                let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
+                callback(error)
+            }
+            return
+        }
         issueCommand("AUTH", pswd) {(response: RedisResponse) in
             let (_, error) = self.redisOkResponseHandler(response, nilOk: false)
             callback(error)
